@@ -26,8 +26,29 @@ bool snake::is_collision() const {
     }) != _snake_index.end();
 }
 
+void snake::move() {
+    switch (_current_direction)
+    {
+    case move_direction::up:
+        move_up();
+        break;
+    
+    case move_direction::down:
+        move_down();
+        break;
+    
+    case move_direction::right:
+        move_right();
+        break;
+    
+    case move_direction::left:
+        move_left();
+        break;
+    }
+}
+
 void snake::move_up() {
-    move();
+    move_setup();
     auto pos = _snake_index.front().first;
     if (pos == 0) {
         pos = 9;
@@ -38,7 +59,7 @@ void snake::move_up() {
 }
 
 void snake::move_down() {
-    move();
+    move_setup();
     auto pos = _snake_index.front().first;
     if (pos == 9) {
         pos = 0;
@@ -49,7 +70,7 @@ void snake::move_down() {
 }
 
 void snake::move_right() {
-    move();
+    move_setup();
     auto pos = _snake_index.front().second;
     if (pos == 11) {
         pos = 0;
@@ -60,7 +81,7 @@ void snake::move_right() {
 }
 
 void snake::move_left() {
-    move();
+    move_setup();
     auto pos = _snake_index.front().second;
     if (pos == 0) {
         pos = 11;
@@ -70,7 +91,7 @@ void snake::move_left() {
     _snake_index.front().second = pos;
 }
 
-void snake::move() {
+void snake::move_setup() {
     for (uint8_t i = _snake_index.size() - 1; i > 0; --i) {
         _snake_index[i] = _snake_index[i - 1];
     }
@@ -81,4 +102,3 @@ bool snake::is_snake_index(uint8_t row, uint8_t column) const {
         return index.first == row && index.second == column;
     }) != _snake_index.end();
 }
-
