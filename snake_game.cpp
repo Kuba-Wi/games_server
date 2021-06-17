@@ -1,7 +1,15 @@
 #include "snake_game.h"
-#include <functional>
 
 void snake_game::start_game() {
-    _running = true;
-    _timer.start_timer(std::bind(&snake::move, &_snake), _interval_ms);
+    _timer.start_timer([&](){
+        if (_snake.is_collision()) {
+            return false;
+        }
+        if (_snake.is_food_eaten()) {
+            _snake.add_snake_index();
+            _snake.new_food();
+        }
+        _snake.move();
+        return true;
+        }, _interval_ms);
 }

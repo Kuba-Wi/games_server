@@ -22,3 +22,5 @@ target_compile_options(${PROJECT_NAME} PRIVATE ${FLAGS})
 add_executable(client client_udp_tutorial.cpp)
 target_link_libraries(client -pthread)
 target_compile_options(client PRIVATE ${FLAGS})
+
+add_subdirectory(snake_client)

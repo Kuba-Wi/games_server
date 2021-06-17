@@ -7,6 +7,7 @@ void snake::new_food() {
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> distrib_row(0, 9);
     std::uniform_int_distribution<> distrib_column(0, 11);
+    std::scoped_lock sl(_snake_mutex, _food_mutex);
     do {
         _food_index.first = distrib_row(gen);
         _food_index.second = distrib_column(gen);
@@ -14,6 +15,7 @@ void snake::new_food() {
 }
 
 bool snake::is_index_present(uint8_t row, uint8_t column) const {
+    std::scoped_lock sl(_snake_mutex, _food_mutex);
     if (is_snake_index(row, column)) {
         return true;
     }
@@ -21,14 +23,15 @@ bool snake::is_index_present(uint8_t row, uint8_t column) const {
 }
 
 bool snake::is_collision() const {
+    std::lock_guard lg_snake(_snake_mutex);
     return std::find_if(std::next(_snake_index.begin()), _snake_index.end(), [&](auto& index){
         return index.first == _snake_index.front().first && index.second == _snake_index.front().second;
     }) != _snake_index.end();
 }
 
 void snake::move() {
-    switch (_current_direction)
-    {
+    std::lock_guard lg_snake(_snake_mutex);
+    switch (_current_direction) {
     case move_direction::up:
         move_up();
         break;

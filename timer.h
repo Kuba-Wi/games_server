@@ -4,13 +4,20 @@
 #include <chrono>
 #include <thread>
 
+#include <iostream>
 class timer {
 public:
     template <typename Function>
     void start_timer(Function f, size_t interval_ms);
-    ~timer() {
+    void stop_timer() {
         _active = false;
-        th.join();
+        if (th.joinable()) {
+            th.join();
+        std::cout << "stop\n";
+        }
+    }
+    ~timer() {
+        stop_timer();
     }
 private:
     std::atomic<bool> _active{false};
@@ -22,6 +29,9 @@ void timer::start_timer(Function f, size_t interval_ms) {
     if (_active) {
         return;
     }
+    if (th.joinable()) {
+        th.join();
+    }
     _active = true;
     th = std::thread{[=, this](){
         while (_active) {
@@ -29,7 +39,7 @@ void timer::start_timer(Function f, size_t interval_ms) {
             if (!_active) {
                 return;
             }
-            f();
+            _active = f();
         }
     }};
 }

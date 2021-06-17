@@ -12,11 +12,10 @@ public:
         auto data_food = _snake.food_index_data();
         return std::vector<decltype(data_body)>{data_body, data_food};
     }
-    void set_snake_direction(int direction) { _snake.set_current_direction(direction); }
+    void set_snake_direction(uint8_t direction) { _snake.set_current_direction(static_cast<move_direction>(direction)); }
 
 private:
     snake _snake;
     timer _timer;
     size_t _interval_ms;
-    bool _running = false;
 };
