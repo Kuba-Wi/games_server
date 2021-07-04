@@ -6,6 +6,7 @@
 class snake_game {
 public:
     snake_game(size_t interval_ms) : _interval_ms(interval_ms) {}
+    ~snake_game();
     void start_game();
     auto get_snake_data() {
         auto data_body = _snake.snake_index_data();
@@ -18,4 +19,6 @@ private:
     snake _snake;
     timer _timer;
     size_t _interval_ms;
+    std::thread _game_end_th;
+    std::atomic<bool> _game_in_progress{false};
 };

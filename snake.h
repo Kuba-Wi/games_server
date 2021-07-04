@@ -39,7 +39,7 @@ public:
         std::lock_guard lg_food(_food_mutex);
         return std::make_pair(&_food_index, sizeof(_food_index)); 
     }
-    void set_current_direction(move_direction direction) { _current_direction = direction; }
+    void set_current_direction(move_direction direction);
     void move();
 
 private:

@@ -28,24 +28,18 @@ server::~server() {
 
 void server::receive_data() {
     boost::system::error_code er;
-    uint8_t recv_buf;
     try {
         _socket.async_receive_from(
-            boost::asio::buffer(&recv_buf, sizeof(uint8_t)),
+            boost::asio::buffer(&_data_received, sizeof(uint8_t)),
             _client_endpoint,
-            [&](const boost::system::error_code& er, [[maybe_unused]] size_t bytes_received) {
+            [&](const boost::system::error_code& er, size_t) {
                 if (!er) {
-                    _data_received = recv_buf;
                     receive_data();
                 } else {
                     std::cerr << er.message() << "\n";
                 }
             });
-    } catch(boost::system::error_code& er) {
-        std::cerr << er.message() << std::endl;
     } catch(std::exception& e) {
         std::cerr << e.what() << std::endl;
-    } catch(...) {
-        std::cerr << "Unrecognized exception in receive_data function\n";
     }
 }

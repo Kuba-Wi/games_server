@@ -1,6 +1,7 @@
 #include "snake.h"
 #include <algorithm>
 #include <random>
+#include <unordered_map>
 
 void snake::new_food() {
     std::random_device rd; 
@@ -104,4 +105,12 @@ bool snake::is_snake_index(uint8_t row, uint8_t column) const {
     return std::find_if(_snake_index.begin(), _snake_index.end(), [=](auto& index){
         return index.first == row && index.second == column;
     }) != _snake_index.end();
+}
+
+void snake::set_current_direction(move_direction direction) {
+    using md = move_direction;
+    std::unordered_map<md, md> opposite_dir{{md::up, md::down}, {md::down, md::up},
+                                            {md::left, md::right}, {md::right, md::left}};
+    if (opposite_dir[direction] != _current_direction)
+        _current_direction = direction;
 }

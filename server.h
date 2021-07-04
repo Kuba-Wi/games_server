@@ -1,7 +1,6 @@
 #pragma once
 
 #include <boost/asio.hpp>
-#include <atomic>
 #include <iostream>
 #include <thread>
 #include <vector>
@@ -22,7 +21,7 @@ private:
     boost::asio::ip::udp::endpoint _client_endpoint;
 
     std::thread _io_context_thread;
-    std::atomic<uint8_t> _data_received{0};
+    uint8_t _data_received;
 };
 
 template <typename T>
@@ -32,8 +31,10 @@ void server::send_data(const std::vector<std::pair<T*, size_t>>& data) {
     for (auto& pair : data) {
         buf.emplace_back(pair.first, pair.second);
     }
-    _socket.send_to(buf, _client_endpoint, 0, er);
-    if(er) {
-        std::cerr << "Failed to send data:\n" << er.message() << "\n";
+    try {
+        _socket.async_send_to(buf, _client_endpoint, 
+            [&](const boost::system::error_code&, size_t) {});
+    } catch(std::exception& e) {
+        std::cerr << e.what() << std::endl;
     }
 }

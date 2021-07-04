@@ -29,13 +29,12 @@ client_connection::~client_connection() {
 
 void client_connection::send_data(uint8_t data) {
     try {
-        _socket.send_to(
+        _socket.async_send_to(
             boost::asio::buffer(&data, sizeof(data)), 
-            _server_endpoint);
+            _server_endpoint,
+            [&](const boost::system::error_code&, size_t) {});
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
-    } catch(...) {
-        std::cerr << "Unrecognized exception in receive_data function\n";
     }
 }
 
@@ -55,8 +54,6 @@ void client_connection::receive_data() {
             });
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
-    } catch(...) {
-        std::cerr << "Unrecognized exception in receive_data function\n";
     }
 }
 

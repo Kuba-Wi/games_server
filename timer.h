@@ -4,7 +4,6 @@
 #include <chrono>
 #include <thread>
 
-#include <iostream>
 class timer {
 public:
     template <typename Function>
@@ -13,7 +12,6 @@ public:
         _active = false;
         if (th.joinable()) {
             th.join();
-        std::cout << "stop\n";
         }
     }
     ~timer() {
@@ -26,9 +24,7 @@ private:
 
 template <typename Function>
 void timer::start_timer(Function f, size_t interval_ms) {
-    if (_active) {
-        return;
-    }
+    _active = false;
     if (th.joinable()) {
         th.join();
     }
@@ -39,7 +35,7 @@ void timer::start_timer(Function f, size_t interval_ms) {
             if (!_active) {
                 return;
             }
-            _active = f();
+            f();
         }
     }};
 }
