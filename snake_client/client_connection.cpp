@@ -14,6 +14,7 @@ client_connection::client_connection() : _socket(_io_context) {
         std::cerr << er_open.message() << "\n";
     }
     _data_received.resize(200);
+    _data_copy.resize(200);
     send_data(0);
     receive_data();
 
@@ -40,13 +41,15 @@ void client_connection::send_data(uint8_t data) {
 
 void client_connection::receive_data() {
     try {
-        std::lock_guard<std::mutex> lg(_data_mutex);
+        std::unique_lock ul(_data_mutex);
+        _keep_rec_cv.wait(ul, [&](){ return _keep_receiving.load(); });
         _socket.async_receive_from(
             boost::asio::buffer(_data_received), 
             _server_endpoint,
-            [&](const boost::system::error_code& er, size_t bytes_received){
+            [&, ul = std::move(ul)](const boost::system::error_code& er, size_t bytes_received) mutable {
                 if (!er) {
                     _bytes_received = bytes_received;
+                    ul.unlock();
                     receive_data();
                 } else {
                     std::cerr << er.message();
@@ -58,8 +61,18 @@ void client_connection::receive_data() {
 }
 
 bool client_connection::check_index_present(uint8_t x, uint8_t y) const {
-    std::lock_guard<std::mutex> lg(_data_mutex);
-    return std::any_of(_data_received.begin(), _data_received.begin() + _bytes_received / 2, [x, y](auto& pair){
+    std::lock_guard lg(_data_cp_mutex);
+    return std::any_of(_data_copy.begin(), _data_copy.begin() + _bytes_received / 2, [x, y](const auto& pair){
             return pair.first == x && pair.second == y;
         });
+}
+
+void client_connection::copy_data() {
+    _keep_receiving = false;
+    {
+        std::scoped_lock sl(_data_mutex, _data_cp_mutex);
+        std::copy(_data_received.begin(), _data_received.begin() + _bytes_received / 2, _data_copy.begin());
+        _keep_receiving = true;
+    }
+    _keep_rec_cv.notify_all();
 }

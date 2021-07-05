@@ -1,6 +1,8 @@
 #pragma once
 
 #include <boost/asio.hpp>
+
+#include <atomic>
 #include <iostream>
 #include <thread>
 #include <vector>
@@ -13,7 +15,7 @@ public:
     template <typename T>
     void send_data(const std::vector<std::pair<T*, size_t>>& data);
 
-    uint8_t get_received_data() const { return _data_received; }
+    uint8_t get_received_data() const;
 private:
     boost::asio::io_context _io_context;
     boost::asio::ip::udp::socket _socket;
@@ -21,7 +23,8 @@ private:
     boost::asio::ip::udp::endpoint _client_endpoint;
 
     std::thread _io_context_thread;
-    uint8_t _data_received;
+    uint8_t _data_buffer;
+    std::atomic<uint8_t> _byte_received;
 };
 
 template <typename T>

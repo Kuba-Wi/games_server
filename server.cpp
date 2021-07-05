@@ -27,13 +27,13 @@ server::~server() {
 }
 
 void server::receive_data() {
-    boost::system::error_code er;
     try {
         _socket.async_receive_from(
-            boost::asio::buffer(&_data_received, sizeof(uint8_t)),
+            boost::asio::buffer(&_data_buffer, sizeof(uint8_t)),
             _client_endpoint,
-            [&](const boost::system::error_code& er, size_t) {
+            [&](const boost::system::error_code& er, size_t) mutable {
                 if (!er) {
+                    _byte_received = _data_buffer;
                     receive_data();
                 } else {
                     std::cerr << er.message() << "\n";
@@ -42,4 +42,8 @@ void server::receive_data() {
     } catch(std::exception& e) {
         std::cerr << e.what() << std::endl;
     }
+}
+
+uint8_t server::get_received_data() const {
+    return _byte_received;
 }

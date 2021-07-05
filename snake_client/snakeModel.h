@@ -38,7 +38,6 @@ public:
 
     QVariant data(const QModelIndex &index, [[maybe_unused]] int role) const override
     {
-        // auto& data_display = _conn.get_data();
         if (_conn.check_index_present(index.row(), index.column())) {
             return QColor{"yellow"};
         }
@@ -75,6 +74,7 @@ public slots:
 
     void refresh() {
         this->beginResetModel();
+        _conn.copy_data();
         this->endResetModel();
     }
 
