@@ -49,6 +49,7 @@ void snake::move() {
         move_left();
         break;
     }
+    _direction_set = false;
 }
 
 void snake::move_up() {
@@ -108,9 +109,14 @@ bool snake::is_snake_index(uint8_t row, uint8_t column) const {
 }
 
 void snake::set_current_direction(move_direction direction) {
+    if (_direction_set) {
+        return;
+    }
     using md = move_direction;
     std::unordered_map<md, md> opposite_dir{{md::up, md::down}, {md::down, md::up},
                                             {md::left, md::right}, {md::right, md::left}};
-    if (opposite_dir[direction] != _current_direction)
+    if (opposite_dir[direction] != _current_direction && _current_direction != direction) {
         _current_direction = direction;
+        _direction_set = true;
+    }
 }

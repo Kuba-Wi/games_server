@@ -37,7 +37,7 @@ public:
         return std::make_pair(data_vec,
                           sizeof(decltype(data_vec)::value_type) * data_vec.size());
     }
-    
+
     void set_current_direction(move_direction direction);
     void move();
 
@@ -52,6 +52,7 @@ private:
     std::vector<std::pair<uint8_t, uint8_t>> _snake_index;
     std::pair<uint8_t, uint8_t> _food_index;
     std::atomic<move_direction> _current_direction{move_direction::up};
+    std::atomic<bool> _direction_set{false};
 
     mutable std::mutex _snake_mutex;
     mutable std::mutex _food_mutex;
