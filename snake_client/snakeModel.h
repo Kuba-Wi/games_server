@@ -12,14 +12,6 @@ class SnakeModel : public QAbstractTableModel
     Q_OBJECT
 
 public:
-    SnakeModel() {
-        // std::thread th{[&](){
-        //     while(true)
-                // _conn.receive_data();
-        // }};
-        // th.detach();
-    }
-
     int rowCount(const QModelIndex& parent = QModelIndex()) const override
     {
         if (parent.isValid())
@@ -74,7 +66,7 @@ public slots:
 
     void refresh() {
         this->beginResetModel();
-        _conn.copy_data();
+        _conn.refresh_client();
         this->endResetModel();
     }
 

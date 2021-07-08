@@ -9,9 +9,7 @@ public:
     ~snake_game();
     void start_game();
     auto get_snake_data() {
-        auto data_body = _snake.snake_index_data();
-        auto data_food = _snake.food_index_data();
-        return std::vector<decltype(data_body)>{data_body, data_food};
+        return _snake.get_data();
     }
     void set_snake_direction(uint8_t direction) { _snake.set_current_direction(static_cast<move_direction>(direction)); }
 

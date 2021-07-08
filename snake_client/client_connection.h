@@ -14,7 +14,7 @@ public:
 
     void send_data(uint8_t data);
     bool check_index_present(uint8_t x, uint8_t y) const;
-    void copy_data();
+    void refresh_client();
 private:
     void receive_data();
     
@@ -25,11 +25,14 @@ private:
 
     std::thread _io_context_thread;
     mutable std::mutex _data_mutex;
-    mutable std::mutex _data_cp_mutex;
-    std::atomic<size_t> _bytes_received{0};
-    mutable std::atomic<bool> _keep_receiving{true};
-    mutable std::condition_variable _keep_rec_cv;
+    mutable std::mutex _client_data_mutex;
+    std::mutex _send_mutex;
+    std::condition_variable _keep_rec_cv;
+
+    uint8_t _data_to_send;
+    size_t _bytes_received{0};
+    std::atomic<bool> _keep_receiving{true};
 
     std::vector<std::pair<uint8_t, uint8_t>> _data_received;
-    std::vector<std::pair<uint8_t, uint8_t>> _data_copy;
+    std::vector<std::pair<uint8_t, uint8_t>> _client_data;
 };

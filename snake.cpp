@@ -24,14 +24,14 @@ bool snake::is_index_present(uint8_t row, uint8_t column) const {
 }
 
 bool snake::is_collision() const {
-    std::lock_guard lg_snake(_snake_mutex);
+    std::lock_guard lg(_snake_mutex);
     return std::find_if(std::next(_snake_index.begin()), _snake_index.end(), [&](auto& index){
         return index.first == _snake_index.front().first && index.second == _snake_index.front().second;
     }) != _snake_index.end();
 }
 
 void snake::move() {
-    std::lock_guard lg_snake(_snake_mutex);
+    std::lock_guard lg(_snake_mutex);
     switch (_current_direction) {
     case move_direction::up:
         move_up();

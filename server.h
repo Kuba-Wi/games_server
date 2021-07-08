@@ -6,6 +6,7 @@
 #include <iostream>
 #include <thread>
 #include <vector>
+#include <mutex>
 
 class server {
 public:
@@ -13,7 +14,7 @@ public:
     ~server();
     void receive_data();
     template <typename T>
-    void send_data(const std::vector<std::pair<T*, size_t>>& data);
+    void send_data(const std::pair<std::vector<T>, size_t>& data);
 
     uint8_t get_received_data() const;
 private:
@@ -24,20 +25,22 @@ private:
 
     std::thread _io_context_thread;
     uint8_t _data_buffer;
-    std::atomic<uint8_t> _byte_received;
+    std::atomic<uint8_t> _byte_received{0};
+    std::vector<std::pair<uint8_t, uint8_t>> _data_to_send;
+
+    std::mutex _send_mutex;
 };
 
 template <typename T>
-void server::send_data(const std::vector<std::pair<T*, size_t>>& data) {
+void server::send_data(const std::pair<std::vector<T>, size_t>& data) {
+    std::unique_lock ul(_send_mutex);
     boost::system::error_code er;
-    std::vector<boost::asio::mutable_buffer> buf;
-    for (auto& pair : data) {
-        buf.emplace_back(pair.first, pair.second);
-    }
+    _data_to_send = data.first;
+    boost::asio::mutable_buffer buf(_data_to_send.data(), _data_to_send.size() * sizeof(T));
     try {
         _socket.async_send_to(buf, _client_endpoint, 
-            [&](const boost::system::error_code&, size_t) {});
-    } catch(std::exception& e) {
+            [&, ul = std::move(ul)](const boost::system::error_code&, size_t) mutable { ul.unlock(); });
+    } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
     }
 }

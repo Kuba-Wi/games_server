@@ -14,7 +14,6 @@ client_connection::client_connection() : _socket(_io_context) {
         std::cerr << er_open.message() << "\n";
     }
     _data_received.resize(200);
-    _data_copy.resize(200);
     send_data(0);
     receive_data();
 
@@ -30,10 +29,12 @@ client_connection::~client_connection() {
 
 void client_connection::send_data(uint8_t data) {
     try {
+        std::unique_lock ul(_send_mutex);
+        _data_to_send = data;
         _socket.async_send_to(
-            boost::asio::buffer(&data, sizeof(data)), 
+            boost::asio::buffer(&_data_to_send, sizeof(_data_to_send)), 
             _server_endpoint,
-            [&](const boost::system::error_code&, size_t) {});
+            [&, ul = std::move(ul)](const boost::system::error_code&, size_t) mutable { ul.unlock(); });
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
     }
@@ -61,17 +62,18 @@ void client_connection::receive_data() {
 }
 
 bool client_connection::check_index_present(uint8_t x, uint8_t y) const {
-    std::lock_guard lg(_data_cp_mutex);
-    return std::any_of(_data_copy.begin(), _data_copy.begin() + _bytes_received / 2, [x, y](const auto& pair){
+    std::lock_guard lg(_client_data_mutex);
+    return std::any_of(_client_data.begin(), _client_data.end(), [x, y](const auto& pair){
             return pair.first == x && pair.second == y;
         });
 }
 
-void client_connection::copy_data() {
+void client_connection::refresh_client() {
     _keep_receiving = false;
     {
-        std::scoped_lock sl(_data_mutex, _data_cp_mutex);
-        std::copy(_data_received.begin(), _data_received.begin() + _bytes_received / 2, _data_copy.begin());
+        std::scoped_lock sl(_data_mutex, _client_data_mutex);
+        _client_data.resize(_bytes_received / 2);
+        std::copy(_data_received.begin(), _data_received.begin() + _bytes_received / 2, _client_data.begin());
         _keep_receiving = true;
     }
     _keep_rec_cv.notify_all();

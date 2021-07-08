@@ -22,23 +22,22 @@ public:
     bool is_index_present(uint8_t row, uint8_t column) const;
     bool is_collision() const;
     void add_snake_index() { 
-        std::lock_guard lg_snake(_snake_mutex);
+        std::lock_guard lg(_snake_mutex);
         _snake_index.push_back(_snake_index.back()); 
     }
     uint8_t size() const { 
-        std::lock_guard lg_snake(_snake_mutex);
+        std::lock_guard lg(_snake_mutex);
         return _snake_index.size(); 
     }
 
-    auto snake_index_data() {
-        std::lock_guard lg_snake(_snake_mutex);
-        return std::make_pair(_snake_index.data(), 
-                          sizeof(decltype(_snake_index)::value_type) * _snake_index.size());
+    auto get_data() {
+        std::scoped_lock sl(_snake_mutex, _food_mutex);
+        auto data_vec = _snake_index;
+        data_vec.emplace_back(_food_index);
+        return std::make_pair(data_vec,
+                          sizeof(decltype(data_vec)::value_type) * data_vec.size());
     }
-    auto food_index_data() { 
-        std::lock_guard lg_food(_food_mutex);
-        return std::make_pair(&_food_index, sizeof(_food_index)); 
-    }
+    
     void set_current_direction(move_direction direction);
     void move();
 
