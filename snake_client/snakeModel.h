@@ -3,8 +3,11 @@
 #include <qqml.h>
 #include <QAbstractTableModel>
 #include <QColor>
+
 #include <algorithm>
+#include <memory>
 #include <thread>
+
 #include "client_connection.h"
 
 class SnakeModel : public QAbstractTableModel
@@ -12,6 +15,10 @@ class SnakeModel : public QAbstractTableModel
     Q_OBJECT
 
 public:
+    SnakeModel() {
+        _connection = std::make_unique<client_connection>();
+    }
+
     int rowCount(const QModelIndex& parent = QModelIndex()) const override
     {
         if (parent.isValid())
@@ -30,7 +37,7 @@ public:
 
     QVariant data(const QModelIndex &index, [[maybe_unused]] int role) const override
     {
-        if (_conn.check_index_present(index.row(), index.column())) {
+        if (_connection->check_index_present(index.row(), index.column())) {
             return QColor{"yellow"};
         }
         return QColor{"black"};
@@ -61,12 +68,12 @@ public:
 
 public slots:
     void send_data(int data) {
-        _conn.send_data(data);
+        _connection->send_data(data);
     }
 
     void refresh() {
         this->beginResetModel();
-        _conn.refresh_client();
+        _connection->refresh_client();
         this->endResetModel();
     }
 
@@ -74,5 +81,5 @@ signals:
     void gameFinished();
 
 private:
-    client_connection _conn;
+    std::unique_ptr<client_connection> _connection;
 };
