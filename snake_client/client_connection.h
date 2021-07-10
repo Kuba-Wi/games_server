@@ -19,9 +19,8 @@ private:
     void receive_data();
     
     boost::asio::io_context _io_context;
-    boost::asio::ip::udp::endpoint _client_endpoint;
-    boost::asio::ip::udp::endpoint _server_endpoint;
-    boost::asio::ip::udp::socket _socket;
+    boost::asio::ip::tcp::endpoint _server_endpoint;
+    boost::asio::ip::tcp::socket _socket;
 
     std::thread _io_context_thread;
     mutable std::mutex _data_mutex;

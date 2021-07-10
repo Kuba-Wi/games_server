@@ -3,18 +3,17 @@
 
 client_connection::client_connection() : _socket(_io_context) {
     boost::system::error_code er_adress;
-    boost::system::error_code er_open;
+    boost::system::error_code er_connect;
     _server_endpoint.address(boost::asio::ip::make_address("localhost", er_adress));
     _server_endpoint.port(30000);
-    _socket.open(boost::asio::ip::udp::v4(), er_open);
     if (er_adress) {
         std::cerr << er_adress.message() << "\n";
     }
-    if (er_open) {
-        std::cerr << er_open.message() << "\n";
+    _socket.connect(_server_endpoint, er_connect);
+    if (er_connect) {
+        std::cerr << er_connect.message() << "\n";
     }
     _data_received.resize(200);
-    send_data(0);
     receive_data();
 
     _io_context_thread = std::thread{[&](){
@@ -31,9 +30,8 @@ void client_connection::send_data(uint8_t data) {
     try {
         std::unique_lock ul(_send_mutex);
         _data_to_send = data;
-        _socket.async_send_to(
+        _socket.async_send(
             boost::asio::buffer(&_data_to_send, sizeof(_data_to_send)), 
-            _server_endpoint,
             [&, ul = std::move(ul)](const boost::system::error_code&, size_t) mutable { ul.unlock(); });
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
@@ -44,16 +42,15 @@ void client_connection::receive_data() {
     try {
         std::unique_lock ul(_data_mutex);
         _keep_rec_cv.wait(ul, [&](){ return _keep_receiving.load(); });
-        _socket.async_receive_from(
+        _socket.async_receive(
             boost::asio::buffer(_data_received), 
-            _server_endpoint,
             [&, ul = std::move(ul)](const boost::system::error_code& er, size_t bytes_received) mutable {
                 if (!er) {
                     _bytes_received = bytes_received;
                     ul.unlock();
                     receive_data();
                 } else {
-                    std::cerr << er.message();
+                    std::cerr << er.message() << std::endl;
                 }
             });
     } catch (std::exception& e) {

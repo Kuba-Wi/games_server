@@ -19,9 +19,9 @@ public:
     uint8_t get_received_data() const;
 private:
     boost::asio::io_context _io_context;
-    boost::asio::ip::udp::socket _socket;
-    boost::asio::ip::udp::endpoint _server_endpoint;
-    boost::asio::ip::udp::endpoint _client_endpoint;
+    boost::asio::ip::tcp::socket _socket;
+    boost::asio::ip::tcp::endpoint _server_endpoint;
+    boost::asio::ip::tcp::acceptor _acceptor;
 
     std::thread _io_context_thread;
     uint8_t _data_buffer;
@@ -38,7 +38,7 @@ void server::send_data(const std::pair<std::vector<T>, size_t>& data) {
     _data_to_send = data.first;
     boost::asio::mutable_buffer buf(_data_to_send.data(), _data_to_send.size() * sizeof(T));
     try {
-        _socket.async_send_to(buf, _client_endpoint, 
+        _socket.async_send(buf, 
             [&, ul = std::move(ul)](const boost::system::error_code&, size_t) mutable { ul.unlock(); });
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;

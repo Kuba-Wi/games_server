@@ -2,17 +2,13 @@
 #include <iostream>
 #include <vector>
 
-server::server() : _socket(_io_context) {
-    boost::asio::ip::udp::endpoint endpoint(boost::asio::ip::udp::v4(), 30000);
+server::server() : _socket(_io_context), 
+                   _server_endpoint(boost::asio::ip::tcp::v4(), 30000), 
+                   _acceptor(_io_context, _server_endpoint) {
     boost::system::error_code er;
-    _socket.open(endpoint.protocol(), er);
+    _acceptor.accept(_socket, er);
     if (er) {
         std::cerr << er.message() << "\n";
-    } else {
-        _socket.bind(endpoint, er);
-        if (er) {
-            std::cerr << er.message() << "\n";
-        }
     }
 
     receive_data();
@@ -28,9 +24,8 @@ server::~server() {
 
 void server::receive_data() {
     try {
-        _socket.async_receive_from(
+        _socket.async_receive(
             boost::asio::buffer(&_data_buffer, sizeof(uint8_t)),
-            _client_endpoint,
             [&](const boost::system::error_code& er, size_t) mutable {
                 if (!er) {
                     _byte_received = _data_buffer;
