@@ -69,8 +69,10 @@ void client_connection::refresh_client() {
     _keep_receiving = false;
     {
         std::scoped_lock sl(_data_mutex, _client_data_mutex);
-        _client_data.resize(_bytes_received / 2);
-        std::copy(_data_received.begin(), _data_received.begin() + _bytes_received / 2, _client_data.begin());
+        _client_data.resize(_bytes_received / sizeof(decltype(_client_data)::value_type));
+        std::copy(_data_received.begin(), 
+                  _data_received.begin() + _bytes_received / sizeof(decltype(_client_data)::value_type), 
+                  _client_data.begin());
         _keep_receiving = true;
     }
     _keep_rec_cv.notify_all();
