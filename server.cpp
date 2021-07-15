@@ -1,25 +1,7 @@
 #include "server.h"
-#include <iostream>
-#include <vector>
 
-server::server() : _socket(_io_context), 
-                   _server_endpoint(boost::asio::ip::tcp::v4(), 30000), 
-                   _acceptor(_io_context, _server_endpoint) {
-    boost::system::error_code er;
-    _acceptor.accept(_socket, er);
-    if (er) {
-        std::cerr << er.message() << "\n";
-    }
-
+server::server(boost::asio::ip::tcp::socket& socket) : _socket{std::move(socket)} {
     receive_data();
-    _io_context_thread = std::thread{[&](){
-        _io_context.run();
-    }};
-}
-
-server::~server() {
-    _io_context.stop();
-    _io_context_thread.join();
 }
 
 void server::receive_data() {

@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(FILES
     snake.cpp
     server.cpp
+    servers.cpp
     game_server.cpp
     snake_game.cpp
 )

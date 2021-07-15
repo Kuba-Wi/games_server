@@ -10,18 +10,15 @@
 
 class server {
 public:
-    server();
-    ~server();
+    server() = delete;
+    server(boost::asio::ip::tcp::socket& socket);
     void receive_data();
     template <typename T>
     void send_data(const std::pair<std::vector<T>, size_t>& data);
 
     uint8_t get_received_data() const;
 private:
-    boost::asio::io_context _io_context;
     boost::asio::ip::tcp::socket _socket;
-    boost::asio::ip::tcp::endpoint _server_endpoint;
-    boost::asio::ip::tcp::acceptor _acceptor;
 
     std::thread _io_context_thread;
     uint8_t _data_buffer;
