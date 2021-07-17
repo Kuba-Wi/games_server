@@ -20,7 +20,6 @@ private:
     boost::asio::io_context _io_context;
     boost::asio::ip::tcp::endpoint _server_endpoint;
     boost::asio::ip::tcp::acceptor _acceptor;
-    boost::asio::ip::tcp::socket _tmp_socket;
 
     std::thread _io_context_th;
     std::mutex _list_mx;
@@ -33,7 +32,9 @@ void servers::send_data(const std::pair<std::vector<T>, size_t>& data) {
     auto it_end = _server_list.end();
     ul.unlock();
     for (auto it = _server_list.begin(); it != it_end; ++it) {
-        (*it)->send_data(data);
+        if ((*it)->is_socket_connected()) {
+            (*it)->send_data(data);
+        }
     }
 
     ul.lock();

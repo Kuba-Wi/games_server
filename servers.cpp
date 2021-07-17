@@ -1,8 +1,7 @@
 #include "servers.h"
 
 servers::servers() : _server_endpoint(boost::asio::ip::tcp::v4(), 30000), 
-                     _acceptor(_io_context, _server_endpoint),
-                     _tmp_socket(_io_context) {
+                     _acceptor(_io_context, _server_endpoint) {
 
     accept_new_clients();
     _io_context_th = std::thread{[&](){
