@@ -13,10 +13,12 @@ void server::receive_data() {
                     _byte_received = _data_buffer;
                     receive_data();
                 } else {
-                    std::cerr << er.message() << "\n";
+                    _socket_connected = false;
+                    std::cerr << er.message() << std::endl;
                 }
             });
     } catch(std::exception& e) {
+        _socket_connected = false;
         std::cerr << e.what() << std::endl;
     }
 }
