@@ -5,6 +5,8 @@ servers::servers() : _server_endpoint(boost::asio::ip::tcp::v4(), 30000),
 
     accept_new_clients();
     _io_context_th = std::thread{[&](){
+        using work_guard_type = boost::asio::executor_work_guard<boost::asio::io_context::executor_type>;
+        work_guard_type work_guard(_io_context.get_executor());
         _io_context.run();
     }};
 }
@@ -28,7 +30,7 @@ void servers::accept_new_clients() {
             [&](boost::system::error_code er, boost::asio::ip::tcp::socket socket) {
                 if (!er) {
                     std::unique_lock ul(_list_mx);
-                    _server_list.emplace_back(std::make_unique<server>(socket));
+                    _server_list.emplace_back(std::make_shared<server>(socket));
                     ul.unlock();
                     accept_new_clients();
                 } else {

@@ -4,48 +4,66 @@
 
 #include <atomic>
 #include <iostream>
+#include <list>
+#include <memory>
+#include <mutex>
 #include <thread>
 #include <vector>
-#include <mutex>
 
-class server {
+class server : public std::enable_shared_from_this<server> {
 public:
+    using send_type = std::vector<std::pair<uint8_t, uint8_t>>;
+    using iterator_type = std::list<server::send_type>::iterator;
+
     server() = delete;
     server(boost::asio::ip::tcp::socket& socket);
-    void receive_data();
     template <typename T>
-    void send_data(const std::pair<std::vector<T>, size_t>& data);
-    bool is_socket_connected() {
-        return _socket_connected;
-    }
+    void send_data(const std::vector<T>& data);
+    bool is_socket_connected() { return _socket_connected; }
+    void end_connection() { _socket_connected = false; }
+    void erase_el_from_queue(const iterator_type& it);
 
     uint8_t get_received_data() const;
 private:
+    void receive_data();
     boost::asio::ip::tcp::socket _socket;
     std::atomic<bool> _socket_connected{true};
 
-    std::thread _io_context_thread;
     uint8_t _data_buffer;
     std::atomic<uint8_t> _byte_received{0};
-    std::vector<std::pair<uint8_t, uint8_t>> _data_to_send;
 
+    std::list<send_type> _send_queue;
     std::mutex _send_mutex;
 };
 
+struct send_handler {
+    send_handler(const std::shared_ptr<server>& ptr, const server::iterator_type& iter) : server_ptr{ptr}, it{iter} {}
+    void operator()(const boost::system::error_code& er, size_t) {
+        if (er) {
+            server_ptr->end_connection();
+            std::cerr << er.message() << std::endl;
+        }
+        server_ptr->erase_el_from_queue(it);
+    }
+
+    std::shared_ptr<server> server_ptr;    
+    server::iterator_type it;
+};
+
 template <typename T>
-void server::send_data(const std::pair<std::vector<T>, size_t>& data) {
+void server::send_data(const std::vector<T>& data) {
+    if (!_socket_connected) {
+        return;
+    }
     std::unique_lock ul(_send_mutex);
-    _data_to_send = data.first;
-    boost::asio::mutable_buffer buf(_data_to_send.data(), _data_to_send.size() * sizeof(T));
+    _send_queue.push_back(data);
+    boost::asio::mutable_buffer buf(_send_queue.back().data(), _send_queue.back().size() * sizeof(T));
+    auto it = std::prev(_send_queue.end());
+    ul.unlock();
+    send_handler handler{this->shared_from_this(), it};
+    
     try {
-        _socket.async_send(buf, 
-            [&, ul = std::move(ul)](const boost::system::error_code& er, size_t) mutable { 
-                if (er) {
-                    _socket_connected = false;
-                    std::cout << er.message() << std::endl;
-                }
-                ul.unlock();
-            });
+        _socket.async_send(buf, handler);
     } catch (std::exception& e) {
         _socket_connected = false;
         std::cerr << e.what() << std::endl;

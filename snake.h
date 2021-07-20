@@ -34,8 +34,7 @@ public:
         std::scoped_lock sl(_snake_mutex, _food_mutex);
         auto data_vec = _snake_index;
         data_vec.emplace_back(_food_index);
-        return std::make_pair(data_vec,
-                          sizeof(decltype(data_vec)::value_type) * data_vec.size());
+        return data_vec;
     }
 
     void set_current_direction(move_direction direction);

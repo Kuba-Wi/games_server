@@ -11,11 +11,11 @@ public:
     ~servers();
     void accept_new_clients();
     template <typename T>
-    void send_data(const std::pair<std::vector<T>, size_t>& data);
+    void send_data(const std::vector<T>& data);
     uint8_t get_data_received();
 
 private:
-    std::list<std::unique_ptr<server>> _server_list;
+    std::list<std::shared_ptr<server>> _server_list;
 
     boost::asio::io_context _io_context;
     boost::asio::ip::tcp::endpoint _server_endpoint;
@@ -27,14 +27,12 @@ private:
 };
 
 template <typename T>
-void servers::send_data(const std::pair<std::vector<T>, size_t>& data) {
+void servers::send_data(const std::vector<T>& data) {
     std::unique_lock ul(_list_mx);
     auto it_end = _server_list.end();
     ul.unlock();
     for (auto it = _server_list.begin(); it != it_end; ++it) {
-        if ((*it)->is_socket_connected()) {
-            (*it)->send_data(data);
-        }
+        (*it)->send_data(data);
     }
 
     ul.lock();

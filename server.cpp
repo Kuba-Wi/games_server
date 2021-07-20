@@ -26,3 +26,8 @@ void server::receive_data() {
 uint8_t server::get_received_data() const {
     return _byte_received;
 }
+
+void server::erase_el_from_queue(const iterator_type& it) {
+    std::lock_guard lg(_send_mutex);
+    _send_queue.erase(it);
+}
