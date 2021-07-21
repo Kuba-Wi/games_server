@@ -1,19 +1,15 @@
 #include "server.h"
 
-server::server(boost::asio::ip::tcp::socket& socket) : _socket{std::move(socket)} {
-    receive_data();
-}
-
 void server::receive_data() {
     try {
         _socket.async_receive(
             boost::asio::buffer(&_data_buffer, sizeof(uint8_t)),
-            [&](const boost::system::error_code& er, size_t) mutable {
+            [ptr = this->shared_from_this()](const boost::system::error_code& er, size_t) mutable {
                 if (!er) {
-                    _byte_received = _data_buffer;
-                    receive_data();
+                    ptr->update_byte_received();
+                    ptr->receive_data();
                 } else {
-                    _socket_connected = false;
+                    ptr->end_connection();
                     std::cerr << er.message() << std::endl;
                 }
             });
@@ -49,4 +45,8 @@ uint8_t server::get_received_data() const {
 void server::erase_el_from_queue(const send_iterator& it) {
     std::lock_guard lg(_send_mutex);
     _send_queue.erase(it);
+}
+
+void server::update_byte_received() {
+    _byte_received = _data_buffer;
 }

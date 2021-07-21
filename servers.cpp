@@ -31,6 +31,7 @@ void servers::accept_new_clients() {
                 if (!er) {
                     std::unique_lock ul(_list_mx);
                     _server_list.emplace_back(std::make_shared<server>(socket));
+                    _server_list.back()->receive_data();
                     this->update_receiving_serv();
                     ul.unlock();
                     accept_new_clients();

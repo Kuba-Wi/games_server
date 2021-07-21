@@ -16,15 +16,16 @@ public:
     using send_iterator = std::list<server::send_type>::iterator;
 
     server() = delete;
-    server(boost::asio::ip::tcp::socket& socket);
+    server(boost::asio::ip::tcp::socket& socket) : _socket{std::move(socket)} {}
+    void receive_data();
     void send_data(const send_type& data);
     bool is_socket_connected() { return _socket_connected; }
     void end_connection() { _socket_connected = false; }
     void erase_el_from_queue(const send_iterator& it);
 
     uint8_t get_received_data() const;
+    void update_byte_received();
 private:
-    void receive_data();
     boost::asio::ip::tcp::socket _socket;
     std::atomic<bool> _socket_connected{true};
 
