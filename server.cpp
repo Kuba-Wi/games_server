@@ -28,23 +28,25 @@ void server::send_data(const send_type& data) {
     boost::asio::mutable_buffer buf(_send_queue.back().data(), _send_queue.back().size() * sizeof(send_type::value_type));
     auto it = std::prev(_send_queue.end());
     ul.unlock();
-    send_handler handler{this->shared_from_this(), it};
-    
-    try {
-        boost::asio::async_write(_socket, buf, handler);
-    } catch (std::exception& e) {
-        _socket_connected = false;
-        std::cerr << e.what() << std::endl;
+
+    this->execute_send(buf, it);
+}
+
+void server::send_client_signal(client_signal signal) {
+    if (!_socket_connected) {
+        return;
     }
+    std::unique_lock ul(_signal_mutex);
+    _signal_queue.push_back(static_cast<int8_t>(signal));
+    boost::asio::mutable_buffer buf(&_signal_queue.back(), sizeof(_signal_queue.back()) * sizeof(int8_t));
+    auto it = std::prev(_signal_queue.end());
+    ul.unlock();
+
+    this->execute_send(buf, it);
 }
 
 uint8_t server::get_received_data() const {
     return _byte_received;
-}
-
-void server::erase_el_from_queue(const send_iterator& it) {
-    std::lock_guard lg(_send_mutex);
-    _send_queue.erase(it);
 }
 
 void server::update_byte_received() {
