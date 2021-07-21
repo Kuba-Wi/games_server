@@ -16,6 +16,8 @@ public:
     void set_snake_direction(uint8_t direction) { _snake.set_current_direction(static_cast<move_direction>(direction)); }
 
 private:
+    void start_snake();
+
     snake _snake;
     timer _timer;
     size_t _interval_ms;

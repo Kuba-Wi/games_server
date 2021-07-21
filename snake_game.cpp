@@ -13,6 +13,10 @@ void snake_game::start_game() {
             _timer.stop_timer();
         }
     };
+    this->start_snake();
+}
+
+void snake_game::start_snake() {
     _timer.start_timer([&](){
             if (_snake.is_food_eaten()) {
                 _snake.add_snake_index();
