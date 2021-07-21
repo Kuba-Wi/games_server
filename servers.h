@@ -10,8 +10,7 @@ public:
     servers();
     ~servers();
     void accept_new_clients();
-    template <typename T>
-    void send_data(const std::vector<T>& data);
+    void send_data(const server::send_type& data);
     uint8_t get_data_received();
 
 private:
@@ -25,19 +24,3 @@ private:
     std::mutex _list_mx;
     std::atomic<uint8_t> _data_received{0};
 };
-
-template <typename T>
-void servers::send_data(const std::vector<T>& data) {
-    std::unique_lock ul(_list_mx);
-    auto it_end = _server_list.end();
-    ul.unlock();
-    for (auto it = _server_list.begin(); it != it_end; ++it) {
-        (*it)->send_data(data);
-    }
-
-    ul.lock();
-    _server_list.remove_if([&](auto& serv){
-            return !serv->is_socket_connected();
-        });
-    ul.unlock();
-}

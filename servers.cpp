@@ -41,3 +41,18 @@ void servers::accept_new_clients() {
         std::cerr << e.what() << std::endl;
     }
 }
+
+void servers::send_data(const server::send_type& data) {
+    std::unique_lock ul(_list_mx);
+    auto it_end = _server_list.end();
+    ul.unlock();
+    for (auto it = _server_list.begin(); it != it_end; ++it) {
+        (*it)->send_data(data);
+    }
+
+    ul.lock();
+    _server_list.remove_if([&](auto& serv){
+            return !serv->is_socket_connected();
+        });
+    ul.unlock();
+}
