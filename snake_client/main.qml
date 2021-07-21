@@ -44,7 +44,6 @@ ApplicationWindow {
         width: buttonSize
         height: buttonSize
         onClicked: {
-            snake_model.send_data(currentDirection);
             if (currentDirection != Enum.Direction.Down) {
                 currentDirection = Enum.Direction.Up
                 snake_model.send_data(currentDirection);
