@@ -17,8 +17,7 @@ public:
 
     server() = delete;
     server(boost::asio::ip::tcp::socket& socket);
-    template <typename T>
-    void send_data(const std::vector<T>& data);
+    void send_data(const send_type& data);
     bool is_socket_connected() { return _socket_connected; }
     void end_connection() { _socket_connected = false; }
     void erase_el_from_queue(const iterator_type& it);
@@ -49,23 +48,3 @@ struct send_handler {
     std::shared_ptr<server> server_ptr;    
     server::iterator_type it;
 };
-
-template <typename T>
-void server::send_data(const std::vector<T>& data) {
-    if (!_socket_connected) {
-        return;
-    }
-    std::unique_lock ul(_send_mutex);
-    _send_queue.push_back(data);
-    boost::asio::mutable_buffer buf(_send_queue.back().data(), _send_queue.back().size() * sizeof(T));
-    auto it = std::prev(_send_queue.end());
-    ul.unlock();
-    send_handler handler{this->shared_from_this(), it};
-    
-    try {
-        _socket.async_send(buf, handler);
-    } catch (std::exception& e) {
-        _socket_connected = false;
-        std::cerr << e.what() << std::endl;
-    }
-}

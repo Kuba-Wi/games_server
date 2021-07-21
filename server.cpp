@@ -23,6 +23,25 @@ void server::receive_data() {
     }
 }
 
+void server::send_data(const send_type& data) {
+    if (!_socket_connected) {
+        return;
+    }
+    std::unique_lock ul(_send_mutex);
+    _send_queue.push_back(data);
+    boost::asio::mutable_buffer buf(_send_queue.back().data(), _send_queue.back().size() * sizeof(send_type::value_type));
+    auto it = std::prev(_send_queue.end());
+    ul.unlock();
+    send_handler handler{this->shared_from_this(), it};
+    
+    try {
+        _socket.async_send(buf, handler);
+    } catch (std::exception& e) {
+        _socket_connected = false;
+        std::cerr << e.what() << std::endl;
+    }
+}
+
 uint8_t server::get_received_data() const {
     return _byte_received;
 }
