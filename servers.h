@@ -11,7 +11,7 @@ public:
     servers();
     ~servers();
     void accept_new_clients();
-    void send_data(const server::send_type& data);
+    void send_data(const send_type& data);
     uint8_t get_data_received();
 
 private:

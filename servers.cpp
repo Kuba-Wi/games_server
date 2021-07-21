@@ -44,7 +44,7 @@ void servers::accept_new_clients() {
     }
 }
 
-void servers::send_data(const server::send_type& data) {
+void servers::send_data(const send_type& data) {
     std::unique_lock ul(_list_mx);
     auto it_end = _server_list.end();
     ul.unlock();
