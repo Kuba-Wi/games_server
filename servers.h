@@ -7,6 +7,7 @@
 
 class servers {
 public:
+    using server_iterator = std::list<std::shared_ptr<server>>::iterator;
     servers();
     ~servers();
     void accept_new_clients();
@@ -14,7 +15,11 @@ public:
     uint8_t get_data_received();
 
 private:
+    void update_receiving_serv();
+    void remove_disconnected_serv();
+
     std::list<std::shared_ptr<server>> _server_list;
+    server_iterator _receiving_server_it;
 
     boost::asio::io_context _io_context;
     boost::asio::ip::tcp::endpoint _server_endpoint;

@@ -19,7 +19,7 @@ servers::~servers() {
 uint8_t servers::get_data_received() {
     std::lock_guard sl(_list_mx);
     if (_server_list.size() > 0) {
-        _data_received = _server_list.front()->get_received_data();
+        _data_received = (*_receiving_server_it)->get_received_data();
     }
     return _data_received;
 }
@@ -31,6 +31,7 @@ void servers::accept_new_clients() {
                 if (!er) {
                     std::unique_lock ul(_list_mx);
                     _server_list.emplace_back(std::make_shared<server>(socket));
+                    this->update_receiving_serv();
                     ul.unlock();
                     accept_new_clients();
                 } else {
@@ -50,9 +51,19 @@ void servers::send_data(const server::send_type& data) {
         (*it)->send_data(data);
     }
 
-    ul.lock();
+    this->remove_disconnected_serv();
+}
+
+void servers::update_receiving_serv() {
+    if (_server_list.size() > 0) {
+        _receiving_server_it = _server_list.begin();
+    }
+}
+
+void servers::remove_disconnected_serv() {
+    std::lock_guard lg(_list_mx);
     _server_list.remove_if([&](auto& serv){
             return !serv->is_socket_connected();
         });
-    ul.unlock();
+    this->update_receiving_serv();
 }

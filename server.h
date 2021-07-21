@@ -13,14 +13,14 @@
 class server : public std::enable_shared_from_this<server> {
 public:
     using send_type = std::vector<std::pair<uint8_t, uint8_t>>;
-    using iterator_type = std::list<server::send_type>::iterator;
+    using send_iterator = std::list<server::send_type>::iterator;
 
     server() = delete;
     server(boost::asio::ip::tcp::socket& socket);
     void send_data(const send_type& data);
     bool is_socket_connected() { return _socket_connected; }
     void end_connection() { _socket_connected = false; }
-    void erase_el_from_queue(const iterator_type& it);
+    void erase_el_from_queue(const send_iterator& it);
 
     uint8_t get_received_data() const;
 private:
@@ -36,7 +36,7 @@ private:
 };
 
 struct send_handler {
-    send_handler(const std::shared_ptr<server>& ptr, const server::iterator_type& iter) : server_ptr{ptr}, it{iter} {}
+    send_handler(const std::shared_ptr<server>& ptr, const server::send_iterator& iter) : server_ptr{ptr}, it{iter} {}
     void operator()(const boost::system::error_code& er, size_t) {
         if (er) {
             server_ptr->end_connection();
@@ -46,5 +46,5 @@ struct send_handler {
     }
 
     std::shared_ptr<server> server_ptr;    
-    server::iterator_type it;
+    server::send_iterator it;
 };

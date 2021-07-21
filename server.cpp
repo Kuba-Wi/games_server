@@ -35,7 +35,7 @@ void server::send_data(const send_type& data) {
     send_handler handler{this->shared_from_this(), it};
     
     try {
-        _socket.async_send(buf, handler);
+        boost::asio::async_write(_socket, buf, handler);
     } catch (std::exception& e) {
         _socket_connected = false;
         std::cerr << e.what() << std::endl;
@@ -46,7 +46,7 @@ uint8_t server::get_received_data() const {
     return _byte_received;
 }
 
-void server::erase_el_from_queue(const iterator_type& it) {
+void server::erase_el_from_queue(const send_iterator& it) {
     std::lock_guard lg(_send_mutex);
     _send_queue.erase(it);
 }
