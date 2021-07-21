@@ -45,8 +45,10 @@ ApplicationWindow {
         height: buttonSize
         onClicked: {
             snake_model.send_data(currentDirection);
-            if (currentDirection != Enum.Direction.Down)
+            if (currentDirection != Enum.Direction.Down) {
                 currentDirection = Enum.Direction.Up
+                snake_model.send_data(currentDirection);
+            }
         }
         text: "up"
     }
@@ -59,8 +61,10 @@ ApplicationWindow {
         width: buttonSize
         height: buttonSize
         onClicked: {
-            if (currentDirection != Enum.Direction.Up)
-                currentDirection = Enum.Direction.Down
+            if (currentDirection != Enum.Direction.Up) {
+                currentDirection = Enum.Direction.Down;
+                snake_model.send_data(currentDirection);
+            }
         }
         text: "down"
     }
@@ -71,8 +75,10 @@ ApplicationWindow {
         width: buttonSize
         height: buttonSize
         onClicked: {
-            if (currentDirection != Enum.Direction.Right)
-                currentDirection = Enum.Direction.Left
+            if (currentDirection != Enum.Direction.Right) {
+                currentDirection = Enum.Direction.Left;
+                snake_model.send_data(currentDirection);
+            }
         }
         text: "left"
     }
@@ -83,8 +89,10 @@ ApplicationWindow {
         width: buttonSize
         height: buttonSize
         onClicked: {
-            if (currentDirection != Enum.Direction.Left)
-                currentDirection = Enum.Direction.Right
+            if (currentDirection != Enum.Direction.Left) {
+                currentDirection = Enum.Direction.Right;
+                snake_model.send_data(currentDirection);
+            }
         }
         text: "right"
     }
@@ -95,7 +103,6 @@ ApplicationWindow {
         running: true
         repeat: true
         onTriggered: {
-            snake_model.send_data(currentDirection);
             snake_model.refresh();
         }
     }
