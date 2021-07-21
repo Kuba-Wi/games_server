@@ -3,6 +3,8 @@
 #include "snake.h"
 #include "timer.h"
 
+#include <condition_variable>
+
 class snake_game {
 public:
     snake_game(size_t interval_ms) : _interval_ms(interval_ms) {}
@@ -18,5 +20,6 @@ private:
     timer _timer;
     size_t _interval_ms;
     std::thread _game_end_th;
+    std::condition_variable _game_end_cv;
     std::atomic<bool> _game_in_progress{false};
 };
