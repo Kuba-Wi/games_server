@@ -2,7 +2,8 @@
 
 void server::receive_data() {
     try {
-        _socket.async_receive(
+        boost::asio::async_read(
+            _socket,
             boost::asio::buffer(&_data_buffer, sizeof(uint8_t)),
             [ptr = this->shared_from_this()](const boost::system::error_code& er, size_t) {
                 if (!er) {

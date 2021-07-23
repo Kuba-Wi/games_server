@@ -30,7 +30,8 @@ void client_connection::send_data(uint8_t data) {
     try {
         std::unique_lock ul(_send_mutex);
         _data_to_send = data;
-        _socket.async_send(
+        boost::asio::async_write(
+            _socket,
             boost::asio::buffer(&_data_to_send, sizeof(_data_to_send)), 
             [&, ul = std::move(ul)](const boost::system::error_code&, size_t) mutable { ul.unlock(); });
     } catch (std::exception& e) {
