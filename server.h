@@ -73,12 +73,12 @@ requires send_or_signal_iterator<iterator_type>
 void server::execute_send(const boost::asio::mutable_buffer& buf, const iterator_type& it) {
     try {
         boost::asio::async_write(_socket, buf, 
-            [iter = it, ptr = this->shared_from_this()](const boost::system::error_code& er, size_t){
+            [it, ptr = this->shared_from_this()](const boost::system::error_code& er, size_t){
                 if (er) {
                     ptr->end_connection();
                     std::cerr << er.message() << std::endl;
                 }
-                ptr->erase_el_from_queue(iter);
+                ptr->erase_el_from_queue(it);
             });
     } catch (std::exception& e) {
         _socket_connected = false;

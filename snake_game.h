@@ -14,6 +14,7 @@ public:
         return _snake.get_data();
     }
     void set_snake_direction(uint8_t direction) { _snake.set_current_direction(static_cast<move_direction>(direction)); }
+    size_t get_snake_move_time_ms() const { return _interval_ms; }
 
 private:
     void start_snake();

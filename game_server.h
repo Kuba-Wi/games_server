@@ -12,6 +12,9 @@ public:
     void set_snake_direction();
 
 private:
+    inline
+    void sleep_game_loop(size_t interval_ms, size_t measured_time_ms);
+
     servers& _servers;
     snake_game& _snake_game;
     uint8_t _data_received = 0;
