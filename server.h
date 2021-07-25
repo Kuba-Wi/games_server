@@ -36,7 +36,7 @@ public:
     requires send_or_signal_iterator<iterator_type>
     void erase_el_from_queue(const iterator_type& it);
 
-    uint8_t get_received_data() const;
+    int8_t get_received_data() const;
     void update_byte_received();
 private:
     template <typename iterator_type>
@@ -46,8 +46,8 @@ private:
     boost::asio::ip::tcp::socket _socket;
     std::atomic<bool> _socket_connected{true};
 
-    uint8_t _data_buffer;
-    std::atomic<uint8_t> _byte_received{0};
+    int8_t _data_buffer;
+    std::atomic<int8_t> _byte_received{0};
 
     std::list<send_type> _send_queue;
     std::mutex _send_mutex;

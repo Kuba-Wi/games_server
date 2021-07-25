@@ -27,5 +27,6 @@ private:
 
     std::thread _io_context_th;
     std::mutex _list_mx;
-    std::atomic<uint8_t> _data_received{0};
+    std::atomic<int8_t> _data_received{0};
+    std::unique_ptr<client_signal> _signal_to_send_ptr;
 };

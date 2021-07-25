@@ -2,7 +2,7 @@
 #include <boost/asio.hpp>
 
 #include <atomic>
-#include <condition_variable>
+#include <list>
 #include <mutex>
 #include <thread>
 #include <vector>
@@ -12,10 +12,10 @@ public:
     client_connection();
     ~client_connection();
 
-    void send_data(uint8_t data);
+    void send_data(int8_t data);
     bool check_index_present(uint8_t x, uint8_t y) const;
-    void refresh_client();
 private:
+    void refresh_client_data(size_t bytes_received);
     void receive_data();
     
     boost::asio::io_context _io_context;
@@ -23,15 +23,11 @@ private:
     boost::asio::ip::tcp::socket _socket;
 
     std::thread _io_context_thread;
-    mutable std::mutex _data_mutex;
-    mutable std::mutex _client_data_mutex;
-    std::mutex _send_mutex;
-    std::condition_variable _keep_rec_cv;
+    mutable std::mutex _client_data_mx;
 
-    uint8_t _data_to_send;
-    size_t _bytes_received{0};
-    std::atomic<bool> _keep_receiving{true};
+    std::mutex _send_queue_mx;
+    std::list<int8_t> _send_queue;
 
-    std::vector<std::pair<uint8_t, uint8_t>> _data_received;
+    std::vector<std::pair<int8_t, int8_t>> _data_received;
     std::vector<std::pair<uint8_t, uint8_t>> _client_data;
 };

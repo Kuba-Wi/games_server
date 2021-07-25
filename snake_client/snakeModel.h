@@ -73,7 +73,6 @@ public slots:
 
     void refresh() {
         this->beginResetModel();
-        _connection->refresh_client();
         this->endResetModel();
     }
 

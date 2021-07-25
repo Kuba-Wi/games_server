@@ -4,7 +4,7 @@ void server::receive_data() {
     try {
         boost::asio::async_read(
             _socket,
-            boost::asio::buffer(&_data_buffer, sizeof(uint8_t)),
+            boost::asio::buffer(&_data_buffer, sizeof(_data_buffer)),
             [ptr = this->shared_from_this()](const boost::system::error_code& er, size_t) {
                 if (!er) {
                     ptr->update_byte_received();
@@ -46,7 +46,7 @@ void server::send_client_signal(client_signal signal) {
     this->execute_send(buf, it);
 }
 
-uint8_t server::get_received_data() const {
+int8_t server::get_received_data() const {
     return _byte_received;
 }
 
