@@ -27,6 +27,12 @@ ApplicationWindow {
                 label_score.visible = true;
                 label_score.text = "Score: "
             }
+            onSendingEnabled: {
+                up_button.enabled = true;
+                down_button.enabled = true;
+                right_button.enabled = true;
+                left_button.enabled = true;
+            }
         }
 
         delegate: Rectangle {
@@ -43,6 +49,7 @@ ApplicationWindow {
         anchors.bottomMargin: buttonSize
         width: buttonSize
         height: buttonSize
+        enabled: false
         onClicked: {
             if (currentDirection != Enum.Direction.Down) {
                 currentDirection = Enum.Direction.Up
@@ -59,6 +66,7 @@ ApplicationWindow {
         anchors.bottomMargin: 10
         width: buttonSize
         height: buttonSize
+        enabled: false
         onClicked: {
             if (currentDirection != Enum.Direction.Up) {
                 currentDirection = Enum.Direction.Down;
@@ -69,10 +77,12 @@ ApplicationWindow {
     }
 
     Button {
+        id: left_button
         anchors.right: up_button.left
         anchors.top: up_button.bottom
         width: buttonSize
         height: buttonSize
+        enabled: false
         onClicked: {
             if (currentDirection != Enum.Direction.Right) {
                 currentDirection = Enum.Direction.Left;
@@ -83,10 +93,12 @@ ApplicationWindow {
     }
 
     Button {
+        id: right_button
         anchors.left: up_button.right
         anchors.top: up_button.bottom
         width: buttonSize
         height: buttonSize
+        enabled: false
         onClicked: {
             if (currentDirection != Enum.Direction.Left) {
                 currentDirection = Enum.Direction.Right;
@@ -98,7 +110,7 @@ ApplicationWindow {
 
     Timer {
         id: timer
-        interval: 1
+        interval: 50
         running: true
         repeat: true
         onTriggered: {

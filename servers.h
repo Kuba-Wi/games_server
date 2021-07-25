@@ -13,10 +13,13 @@ public:
     void accept_new_clients();
     void send_data(const send_type& data);
     uint8_t get_data_received();
+    void remove_disconnected_serv();
 
 private:
+    bool clients_connected() const {
+        return _server_list.size() > 0;
+    }
     void update_receiving_serv();
-    void remove_disconnected_serv();
 
     std::list<std::shared_ptr<server>> _server_list;
     server_iterator _receiving_server_it;

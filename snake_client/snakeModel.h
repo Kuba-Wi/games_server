@@ -74,10 +74,14 @@ public slots:
     void refresh() {
         this->beginResetModel();
         this->endResetModel();
+        if (_connection->is_sending_enabled()) {
+            emit this->sendingEnabled();
+        }
     }
 
 signals:
     void gameFinished();
+    void sendingEnabled();
 
 private:
     std::unique_ptr<client_connection> _connection;

@@ -7,9 +7,7 @@ class game_server {
 public:
     game_server(servers& servers, snake_game& snake_game) : _servers(servers), _snake_game(snake_game) {}
     ~game_server();
-    void send_snake_data();
     void start_game();
-    void set_snake_direction();
 
 private:
     inline

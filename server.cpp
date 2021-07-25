@@ -11,12 +11,12 @@ void server::receive_data() {
                     ptr->receive_data();
                 } else {
                     ptr->end_connection();
-                    std::cerr << er.message() << std::endl;
+                    std::cerr << "Receive: " << er.message() << std::endl;
                 }
             });
     } catch(std::exception& e) {
         _socket_connected = false;
-        std::cerr << e.what() << std::endl;
+        std::cerr << "Receive exception: " << e.what() << std::endl;
     }
 }
 

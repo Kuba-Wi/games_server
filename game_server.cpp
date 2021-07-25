@@ -1,14 +1,6 @@
 #include "game_server.h"
 #include <chrono>
 
-void game_server::send_snake_data() {
-    _servers.send_data(_snake_game.get_snake_data());
-}
-
-void game_server::set_snake_direction() {
-    _snake_game.set_snake_direction(_servers.get_data_received());
-}
-
 void game_server::start_game() {
     using namespace std::chrono;
     constexpr size_t time_fraction = 10;
@@ -21,8 +13,9 @@ void game_server::start_game() {
     _snake_game_th = std::thread{[&](){
         while (_game_running) {
             start = steady_clock::now();
-            this->send_snake_data();
-            this->set_snake_direction();
+            _servers.send_data(_snake_game.get_snake_data());
+            _servers.remove_disconnected_serv();
+            _snake_game.set_snake_direction(_servers.get_data_received());
             end = steady_clock::now();
             this->sleep_game_loop(time_interval_ms, duration_cast<milliseconds>(end - start).count());
         }

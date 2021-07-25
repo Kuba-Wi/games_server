@@ -18,7 +18,7 @@ servers::~servers() {
 
 uint8_t servers::get_data_received() {
     std::lock_guard sl(_list_mx);
-    if (_server_list.size() > 0) {
+    if (clients_connected()) {
         auto data = (*_receiving_server_it)->get_received_data();
         if (data < 0) {
             _signal_to_send_ptr.reset();
@@ -41,30 +41,27 @@ void servers::accept_new_clients() {
                     ul.unlock();
                     accept_new_clients();
                 } else {
-                    std::cerr << er.message() << std::endl;
+                    std::cerr << "Accept: " << er.message() << std::endl;
                 }
             });
     } catch(std::exception& e) {
-        std::cerr << e.what() << std::endl;
+        std::cerr << "Accept exception: " << e.what() << std::endl;
     }
 }
 
 void servers::send_data(const send_type& data) {
-    std::unique_lock ul(_list_mx);
-    for (auto it = _server_list.begin(); it != _server_list.end(); ++it) {
-        if (_signal_to_send_ptr && it == _receiving_server_it) {
+    std::lock_guard lg(_list_mx);
+    if (clients_connected()) {
+        if (_signal_to_send_ptr) {
             (*_receiving_server_it)->send_client_signal(*_signal_to_send_ptr);
         } else {
-            (*it)->send_data(data);
+            (*_receiving_server_it)->send_data(data);
         }
     }
-    ul.unlock();
-
-    this->remove_disconnected_serv();
 }
 
 void servers::update_receiving_serv() {
-    if (_server_list.size() > 0) {
+    if (clients_connected()) {
         if (_receiving_server_it != _server_list.begin()) {
             _receiving_server_it = _server_list.begin();
             _signal_to_send_ptr = std::make_unique<client_signal>(client_signal::start_sending);

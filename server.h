@@ -76,12 +76,12 @@ void server::execute_send(const boost::asio::mutable_buffer& buf, const iterator
             [it, ptr = this->shared_from_this()](const boost::system::error_code& er, size_t){
                 if (er) {
                     ptr->end_connection();
-                    std::cerr << er.message() << std::endl;
+                    std::cerr << "Send: " << er.message() << std::endl;
                 }
                 ptr->erase_el_from_queue(it);
             });
     } catch (std::exception& e) {
         _socket_connected = false;
-        std::cerr << e.what() << std::endl;
+        std::cerr << "Send exception: " << e.what() << std::endl;
     }
 }
