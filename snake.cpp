@@ -3,11 +3,17 @@
 #include <random>
 #include <unordered_map>
 
+snake::snake(uint8_t height, uint8_t width) : _height(height), _width(width) {
+    _snake_index.emplace_back(_height / 2, _width / 2);
+    _snake_index.emplace_back(_height / 2 + 1, _width / 2);
+    this->new_food();
+}
+
 void snake::new_food() {
     std::random_device rd; 
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<> distrib_row(0, 9);
-    std::uniform_int_distribution<> distrib_column(0, 11);
+    std::uniform_int_distribution<> distrib_row(0, _height - 1);
+    std::uniform_int_distribution<> distrib_column(0, _width - 1);
     std::scoped_lock sl(_snake_mutex, _food_mutex);
     do {
         _food_index.first = distrib_row(gen);
@@ -56,7 +62,7 @@ void snake::move_up() {
     move_setup();
     auto pos = _snake_index.front().first;
     if (pos == 0) {
-        pos = 9;
+        pos = _height - 1;
     } else {
         --pos;
     }
@@ -66,7 +72,7 @@ void snake::move_up() {
 void snake::move_down() {
     move_setup();
     auto pos = _snake_index.front().first;
-    if (pos == 9) {
+    if (pos == _height - 1) {
         pos = 0;
     } else {
         ++pos;
@@ -77,7 +83,7 @@ void snake::move_down() {
 void snake::move_right() {
     move_setup();
     auto pos = _snake_index.front().second;
-    if (pos == 11) {
+    if (pos == _width - 1) {
         pos = 0;
     } else {
         ++pos;
@@ -89,7 +95,7 @@ void snake::move_left() {
     move_setup();
     auto pos = _snake_index.front().second;
     if (pos == 0) {
-        pos = 11;
+        pos = _width - 1;
     } else {
         --pos;
     }

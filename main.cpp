@@ -4,7 +4,7 @@
 #include "snake_game.h"
 
 int main() {
-    snake_game sg(500);
+    snake_game sg(500, 10, 12);
     servers serv;
     game_server g_server(serv, sg);
     g_server.start_game();
