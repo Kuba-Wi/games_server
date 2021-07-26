@@ -22,7 +22,6 @@ ApplicationWindow {
         model: SnakeModel {
             id: snake_model
             onGameFinished: {
-                timer.running = false;
                 table_view.visible = false;
                 label_score.visible = true;
                 label_score.text = "Score: "
@@ -106,16 +105,6 @@ ApplicationWindow {
             }
         }
         text: "right"
-    }
-
-    Timer {
-        id: timer
-        interval: 50
-        running: true
-        repeat: true
-        onTriggered: {
-            snake_model.refresh();
-        }
     }
 
     Label {

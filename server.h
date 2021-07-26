@@ -51,7 +51,6 @@ private:
 
     std::list<send_type> _send_queue;
     std::mutex _send_mutex;
-
     std::list<int8_t> _signal_queue;
     std::mutex _signal_mutex;
 };

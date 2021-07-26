@@ -18,9 +18,7 @@ public:
 
     void send_data(int8_t data);
     bool check_index_present(uint8_t x, uint8_t y) const;
-    bool is_sending_enabled() const {
-        return _sending_data_enabled;
-    }
+
 private:
     void process_received_signal(int8_t signal);
     void refresh_client_data(size_t bytes_received);

@@ -1,4 +1,5 @@
 #include "client_connection.h"
+#include "ui_iface.h"
 #include <iostream>
 
 client_connection::client_connection() : _socket(_io_context) {
@@ -64,6 +65,7 @@ void client_connection::receive_data() {
                         this->send_data(_data_received.front().first);
                     } else {
                         this->refresh_client_data(bytes_received);
+                        refresh_client();
                     }
                     receive_data();
                 } else {
@@ -78,6 +80,7 @@ void client_connection::receive_data() {
 void client_connection::process_received_signal(int8_t signal) {
     if (static_cast<client_signal>(signal) == client_signal::start_sending) {
         _sending_data_enabled = true;
+        enable_sending();
     }
 }
 

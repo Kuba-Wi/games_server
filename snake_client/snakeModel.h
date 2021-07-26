@@ -9,6 +9,7 @@
 #include <thread>
 
 #include "client_connection.h"
+#include "qt_ui_iface.h"
 
 class SnakeModel : public QAbstractTableModel
 {
@@ -16,6 +17,11 @@ class SnakeModel : public QAbstractTableModel
 
 public:
     SnakeModel() {
+        connect(&qt_ui_if, &qt_ui_iface::refreshClient, this, &SnakeModel::refresh);
+        connect(&qt_ui_if, &qt_ui_iface::enableSending, this, [&](){
+            emit this->sendingEnabled();
+        });
+
         _connection = std::make_unique<client_connection>();
     }
 
@@ -74,9 +80,6 @@ public slots:
     void refresh() {
         this->beginResetModel();
         this->endResetModel();
-        if (_connection->is_sending_enabled()) {
-            emit this->sendingEnabled();
-        }
     }
 
 signals:
