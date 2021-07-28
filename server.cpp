@@ -15,7 +15,7 @@ void server::receive_data() {
                 }
             });
     } catch(std::exception& e) {
-        _socket_connected = false;
+        this->end_connection();
         std::cerr << "Receive exception: " << e.what() << std::endl;
     }
 }

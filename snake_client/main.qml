@@ -18,6 +18,7 @@ ApplicationWindow {
         columnSpacing: 1
         rowSpacing: 1
         clip: true
+        visible: false
 
         model: SnakeModel {
             id: snake_model
@@ -31,6 +32,8 @@ ApplicationWindow {
                 down_button.enabled = true;
                 right_button.enabled = true;
                 left_button.enabled = true;
+                table_view.visible = true;
+                label_connection.visible = false;
             }
         }
 
@@ -105,6 +108,15 @@ ApplicationWindow {
             }
         }
         text: "right"
+    }
+
+    Label {
+        id: label_connection
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        anchors.topMargin: 100
+        visible: true
+        text: "Connected, wait for your turn..."
     }
 
     Label {

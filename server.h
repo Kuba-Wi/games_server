@@ -80,7 +80,7 @@ void server::execute_send(const boost::asio::mutable_buffer& buf, const iterator
                 ptr->erase_el_from_queue(it);
             });
     } catch (std::exception& e) {
-        _socket_connected = false;
+        this->end_connection();
         std::cerr << "Send exception: " << e.what() << std::endl;
     }
 }
