@@ -30,11 +30,18 @@ public:
         return _snake_index.size(); 
     }
 
-    auto get_data() {
+    auto get_data() const {
         std::scoped_lock sl(_snake_mutex, _food_mutex);
-        auto data_vec = _snake_index;
-        data_vec.emplace_back(_food_index);
-        return data_vec;
+        std::vector<int8_t> data((_snake_index.size() + 1) * sizeof(decltype(_snake_index)::value_type));
+        auto it = data.begin();
+        for (auto& pair : _snake_index) {
+            *(it++) = pair.first;
+            *(it++) = pair.second;
+        }
+        *(it++) = _food_index.first;
+        *(it++) = _food_index.second;
+
+        return data;
     }
 
     void set_current_direction(move_direction direction);

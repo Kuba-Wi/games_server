@@ -1,8 +1,5 @@
 #pragma once
 
-#include <list>
-#include <memory>
-
 #include "server.h"
 
 class servers {
@@ -12,7 +9,7 @@ public:
     ~servers();
     void accept_new_clients();
     void send_data(const send_type& data);
-    uint8_t get_data_received();
+    std::optional<uint8_t> get_data_received();
     void remove_disconnected_serv();
 
 private:
@@ -30,6 +27,4 @@ private:
 
     std::thread _io_context_th;
     std::mutex _list_mx;
-    std::atomic<int8_t> _data_received{0};
-    std::unique_ptr<client_signal> _signal_to_send_ptr;
 };

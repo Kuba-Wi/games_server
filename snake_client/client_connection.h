@@ -16,7 +16,7 @@ public:
     client_connection();
     ~client_connection();
 
-    void send_data(int8_t data);
+    void send_data(uint8_t data);
     bool check_index_present(uint8_t x, uint8_t y) const;
 
 private:
@@ -34,7 +34,7 @@ private:
     std::mutex _send_queue_mx;
     std::list<int8_t> _send_queue;
 
-    std::vector<std::pair<int8_t, int8_t>> _data_received;
+    std::vector<int8_t> _data_received;
     std::vector<std::pair<uint8_t, uint8_t>> _client_data;
     std::atomic<bool> _sending_data_enabled{false};
 };

@@ -16,17 +16,12 @@ servers::~servers() {
     _io_context_th.join();
 }
 
-uint8_t servers::get_data_received() {
+std::optional<uint8_t> servers::get_data_received() {
     std::lock_guard sl(_list_mx);
     if (clients_connected()) {
-        auto data = (*_receiving_server_it)->get_received_data();
-        if (data < 0) {
-            _signal_to_send_ptr.reset();
-        } else {
-            _data_received = data;
-        }
+        return (*_receiving_server_it)->get_received_data();
     }
-    return _data_received;
+    return std::nullopt;
 }
 
 void servers::accept_new_clients() {
@@ -52,11 +47,7 @@ void servers::accept_new_clients() {
 void servers::send_data(const send_type& data) {
     std::lock_guard lg(_list_mx);
     if (clients_connected()) {
-        if (_signal_to_send_ptr) {
-            (*_receiving_server_it)->send_client_signal(*_signal_to_send_ptr);
-        } else {
-            (*_receiving_server_it)->send_data(data);
-        }
+        (*_receiving_server_it)->send_data(data);
     }
 }
 
@@ -64,7 +55,7 @@ void servers::update_receiving_serv() {
     if (clients_connected()) {
         if (_receiving_server_it != _server_list.begin()) {
             _receiving_server_it = _server_list.begin();
-            _signal_to_send_ptr = std::make_unique<client_signal>(client_signal::start_sending);
+            (*_receiving_server_it)->send_client_signal(client_signal::start_sending);
         }
     }
 }

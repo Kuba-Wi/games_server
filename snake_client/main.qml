@@ -3,7 +3,6 @@ import QtQuick.Controls 2.12
 import SnakeModel 0.1
 
 ApplicationWindow {
-    property var currentDirection: Enum.Direction.Up
     property var buttonSize: 50
 
     visible: true
@@ -53,10 +52,7 @@ ApplicationWindow {
         height: buttonSize
         enabled: false
         onClicked: {
-            if (currentDirection != Enum.Direction.Down) {
-                currentDirection = Enum.Direction.Up
-                snake_model.send_data(currentDirection);
-            }
+            snake_model.send_data(Enum.Direction.Up);
         }
         text: "up"
     }
@@ -70,10 +66,7 @@ ApplicationWindow {
         height: buttonSize
         enabled: false
         onClicked: {
-            if (currentDirection != Enum.Direction.Up) {
-                currentDirection = Enum.Direction.Down;
-                snake_model.send_data(currentDirection);
-            }
+            snake_model.send_data(Enum.Direction.Down);
         }
         text: "down"
     }
@@ -86,10 +79,7 @@ ApplicationWindow {
         height: buttonSize
         enabled: false
         onClicked: {
-            if (currentDirection != Enum.Direction.Right) {
-                currentDirection = Enum.Direction.Left;
-                snake_model.send_data(currentDirection);
-            }
+            snake_model.send_data(Enum.Direction.Left);
         }
         text: "left"
     }
@@ -102,10 +92,7 @@ ApplicationWindow {
         height: buttonSize
         enabled: false
         onClicked: {
-            if (currentDirection != Enum.Direction.Left) {
-                currentDirection = Enum.Direction.Right;
-                snake_model.send_data(currentDirection);
-            }
+            snake_model.send_data(Enum.Direction.Right);
         }
         text: "right"
     }
