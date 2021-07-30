@@ -29,7 +29,6 @@ void game_server::start_game() {
     }};
 }
 
-inline
 void game_server::sleep_game_loop(size_t interval_ms, size_t measured_time_ms) {
     if (measured_time_ms < interval_ms) {
         std::this_thread::sleep_for(std::chrono::milliseconds(interval_ms - measured_time_ms));

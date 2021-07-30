@@ -66,7 +66,8 @@ void client_connection::receive_data() {
                         this->refresh_client_data(bytes_received);
                         refresh_client();
                     }
-                    receive_data();
+                    this->resize_data_buffer();
+                    this->receive_data();
                 } else {
                     std::cerr << "Receive: " << er.message() << std::endl;
                 }
@@ -93,7 +94,6 @@ bool client_connection::check_index_present(uint8_t x, uint8_t y) const {
 void client_connection::refresh_client_data(size_t bytes_received) {
     std::lock_guard lg(_client_data_mx);
     if (_data_received.size() == 1) {
-        _data_received.resize(_data_received.front());
         return;
     }
     _client_data.resize(bytes_received / sizeof(decltype(_client_data)::value_type));
@@ -101,8 +101,12 @@ void client_connection::refresh_client_data(size_t bytes_received) {
     for (size_t i = 0; i < _data_received.size() - 1; i += 2) {
         *(it++) = {_data_received[i], _data_received[i + 1]};
     }
-    _data_received.resize(1);
-    // std::copy(_data_received.begin(), 
-    //           _data_received.begin() + bytes_received / sizeof(decltype(_client_data)::value_type), 
-    //           _client_data.begin()); 
+}
+
+void client_connection::resize_data_buffer() {
+    if (_data_received.size() > 1 || _data_received.front() < 0) {
+        _data_received.resize(1);
+    } else {
+        _data_received.resize(_data_received.front());
+    }
 }

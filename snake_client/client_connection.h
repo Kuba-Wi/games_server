@@ -23,6 +23,7 @@ private:
     void process_received_signal(int8_t signal);
     void refresh_client_data(size_t bytes_received);
     void receive_data();
+    void resize_data_buffer();
     
     boost::asio::io_context _io_context;
     boost::asio::ip::tcp::endpoint _server_endpoint;

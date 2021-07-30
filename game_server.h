@@ -10,7 +10,6 @@ public:
     void start_game();
 
 private:
-    inline
     void sleep_game_loop(size_t interval_ms, size_t measured_time_ms);
 
     servers& _servers;
