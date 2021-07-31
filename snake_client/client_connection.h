@@ -8,7 +8,8 @@
 #include <vector>
 
 enum class client_signal : int8_t {
-    start_sending = -1
+    start_sending = -1,
+    initial_data = -2
 };
 
 class client_connection {
@@ -20,7 +21,7 @@ public:
     bool check_index_present(uint8_t x, uint8_t y) const;
 
 private:
-    void process_received_signal(int8_t signal);
+    void process_received_signal(const std::vector<int8_t>& signal);
     void refresh_client_data(size_t bytes_received);
     void receive_data();
     void resize_data_buffer();
@@ -38,4 +39,6 @@ private:
     std::vector<int8_t> _data_received;
     std::vector<std::pair<uint8_t, uint8_t>> _client_data;
     std::atomic<bool> _sending_data_enabled{false};
+    std::atomic<uint8_t> _board_height{0};
+    std::atomic<uint8_t> _board_width{0};
 };

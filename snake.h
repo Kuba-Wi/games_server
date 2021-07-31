@@ -15,35 +15,14 @@ public:
     snake(uint8_t height, uint8_t width);
 
     void new_food();
-    bool is_food_eaten() const {
-        std::scoped_lock sl(_snake_mutex, _food_mutex);
-        return _snake_index.front() == _food_index; 
-    }
+    bool is_food_eaten() const;
     bool is_index_present(uint8_t row, uint8_t column) const;
     bool is_collision() const;
-    void add_snake_index() { 
-        std::lock_guard lg(_snake_mutex);
-        _snake_index.push_back(_snake_index.back()); 
-    }
-    uint8_t size() const { 
-        std::lock_guard lg(_snake_mutex);
-        return _snake_index.size(); 
-    }
+    void add_snake_index();
 
-    auto get_data() const {
-        std::scoped_lock sl(_snake_mutex, _food_mutex);
-        std::vector<int8_t> data((_snake_index.size() + 1) * sizeof(decltype(_snake_index)::value_type));
-        auto it = data.begin();
-        for (auto& pair : _snake_index) {
-            *(it++) = pair.first;
-            *(it++) = pair.second;
-        }
-        *(it++) = _food_index.first;
-        *(it++) = _food_index.second;
-
-        return data;
-    }
-
+    std::vector<int8_t> get_data() const;
+    uint8_t get_board_height() const { return _height; }
+    uint8_t get_board_width() const { return _width; }
     void set_current_direction(move_direction direction);
     void move();
 

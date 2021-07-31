@@ -9,7 +9,6 @@ void game_server::start_game() {
     time_point<steady_clock> end;
     std::optional<uint8_t> opt_data_received;
 
-
     _snake_game.start_game();
     _game_running = true;
     _snake_game_th = std::thread{[&](){
@@ -27,6 +26,13 @@ void game_server::start_game() {
             this->sleep_game_loop(time_interval_ms, duration_cast<milliseconds>(end - start).count());
         }
     }};
+}
+
+void game_server::add_server_initial_data() {
+    std::vector<int8_t> board_dimensions{static_cast<int8_t>(_snake_game.get_board_height()), 
+                                         static_cast<int8_t>(_snake_game.get_board_width())};
+
+    _servers.set_initial_data(board_dimensions);
 }
 
 void game_server::sleep_game_loop(size_t interval_ms, size_t measured_time_ms) {

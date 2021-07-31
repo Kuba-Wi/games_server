@@ -61,7 +61,7 @@ void client_connection::receive_data() {
             [&](const boost::system::error_code& er, size_t bytes_received) {
                 if (!er) {
                     if (_data_received.front() < 0) {
-                        this->process_received_signal(_data_received.front());
+                        this->process_received_signal(_data_received);
                     } else {
                         this->refresh_client_data(bytes_received);
                         refresh_client();
@@ -77,10 +77,13 @@ void client_connection::receive_data() {
     }
 }
 
-void client_connection::process_received_signal(int8_t signal) {
-    if (static_cast<client_signal>(signal) == client_signal::start_sending) {
+void client_connection::process_received_signal(const std::vector<int8_t>& signal) {
+    if (static_cast<client_signal>(signal.front()) == client_signal::start_sending) {
         _sending_data_enabled = true;
         enable_sending();
+    } else if (static_cast<client_signal>(signal.front()) == client_signal::initial_data) {
+        _board_height = signal[1];
+        _board_width = signal[2];
     }
 }
 
@@ -93,7 +96,7 @@ bool client_connection::check_index_present(uint8_t x, uint8_t y) const {
 
 void client_connection::refresh_client_data(size_t bytes_received) {
     std::lock_guard lg(_client_data_mx);
-    if (_data_received.size() == 1) {
+    if (bytes_received == 1) {
         return;
     }
     _client_data.resize(bytes_received / sizeof(decltype(_client_data)::value_type));

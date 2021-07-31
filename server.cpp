@@ -2,7 +2,7 @@
 
 server::server(boost::asio::ip::tcp::socket& socket) : _socket{std::move(socket)} {
     _execute_send_th = std::thread{[&](){
-        this->execute_send();
+        this->send_loop();
     }};
 }
 
@@ -36,14 +36,13 @@ void server::send_data(const send_type& data) {
     if (!_socket_connected) {
         return;
     }
+
     std::unique_lock ul(_send_mx);
     send_type data_size{static_cast<int8_t>(data.size() * sizeof(send_type::value_type))};
     _send_queue.push_back(data_size);
     _send_queue.push_back(data);
-    if (_send_queue.size() == 2) {
-        ul.unlock();
-        _send_data_cv.notify_all();
-    }
+    ul.unlock();
+    _send_data_cv.notify_all();
 }
 
 void server::send_client_signal(client_signal signal) {
@@ -53,10 +52,8 @@ void server::send_client_signal(client_signal signal) {
     std::unique_lock ul(_send_mx);
     _send_queue.push_back({1});
     _send_queue.push_back({static_cast<int8_t>(signal)});
-    if (_send_queue.size() == 2) {
-        ul.unlock();
-        _send_data_cv.notify_all();
-    }
+    ul.unlock();
+    _send_data_cv.notify_all();
 }
 
 std::optional<uint8_t> server::get_received_data() {
@@ -72,17 +69,9 @@ void server::update_byte_received() {
 }
 
 void server::execute_send() {
-    std::unique_lock ul(_send_mx);
-    _send_data_cv.wait(ul, [&](){
-        return _send_queue.size() > 0 || !_socket_connected;
-    });
-    if (!_socket_connected) {
-        return;
-    }
-
+    _sending_blocked = true;
     boost::asio::mutable_buffer buf(_send_queue.front().data(), _send_queue.front().size() * sizeof(send_type::value_type));
     auto it = _send_queue.begin();
-    ul.unlock();
     try {
         boost::asio::async_write(_socket, buf, 
             [it, ptr = this->shared_from_this()](const boost::system::error_code& er, size_t){
@@ -91,11 +80,26 @@ void server::execute_send() {
                     std::cerr << "Send: " << er.message() << std::endl;
                 }
                 ptr->erase_el_from_queue(it);
-                ptr->execute_send();
+                ptr->_sending_blocked = false;
+                ptr->_send_data_cv.notify_all();
             });
     } catch (std::exception& e) {
         this->end_connection();
         std::cerr << "Send exception: " << e.what() << std::endl;
+    }
+}
+
+void server::send_loop() {
+    while (_socket_connected) {
+        std::unique_lock ul(_send_mx);
+        _send_data_cv.wait(ul, [&](){
+            return (_send_queue.size() > 0 && !_sending_blocked) || !_socket_connected;
+        });
+        if (!_socket_connected) {
+            return;
+        }
+        this->execute_send();
+        ul.unlock();
     }
 }
 

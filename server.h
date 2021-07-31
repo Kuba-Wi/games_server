@@ -13,7 +13,8 @@
 #include <vector>
 
 enum class client_signal : int8_t {
-    start_sending = -1
+    start_sending = -1,
+    initial_data = -2
 };
 
 using send_type = std::vector<int8_t>;
@@ -34,9 +35,11 @@ public:
     void update_byte_received();
 private:
     void execute_send();
+    void send_loop();
 
     boost::asio::ip::tcp::socket _socket;
     std::atomic<bool> _socket_connected{true};
+    std::atomic<bool> _sending_blocked{false};
 
     uint8_t _data_buffer;
     std::optional<uint8_t> _byte_received;

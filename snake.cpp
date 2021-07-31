@@ -21,6 +21,11 @@ void snake::new_food() {
     } while(is_snake_index(_food_index.first, _food_index.second));
 }
 
+bool snake::is_food_eaten() const {
+    std::scoped_lock sl(_snake_mutex, _food_mutex);
+    return _snake_index.front() == _food_index; 
+}
+
 bool snake::is_index_present(uint8_t row, uint8_t column) const {
     std::scoped_lock sl(_snake_mutex, _food_mutex);
     if (is_snake_index(row, column)) {
@@ -34,6 +39,25 @@ bool snake::is_collision() const {
     return std::find_if(std::next(_snake_index.begin()), _snake_index.end(), [&](auto& index){
         return index.first == _snake_index.front().first && index.second == _snake_index.front().second;
     }) != _snake_index.end();
+}
+
+void snake::add_snake_index() { 
+    std::lock_guard lg(_snake_mutex);
+    _snake_index.push_back(_snake_index.back()); 
+}
+
+std::vector<int8_t> snake::get_data() const {
+    std::scoped_lock sl(_snake_mutex, _food_mutex);
+    std::vector<int8_t> data((_snake_index.size() + 1) * sizeof(decltype(_snake_index)::value_type));
+    auto it = data.begin();
+    for (auto& pair : _snake_index) {
+        *(it++) = pair.first;
+        *(it++) = pair.second;
+    }
+    *(it++) = _food_index.first;
+    *(it++) = _food_index.second;
+
+    return data;
 }
 
 void snake::move() {
