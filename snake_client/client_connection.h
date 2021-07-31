@@ -12,6 +12,8 @@ enum class client_signal : int8_t {
     initial_data = -2
 };
 
+constexpr int8_t data_delimiter = std::numeric_limits<int8_t>::max();
+
 class client_connection {
 public:
     client_connection();
@@ -26,7 +28,7 @@ private:
     void process_received_signal(const std::vector<int8_t>& signal);
     void refresh_client_data(size_t bytes_received);
     void receive_data();
-    void resize_data_buffer();
+    void refresh_data_buffer(size_t bytes_with_delimiter);
     
     boost::asio::io_context _io_context;
     boost::asio::ip::tcp::endpoint _server_endpoint;

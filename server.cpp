@@ -37,10 +37,11 @@ void server::send_data(const send_type& data) {
         return;
     }
 
+    auto data_to_send = data;
+    data_to_send.push_back(data_delimiter);
+    
     std::unique_lock ul(_send_mx);
-    send_type data_size{static_cast<int8_t>(data.size() * sizeof(send_type::value_type))};
-    _send_queue.push_back(data_size);
-    _send_queue.push_back(data);
+    _send_queue.push_back(data_to_send);
     ul.unlock();
     _send_data_cv.notify_all();
 }

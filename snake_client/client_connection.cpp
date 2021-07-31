@@ -14,7 +14,6 @@ client_connection::client_connection() : _socket(_io_context) {
     if (er_connect) {
         std::cerr << "Connect: " << er_connect.message() << "\n";
     }
-    _data_received.resize(1);
     receive_data();
 
     _io_context_thread = std::thread{[&](){
@@ -39,9 +38,7 @@ void client_connection::send_data(uint8_t data) {
         boost::asio::mutable_buffer buf(&_send_queue.back(), sizeof(uint8_t));
         auto it = std::prev(_send_queue.end());
         ul.unlock();
-        boost::asio::async_write(
-            _socket,
-            buf, 
+        boost::asio::async_write(_socket, buf, 
             [&, it](const boost::system::error_code& er, size_t) { 
                 if (er) {
                     std::cerr << "Send: " << er.message() << std::endl;
@@ -56,17 +53,17 @@ void client_connection::send_data(uint8_t data) {
 
 void client_connection::receive_data() {
     try {
-        async_read(_socket,
-            boost::asio::buffer(_data_received), 
-            [&](const boost::system::error_code& er, size_t bytes_received) {
+        async_read_until(_socket,
+            boost::asio::dynamic_buffer(_data_received), data_delimiter,
+            [&](const boost::system::error_code& er, size_t bytes_with_delimiter) {
                 if (!er) {
                     if (_data_received.front() < 0) {
                         this->process_received_signal(_data_received);
                     } else {
-                        this->refresh_client_data(bytes_received);
+                        this->refresh_client_data(bytes_with_delimiter - 1);
                         refresh_client();
                     }
-                    this->resize_data_buffer();
+                    this->refresh_data_buffer(bytes_with_delimiter);
                     this->receive_data();
                 } else {
                     std::cerr << "Receive: " << er.message() << std::endl;
@@ -97,20 +94,13 @@ bool client_connection::check_index_present(uint8_t x, uint8_t y) const {
 
 void client_connection::refresh_client_data(size_t bytes_received) {
     std::lock_guard lg(_client_data_mx);
-    if (bytes_received == 1) {
-        return;
-    }
     _client_data.resize(bytes_received / sizeof(decltype(_client_data)::value_type));
     auto it = _client_data.begin();
-    for (size_t i = 0; i < _data_received.size() - 1; i += 2) {
+    for (size_t i = 0; i < bytes_received - 1; i += 2) {
         *(it++) = {_data_received[i], _data_received[i + 1]};
     }
 }
 
-void client_connection::resize_data_buffer() {
-    if (_data_received.size() > 1 || _data_received.front() < 0) {
-        _data_received.resize(1);
-    } else {
-        _data_received.resize(_data_received.front());
-    }
+void client_connection::refresh_data_buffer(size_t bytes_with_delimiter) {
+    _data_received.erase(_data_received.begin(), _data_received.begin() + bytes_with_delimiter);
 }

@@ -12,6 +12,8 @@
 #include <thread>
 #include <vector>
 
+constexpr int8_t data_delimiter = std::numeric_limits<int8_t>::max();
+
 using send_type = std::vector<int8_t>;
 using send_iterator = std::list<send_type>::iterator;
 
