@@ -2,6 +2,11 @@
 
 #include "server.h"
 
+enum class client_signal : int8_t {
+    start_sending = -1,
+    initial_data = -2
+};
+
 class servers {
 public:
     using server_iterator = std::list<std::shared_ptr<server>>::iterator;
@@ -18,6 +23,7 @@ private:
     void update_receiving_serv();
     void add_accepted_server(boost::asio::ip::tcp::socket& socket);
     void send_initial_data(const std::shared_ptr<server>& server_ptr);
+    void send_client_signal(const std::shared_ptr<server>& server_ptr, client_signal signal);
 
     std::list<std::shared_ptr<server>> _server_list;
     server_iterator _receiving_server_it;

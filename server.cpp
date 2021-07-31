@@ -45,17 +45,6 @@ void server::send_data(const send_type& data) {
     _send_data_cv.notify_all();
 }
 
-void server::send_client_signal(client_signal signal) {
-    if (!_socket_connected) {
-        return;
-    }
-    std::unique_lock ul(_send_mx);
-    _send_queue.push_back({1});
-    _send_queue.push_back({static_cast<int8_t>(signal)});
-    ul.unlock();
-    _send_data_cv.notify_all();
-}
-
 std::optional<uint8_t> server::get_received_data() {
     std::lock_guard lg(_byte_received_mx);
     auto byte = _byte_received;

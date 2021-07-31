@@ -12,11 +12,6 @@
 #include <thread>
 #include <vector>
 
-enum class client_signal : int8_t {
-    start_sending = -1,
-    initial_data = -2
-};
-
 using send_type = std::vector<int8_t>;
 using send_iterator = std::list<send_type>::iterator;
 
@@ -26,7 +21,6 @@ public:
     ~server();
     void receive_data();
     void send_data(const send_type& data);
-    void send_client_signal(client_signal signal);
     bool is_socket_connected() { return _socket_connected; }
     void end_connection() { _socket_connected = false; }
     void erase_el_from_queue(const send_iterator& it);

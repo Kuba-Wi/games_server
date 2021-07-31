@@ -66,7 +66,7 @@ void servers::update_receiving_serv() {
     if (clients_connected()) {
         if (_receiving_server_it != _server_list.begin()) {
             _receiving_server_it = _server_list.begin();
-            (*_receiving_server_it)->send_client_signal(client_signal::start_sending);
+            this->send_client_signal(*_receiving_server_it, client_signal::start_sending);
         }
     }
 }
@@ -81,4 +81,8 @@ void servers::remove_disconnected_serv() {
 
 void servers::send_initial_data(const std::shared_ptr<server>& server_ptr) {
     server_ptr->send_data(_initial_data);
+}
+
+void servers::send_client_signal(const std::shared_ptr<server>& server_ptr, client_signal signal) {
+    server_ptr->send_data({static_cast<int8_t>(signal)});
 }
