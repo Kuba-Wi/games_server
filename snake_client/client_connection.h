@@ -19,6 +19,8 @@ public:
 
     void send_data(uint8_t data);
     bool check_index_present(uint8_t x, uint8_t y) const;
+    uint8_t get_board_height() const { return _board_height; }
+    uint8_t get_board_width() const { return _board_width; }
 
 private:
     void process_received_signal(const std::vector<int8_t>& signal);

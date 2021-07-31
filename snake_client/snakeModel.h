@@ -21,6 +21,9 @@ public:
         connect(&qt_ui_if, &qt_ui_iface::enableSending, this, [&](){
             emit this->sendingEnabled();
         });
+        connect(&qt_ui_if, &qt_ui_iface::setBoardDimensions, this, [&](){
+            emit this->boardDimensionsSet();
+        });
 
         _connection = std::make_unique<client_connection>();
     }
@@ -30,7 +33,7 @@ public:
         if (parent.isValid())
             return 0;
 
-        return 10;
+        return _connection->get_board_height();
     }
 
     int columnCount(const QModelIndex& parent = QModelIndex()) const override
@@ -38,7 +41,7 @@ public:
         if (parent.isValid())
             return 0;
 
-        return 12;
+        return _connection->get_board_width();
     }
 
     QVariant data(const QModelIndex &index, [[maybe_unused]] int role) const override
@@ -82,9 +85,18 @@ public slots:
         this->endResetModel();
     }
 
+    int get_board_height() {
+        return _connection->get_board_height();
+    }
+
+    int get_board_width() {
+        return _connection->get_board_width();
+    }
+
 signals:
     void gameFinished();
     void sendingEnabled();
+    void boardDimensionsSet();
 
 private:
     std::unique_ptr<client_connection> _connection;

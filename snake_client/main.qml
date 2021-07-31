@@ -21,11 +21,14 @@ ApplicationWindow {
 
         model: SnakeModel {
             id: snake_model
+            property var boardHeight: 0
+            property var boardWidth: 0
             onGameFinished: {
                 table_view.visible = false;
                 label_score.visible = true;
                 label_score.text = "Score: "
             }
+
             onSendingEnabled: {
                 up_button.enabled = true;
                 down_button.enabled = true;
@@ -34,11 +37,16 @@ ApplicationWindow {
                 table_view.visible = true;
                 label_connection.visible = false;
             }
+
+            onBoardDimensionsSet: {
+                boardHeight = snake_model.get_board_height();
+                boardWidth = snake_model.get_board_width();
+            }
         }
 
         delegate: Rectangle {
-            implicitWidth: (table_view.width - table_view.columnSpacing * 11) / 12
-            implicitHeight: (table_view.height - table_view.rowSpacing * 9) / 10
+            implicitWidth: (table_view.width - table_view.columnSpacing * (snake_model.boardWidth - 1)) / snake_model.boardWidth
+            implicitHeight: (table_view.height - table_view.rowSpacing * (snake_model.boardHeight - 1)) / snake_model.boardHeight
             color: display
         }
     }

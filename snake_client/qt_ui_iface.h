@@ -13,7 +13,12 @@ public:
         emit this->enableSending();
     }
 
+    void set_board_dimensions() {
+        emit this->setBoardDimensions();
+    }
+
 signals:
     void refreshClient();
     void enableSending();
+    void setBoardDimensions();
 } inline qt_ui_if;

@@ -84,6 +84,7 @@ void client_connection::process_received_signal(const std::vector<int8_t>& signa
     } else if (static_cast<client_signal>(signal.front()) == client_signal::initial_data) {
         _board_height = signal[1];
         _board_width = signal[2];
+        set_board_dimensions();
     }
 }
 
