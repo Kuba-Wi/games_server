@@ -16,9 +16,10 @@ public:
     void accept_new_clients();
     void send_data(const send_type& data);
     std::optional<uint8_t> get_data_received();
-    void remove_disconnected_serv();
 
 private:
+    void remove_disconnected_serv();
+    void remove_loop();
     bool clients_connected() const { return _server_list.size() > 0; }
     void update_receiving_serv();
     void add_accepted_server(boost::asio::ip::tcp::socket& socket);
@@ -28,6 +29,8 @@ private:
     std::list<std::shared_ptr<server>> _server_list;
     server_iterator _receiving_server_it;
     send_type _initial_data;
+    std::thread _remove_disconnected_th;
+    std::atomic<bool> _servers_running{true};
 
     boost::asio::io_context _io_context;
     boost::asio::ip::tcp::endpoint _server_endpoint;

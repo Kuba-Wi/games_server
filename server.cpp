@@ -37,11 +37,9 @@ void server::send_data(const send_type& data) {
         return;
     }
 
-    auto data_to_send = data;
-    data_to_send.push_back(data_delimiter);
-    
     std::unique_lock ul(_send_mx);
-    _send_queue.push_back(data_to_send);
+    _send_queue.push_back(data);
+    _send_queue.back().push_back(data_delimiter);
     ul.unlock();
     _send_data_cv.notify_all();
 }

@@ -9,11 +9,17 @@ servers::servers() : _server_endpoint(boost::asio::ip::tcp::v4(), 30000),
         work_guard_type work_guard(_io_context.get_executor());
         _io_context.run();
     }};
+
+    _remove_disconnected_th = std::thread{[&](){
+        this->remove_loop();
+    }};
 }
 
 servers::~servers() {
     _io_context.stop();
     _io_context_th.join();
+    _servers_running = false;
+    _remove_disconnected_th.join();
 }
 
 void servers::set_initial_data(const send_type& data) {
@@ -35,9 +41,7 @@ void servers::accept_new_clients() {
         _acceptor.async_accept(
             [&](boost::system::error_code er, boost::asio::ip::tcp::socket socket) {
                 if (!er) {
-                    std::unique_lock ul(_server_list_mx);
                     this->add_accepted_server(socket);
-                    ul.unlock();
                     accept_new_clients();
                 } else {
                     std::cerr << "Accept: " << er.message() << std::endl;
@@ -49,6 +53,7 @@ void servers::accept_new_clients() {
 }
 
 void servers::add_accepted_server(boost::asio::ip::tcp::socket& socket) {
+    std::lock_guard lg(_server_list_mx);
     _server_list.emplace_back(std::make_shared<server>(socket));
     _server_list.back()->receive_data();
     this->send_initial_data(_server_list.back());
@@ -73,10 +78,20 @@ void servers::update_receiving_serv() {
 
 void servers::remove_disconnected_serv() {
     std::lock_guard lg(_server_list_mx);
-    _server_list.remove_if([&](auto& serv){
+    size_t elements_removed = _server_list.remove_if([&](auto& serv){
             return !serv->is_socket_connected();
         });
-    this->update_receiving_serv();
+    if (elements_removed > 0) {
+        this->update_receiving_serv();
+    }
+}
+
+void servers::remove_loop() {
+    constexpr size_t sleep_time = 100;
+    while (_servers_running) {
+        remove_disconnected_serv();
+        std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+    }
 }
 
 void servers::send_initial_data(const std::shared_ptr<server>& server_ptr) {

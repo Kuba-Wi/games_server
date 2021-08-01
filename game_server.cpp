@@ -16,7 +16,6 @@ void game_server::start_game() {
             start = steady_clock::now();
 
             _servers.send_data(_snake_game.get_snake_data());
-            _servers.remove_disconnected_serv();
             opt_data_received = _servers.get_data_received();
             if (opt_data_received) {
                 _snake_game.set_snake_direction(opt_data_received.value());
