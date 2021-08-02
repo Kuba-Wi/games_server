@@ -9,11 +9,16 @@ void game_server::start_game() {
     time_point<steady_clock> end;
     std::optional<uint8_t> opt_data_received;
 
-    _snake_game.start_game();
+    _snake_game.start_new_game();
     _game_running = true;
     _snake_game_th = std::thread{[&](){
         while (_game_running) {
             start = steady_clock::now();
+
+            if (!_snake_game.is_game_in_progress()) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                _snake_game.start_new_game();
+            }
 
             _servers.send_data(_snake_game.get_snake_data());
             opt_data_received = _servers.get_data_received();

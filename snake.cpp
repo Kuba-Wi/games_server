@@ -4,8 +4,16 @@
 #include <unordered_map>
 
 snake::snake(uint8_t height, uint8_t width) : _height(height), _width(width) {
+    this->reset_snake();
+}
+
+void snake::reset_snake() {
+    std::unique_lock ul(_snake_mutex);
+    _snake_index.clear();
+    _current_direction = move_direction::up;
     _snake_index.emplace_back(_height / 2, _width / 2);
     _snake_index.emplace_back(_height / 2 + 1, _width / 2);
+    ul.unlock();
     this->new_food();
 }
 

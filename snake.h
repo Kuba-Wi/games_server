@@ -14,6 +14,7 @@ class snake {
 public:
     snake(uint8_t height, uint8_t width);
 
+    void reset_snake();
     void new_food();
     bool is_food_eaten() const;
     bool is_index_present(uint8_t row, uint8_t column) const;
@@ -38,7 +39,7 @@ private:
     const uint8_t _width;
     std::vector<std::pair<uint8_t, uint8_t>> _snake_index;
     std::pair<uint8_t, uint8_t> _food_index;
-    std::atomic<move_direction> _current_direction{move_direction::up};
+    std::atomic<move_direction> _current_direction;
     std::atomic<bool> _direction_set{false};
 
     mutable std::mutex _snake_mutex;
