@@ -38,6 +38,15 @@ ApplicationWindow {
                 label_connection.visible = false;
             }
 
+            onSendingStopped: {
+                up_button.enabled = false;
+                down_button.enabled = false;
+                right_button.enabled = false;
+                left_button.enabled = false;
+                table_view.visible = false;
+                label_connection.visible = true;
+            }
+
             onBoardDimensionsSet: {
                 boardHeight = snake_model.get_board_height();
                 boardWidth = snake_model.get_board_width();

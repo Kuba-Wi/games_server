@@ -13,6 +13,10 @@ public:
         emit this->enableSending();
     }
 
+    void stop_sending() {
+        emit this->stopSending();
+    }
+
     void set_board_dimensions() {
         emit this->setBoardDimensions();
     }
@@ -20,5 +24,6 @@ public:
 signals:
     void refreshClient();
     void enableSending();
+    void stopSending();
     void setBoardDimensions();
 } inline qt_ui_if;

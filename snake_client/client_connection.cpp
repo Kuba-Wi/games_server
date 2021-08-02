@@ -14,7 +14,7 @@ client_connection::client_connection() : _socket(_io_context) {
     if (er_connect) {
         std::cerr << "Connect: " << er_connect.message() << "\n";
     }
-    receive_data();
+    this->receive_data();
 
     _io_context_thread = std::thread{[&](){
         using work_guard_type = boost::asio::executor_work_guard<boost::asio::io_context::executor_type>;
@@ -82,6 +82,9 @@ void client_connection::process_received_signal(const std::vector<int8_t>& signa
         _board_height = signal[1];
         _board_width = signal[2];
         set_board_dimensions();
+    } else if (static_cast<client_signal>(signal.front()) == client_signal::stop_sending) {
+        _sending_data_enabled = false;
+        stop_sending();
     }
 }
 

@@ -16,7 +16,8 @@ void game_server::start_game() {
             start = steady_clock::now();
 
             if (!_snake_game.is_game_in_progress()) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+                _servers.change_receiving_server();
                 _snake_game.start_new_game();
             }
 

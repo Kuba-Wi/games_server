@@ -9,7 +9,8 @@
 
 enum class client_signal : int8_t {
     start_sending = -1,
-    initial_data = -2
+    initial_data = -2,
+    stop_sending = -3
 };
 
 constexpr int8_t data_delimiter = std::numeric_limits<int8_t>::max();

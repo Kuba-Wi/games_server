@@ -21,6 +21,9 @@ public:
         connect(&qt_ui_if, &qt_ui_iface::enableSending, this, [&](){
             emit this->sendingEnabled();
         });
+        connect(&qt_ui_if, &qt_ui_iface::stopSending, this, [&](){
+            emit this->sendingStopped();
+        });
         connect(&qt_ui_if, &qt_ui_iface::setBoardDimensions, this, [&](){
             emit this->boardDimensionsSet();
         });
@@ -96,6 +99,7 @@ public slots:
 signals:
     void gameFinished();
     void sendingEnabled();
+    void sendingStopped();
     void boardDimensionsSet();
 
 private:

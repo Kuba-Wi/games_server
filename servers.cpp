@@ -3,7 +3,7 @@
 servers::servers() : _server_endpoint(boost::asio::ip::tcp::v4(), 30000), 
                      _acceptor(_io_context, _server_endpoint) {
 
-    accept_new_clients();
+    this->accept_new_clients();
     _io_context_th = std::thread{[&](){
         using work_guard_type = boost::asio::executor_work_guard<boost::asio::io_context::executor_type>;
         work_guard_type work_guard(_io_context.get_executor());
@@ -30,7 +30,7 @@ void servers::set_initial_data(const send_type& data) {
 
 std::optional<uint8_t> servers::get_data_received() {
     std::lock_guard sl(_server_list_mx);
-    if (clients_connected()) {
+    if (this->clients_connected()) {
         return (*_receiving_server_it)->get_received_data();
     }
     return std::nullopt;
@@ -42,7 +42,7 @@ void servers::accept_new_clients() {
             [&](boost::system::error_code er, boost::asio::ip::tcp::socket socket) {
                 if (!er) {
                     this->add_accepted_server(socket);
-                    accept_new_clients();
+                    this->accept_new_clients();
                 } else {
                     std::cerr << "Accept: " << er.message() << std::endl;
                 }
@@ -57,21 +57,35 @@ void servers::add_accepted_server(boost::asio::ip::tcp::socket& socket) {
     _server_list.emplace_back(std::make_shared<server>(socket));
     _server_list.back()->receive_data();
     this->send_initial_data(_server_list.back());
-    this->update_receiving_serv();
+    if (_server_list.size() == 1) {
+        this->update_receiving_serv();
+    }
 }
 
 void servers::send_data(const send_type& data) {
     std::lock_guard lg(_server_list_mx);
-    if (clients_connected()) {
+    if (this->clients_connected()) {
         (*_receiving_server_it)->send_data(data);
     }
 }
 
+void servers::change_receiving_server() {
+    std::lock_guard lg(_server_list_mx);
+    if (_server_list.size() <= 1) {
+        return;
+    }
+    this->send_client_signal(client_signal::stop_sending);
+    std::shared_ptr<server> ptr = *_receiving_server_it;
+    _server_list.erase(_receiving_server_it);
+    _server_list.push_back(ptr);
+    this->update_receiving_serv();
+}
+
 void servers::update_receiving_serv() {
-    if (clients_connected()) {
+    if (this->clients_connected()) {
         if (_receiving_server_it != _server_list.begin()) {
             _receiving_server_it = _server_list.begin();
-            this->send_client_signal(*_receiving_server_it, client_signal::start_sending);
+            this->send_client_signal(client_signal::start_sending);
         }
     }
 }
@@ -89,7 +103,7 @@ void servers::remove_disconnected_serv() {
 void servers::remove_loop() {
     constexpr size_t sleep_time = 100;
     while (_servers_running) {
-        remove_disconnected_serv();
+        this->remove_disconnected_serv();
         std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
     }
 }
@@ -98,6 +112,6 @@ void servers::send_initial_data(const std::shared_ptr<server>& server_ptr) {
     server_ptr->send_data(_initial_data);
 }
 
-void servers::send_client_signal(const std::shared_ptr<server>& server_ptr, client_signal signal) {
-    server_ptr->send_data({static_cast<int8_t>(signal)});
+void servers::send_client_signal(client_signal signal) {
+    (*_receiving_server_it)->send_data({static_cast<int8_t>(signal)});
 }
