@@ -3,15 +3,17 @@
 #include "snake.h"
 #include "snake_game.h"
 
-class game_server {
+class game_server : public Igame_server {
 public:
-    game_server(servers& servers, snake_game& snake_game) : _servers(servers), _snake_game(snake_game) {}
+    game_server(servers& servers, snake_game& snake_game);
     ~game_server();
     void start_game();
     void add_server_initial_data();
+    void update_game() override;
 
 private:
     void sleep_game_loop(size_t interval_ms, size_t measured_time_ms);
+    void start_accepting_clients();
 
     servers& _servers;
     snake_game& _snake_game;

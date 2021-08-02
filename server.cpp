@@ -1,6 +1,7 @@
 #include "server.h"
 
-server::server(boost::asio::ip::tcp::socket& socket) : _socket{std::move(socket)} {
+server::server(boost::asio::ip::tcp::socket& socket, Iservers* servers) : _socket{std::move(socket)},
+                                                                          _servers_observer{servers} {
     _execute_send_th = std::thread{[&](){
         this->send_loop();
     }};
@@ -44,16 +45,9 @@ void server::send_data(const send_type& data) {
     _send_data_cv.notify_all();
 }
 
-std::optional<uint8_t> server::get_received_data() {
-    std::lock_guard lg(_byte_received_mx);
-    auto byte = _byte_received;
-    _byte_received.reset();
-    return byte;
-}
-
 void server::update_byte_received() {
-    std::lock_guard lg(_byte_received_mx);
     _byte_received = _data_buffer;
+    this->notify_servers_observer();
 }
 
 void server::execute_send() {
