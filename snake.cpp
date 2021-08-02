@@ -10,7 +10,9 @@ snake::snake(uint8_t height, uint8_t width) : _height(height), _width(width) {
 void snake::reset_snake() {
     std::unique_lock ul(_snake_mutex);
     _snake_index.clear();
+    _direction_queue.clear();
     _current_direction = move_direction::up;
+    _direction_queue.push_back(move_direction::up);
     _snake_index.emplace_back(_height / 2, _width / 2);
     _snake_index.emplace_back(_height / 2 + 1, _width / 2);
     ul.unlock();
@@ -87,7 +89,13 @@ void snake::move() {
         move_left();
         break;
     }
-    _direction_set = false;
+
+    if (_direction_queue.size() > 0) {
+        _direction_queue.erase(_direction_queue.begin());
+    }
+    if (_direction_queue.size() > 0) {
+        _current_direction = _direction_queue.front();
+    }
 }
 
 void snake::move_up() {
@@ -147,14 +155,17 @@ bool snake::is_snake_index(uint8_t row, uint8_t column) const {
 }
 
 void snake::set_current_direction(move_direction direction) {
-    if (_direction_set) {
-        return;
-    }
     using md = move_direction;
     std::unordered_map<md, md> opposite_dir{{md::up, md::down}, {md::down, md::up},
                                             {md::left, md::right}, {md::right, md::left}};
-    if (opposite_dir[direction] != _current_direction && _current_direction != direction) {
-        _current_direction = direction;
-        _direction_set = true;
+
+    std::lock_guard lg(_snake_mutex);
+    if (_direction_queue.size() == 0) {
+        if (opposite_dir[direction] != _current_direction && direction != _current_direction) {
+            _direction_queue.push_back(direction);
+            _current_direction = _direction_queue.front();
+        }
+    } else if (opposite_dir[direction] != _direction_queue.back() && direction != _direction_queue.back()) {
+        _direction_queue.push_back(direction);
     }
 }

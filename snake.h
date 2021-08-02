@@ -1,5 +1,6 @@
 #pragma once
 #include <atomic>
+#include <list>
 #include <mutex>
 #include <vector>
 
@@ -39,8 +40,8 @@ private:
     const uint8_t _width;
     std::vector<std::pair<uint8_t, uint8_t>> _snake_index;
     std::pair<uint8_t, uint8_t> _food_index;
-    std::atomic<move_direction> _current_direction;
-    std::atomic<bool> _direction_set{false};
+    move_direction _current_direction;
+    std::list<move_direction> _direction_queue;
 
     mutable std::mutex _snake_mutex;
     mutable std::mutex _food_mutex;
