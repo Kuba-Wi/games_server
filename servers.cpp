@@ -34,19 +34,15 @@ void servers::set_initial_data(const send_type& data) {
 }
 
 void servers::accept_new_clients() {
-    try {
-        _acceptor.async_accept(
-            [&](boost::system::error_code er, boost::asio::ip::tcp::socket socket) {
-                if (!er) {
-                    this->add_accepted_server(socket);
-                    this->accept_new_clients();
-                } else {
-                    std::cerr << "Accept: " << er.message() << std::endl;
-                }
-            });
-    } catch(std::exception& e) {
-        std::cerr << "Accept exception: " << e.what() << std::endl;
-    }
+    _acceptor.async_accept(
+        [&](boost::system::error_code er, boost::asio::ip::tcp::socket socket) {
+            if (!er) {
+                this->add_accepted_server(socket);
+                this->accept_new_clients();
+            } else {
+                std::cerr << "Accept: " << er.message() << std::endl;
+            }
+        });
 }
 
 void servers::add_accepted_server(boost::asio::ip::tcp::socket& socket) {

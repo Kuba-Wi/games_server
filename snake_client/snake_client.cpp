@@ -5,7 +5,6 @@
 snake_client::snake_client(network& network) : _network(network) { 
     _network.attach_observer(this); 
     this->connect_network();
-    this->start_receiving_data();
 }
 
 void snake_client::update_snake(const std::vector<int8_t>& data, size_t bytes_received) {
@@ -15,6 +14,15 @@ void snake_client::update_snake(const std::vector<int8_t>& data, size_t bytes_re
         this->refresh_client_data(data, bytes_received);
         refresh_client();
     }
+}
+
+void snake_client::disconnect() {
+    _sending_data_enabled = false; 
+    wait_for_connection();
+}
+
+void snake_client::connect() {
+    establish_connection();
 }
 
 void snake_client::send_data(uint8_t data) {

@@ -4,11 +4,22 @@ import SnakeModel 0.1
 
 ApplicationWindow {
     property var buttonSize: 50
+    height: 400
+    width: 220
 
     visible: true
     title: qsTr("Snake")
 
+    function set_buttons_visibility(bool){
+        up_button.enabled = bool;
+        down_button.enabled = bool;
+        right_button.enabled = bool;
+        left_button.enabled = bool;
+        table_view.visible = bool;
+    }
+
     TableView {
+
         id: table_view
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
@@ -30,20 +41,25 @@ ApplicationWindow {
             }
 
             onSendingEnabled: {
-                up_button.enabled = true;
-                down_button.enabled = true;
-                right_button.enabled = true;
-                left_button.enabled = true;
-                table_view.visible = true;
+                set_buttons_visibility(true);
                 label_connection.visible = false;
             }
 
             onSendingStopped: {
-                up_button.enabled = false;
-                down_button.enabled = false;
-                right_button.enabled = false;
-                left_button.enabled = false;
-                table_view.visible = false;
+                set_buttons_visibility(false);
+                label_connection.text = "Connected, wait for your turn..."
+                label_connection.visible = true;
+            }
+
+            onWaitForConnection: {
+                set_buttons_visibility(false);
+                label_connection.text = "Connecting...";
+                label_connection.visible = true;
+            }
+
+            onEstablishConnection: {
+                set_buttons_visibility(false);
+                label_connection.text = "Connected, wait for your turn..."
                 label_connection.visible = true;
             }
 
@@ -120,7 +136,7 @@ ApplicationWindow {
         anchors.top: parent.top
         anchors.topMargin: 100
         visible: true
-        text: "Connected, wait for your turn..."
+        text: "Connecting..."
     }
 
     Label {

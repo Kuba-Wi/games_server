@@ -2,6 +2,7 @@
 
 #include <boost/asio.hpp>
 
+#include <atomic>
 #include <list>
 #include <mutex>
 #include <vector>
@@ -12,6 +13,8 @@ class Isnake_client {
 public:
     virtual ~Isnake_client() = default;
     virtual void update_snake(const std::vector<int8_t>& data, size_t bytes_received) = 0;
+    virtual void disconnect() = 0;
+    virtual void connect() = 0;
 };
 
 class network {
@@ -26,10 +29,14 @@ public:
 private:
     void refresh_data_buffer(size_t bytes_with_delimiter);
     void notify_snake(size_t bytes_received) { _snake_observer->update_snake(_data_received, bytes_received); }
+    void disconnect_snake() const { _snake_observer->disconnect(); }
+    void connect_snake() const { _snake_observer->connect(); }
+    void prepare_socket_connect() { _socket.close(); }
 
     boost::asio::io_context _io_context;
     boost::asio::ip::tcp::endpoint _server_endpoint;
     boost::asio::ip::tcp::socket _socket;
+    std::atomic<bool> _socket_connected{false};
 
     std::thread _io_context_thread;
 

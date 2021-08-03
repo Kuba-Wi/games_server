@@ -21,9 +21,19 @@ public:
         emit this->setBoardDimensions();
     }
 
+    void wait_for_connection() {
+        emit this->waitForConnection();
+    }
+
+    void establish_connection() {
+        emit this->establishConnection();
+    }
+
 signals:
     void refreshClient();
     void enableSending();
     void stopSending();
     void setBoardDimensions();
+    void waitForConnection();
+    void establishConnection();
 } inline qt_ui_if;

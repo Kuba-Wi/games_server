@@ -14,23 +14,18 @@ server::~server() {
 }
 
 void server::receive_data() {
-    try {
-        boost::asio::async_read(
-            _socket,
-            boost::asio::buffer(&_data_buffer, sizeof(_data_buffer)),
-            [ptr = this->shared_from_this()](const boost::system::error_code& er, size_t) {
-                if (!er) {
-                    ptr->notify_servers_observer();
-                    ptr->receive_data();
-                } else {
-                    ptr->end_connection();
-                    std::cerr << "Receive: " << er.message() << std::endl;
-                }
-            });
-    } catch(std::exception& e) {
-        this->end_connection();
-        std::cerr << "Receive exception: " << e.what() << std::endl;
-    }
+    boost::asio::async_read(
+        _socket,
+        boost::asio::buffer(&_data_buffer, sizeof(_data_buffer)),
+        [ptr = this->shared_from_this()](const boost::system::error_code& er, size_t) {
+            if (!er) {
+                ptr->notify_servers_observer();
+                ptr->receive_data();
+            } else {
+                ptr->end_connection();
+                std::cerr << "Receive: " << er.message() << std::endl;
+            }
+        });
 }
 
 void server::send_data(const send_type& data) {
@@ -49,21 +44,17 @@ void server::execute_send() {
     _sending_blocked = true;
     boost::asio::mutable_buffer buf(_send_queue.front().data(), _send_queue.front().size() * sizeof(send_type::value_type));
     auto it = _send_queue.begin();
-    try {
-        boost::asio::async_write(_socket, buf, 
-            [it, ptr = this->shared_from_this()](const boost::system::error_code& er, size_t){
-                if (er) {
-                    ptr->end_connection();
-                    std::cerr << "Send: " << er.message() << std::endl;
-                }
-                ptr->erase_el_from_queue(it);
-                ptr->_sending_blocked = false;
-                ptr->_send_data_cv.notify_all();
-            });
-    } catch (std::exception& e) {
-        this->end_connection();
-        std::cerr << "Send exception: " << e.what() << std::endl;
-    }
+
+    boost::asio::async_write(_socket, buf, 
+        [it, ptr = this->shared_from_this()](const boost::system::error_code& er, size_t){
+            if (er) {
+                ptr->end_connection();
+                std::cerr << "Send: " << er.message() << std::endl;
+            }
+            ptr->erase_el_from_queue(it);
+            ptr->_sending_blocked = false;
+            ptr->_send_data_cv.notify_all();
+        });
 }
 
 void server::send_loop() {
