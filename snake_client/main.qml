@@ -18,6 +18,11 @@ ApplicationWindow {
         table_view.visible = bool;
     }
 
+    function set_wait_circle_state(bool){
+        wait_circle.visible = bool;
+        wait_circle.running = bool;
+    }
+
     TableView {
 
         id: table_view
@@ -43,6 +48,7 @@ ApplicationWindow {
             onSendingEnabled: {
                 set_buttons_visibility(true);
                 label_connection.visible = false;
+                set_wait_circle_state(false);
             }
 
             onSendingStopped: {
@@ -55,12 +61,14 @@ ApplicationWindow {
                 set_buttons_visibility(false);
                 label_connection.text = "Connecting...";
                 label_connection.visible = true;
+                set_wait_circle_state(true);
             }
 
             onEstablishConnection: {
                 set_buttons_visibility(false);
                 label_connection.text = "Connected, wait for your turn..."
                 label_connection.visible = true;
+                set_wait_circle_state(false);
             }
 
             onBoardDimensionsSet: {
@@ -137,6 +145,15 @@ ApplicationWindow {
         anchors.topMargin: 100
         visible: true
         text: "Connecting..."
+    }
+
+    BusyIndicator {
+        id: wait_circle
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: label_connection.bottom
+        anchors.topMargin: 20
+        visible: true
+        running: true
     }
 
     Label {
