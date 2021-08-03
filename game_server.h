@@ -9,7 +9,7 @@ public:
     ~game_server();
     void start_game();
     void add_server_initial_data();
-    void update_game() override;
+    void update_game(uint8_t byte_received) override;
 
 private:
     void sleep_game_loop(size_t interval_ms, size_t measured_time_ms);

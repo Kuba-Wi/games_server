@@ -33,14 +33,6 @@ void servers::set_initial_data(const send_type& data) {
     std::copy(data.begin(), data.end(), _initial_data.begin() + 1);
 }
 
-std::optional<uint8_t> servers::get_data_received() {
-    std::lock_guard sl(_server_list_mx);
-    if (this->clients_connected()) {
-        return (*_receiving_server_it)->get_received_data();
-    }
-    return std::nullopt;
-}
-
 void servers::accept_new_clients() {
     try {
         _acceptor.async_accept(

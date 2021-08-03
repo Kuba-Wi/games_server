@@ -11,7 +11,7 @@ enum class client_signal : int8_t {
 class Igame_server {
 public:
     virtual ~Igame_server() = default;
-    virtual void update_game() = 0;
+    virtual void update_game(uint8_t byte_received) = 0;
 };
 
 class servers : public Iservers {
@@ -23,11 +23,10 @@ public:
     void set_initial_data(const send_type& data);
     void accept_new_clients();
     void send_data(const send_type& data);
-    std::optional<uint8_t> get_data_received();
     void change_receiving_server();
     
     void attach_observer(Igame_server* observer) { _game_server_observer = observer; }
-    void update() override { _game_server_observer->update_game(); }
+    void update(uint8_t byte_received) override { _game_server_observer->update_game(byte_received); }
 
 private:
     void remove_disconnected_serv();

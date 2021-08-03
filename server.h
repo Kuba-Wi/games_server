@@ -20,7 +20,7 @@ using send_iterator = std::list<send_type>::iterator;
 class Iservers {
 public:
     virtual ~Iservers() = default;
-    virtual void update() = 0;
+    virtual void update(uint8_t byte_received) = 0;
 };
 
 class server : public std::enable_shared_from_this<server> {
@@ -33,20 +33,16 @@ public:
     void end_connection() { _socket_connected = false; }
     void erase_el_from_queue(const send_iterator& it);
 
-    uint8_t get_received_data() const { return _byte_received; }
-    void update_byte_received();
 private:
     void execute_send();
     void send_loop();
-    void notify_servers_observer() const { _servers_observer->update(); }
+    void notify_servers_observer() const { _servers_observer->update(_data_buffer); }
 
     boost::asio::ip::tcp::socket _socket;
     std::atomic<bool> _socket_connected{true};
     std::atomic<bool> _sending_blocked{false};
 
     uint8_t _data_buffer;
-    std::atomic<uint8_t> _byte_received;
-
     std::list<send_type> _send_queue;
     std::mutex _send_mx;
     std::condition_variable _send_data_cv;

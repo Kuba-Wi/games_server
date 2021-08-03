@@ -46,11 +46,8 @@ void game_server::sleep_game_loop(size_t interval_ms, size_t measured_time_ms) {
     }
 }
 
-void game_server::update_game() {
-    auto opt_data_received = _servers.get_data_received();
-    if (opt_data_received.has_value()) {
-        _snake_game.set_snake_direction(opt_data_received.value());
-    }
+void game_server::update_game(uint8_t byte_received) {
+    _snake_game.set_snake_direction(byte_received);
 }
 
 game_server::~game_server() {

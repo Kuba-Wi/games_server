@@ -20,7 +20,7 @@ void server::receive_data() {
             boost::asio::buffer(&_data_buffer, sizeof(_data_buffer)),
             [ptr = this->shared_from_this()](const boost::system::error_code& er, size_t) {
                 if (!er) {
-                    ptr->update_byte_received();
+                    ptr->notify_servers_observer();
                     ptr->receive_data();
                 } else {
                     ptr->end_connection();
@@ -43,11 +43,6 @@ void server::send_data(const send_type& data) {
     _send_queue.back().push_back(data_delimiter);
     ul.unlock();
     _send_data_cv.notify_all();
-}
-
-void server::update_byte_received() {
-    _byte_received = _data_buffer;
-    this->notify_servers_observer();
 }
 
 void server::execute_send() {
