@@ -8,7 +8,7 @@
 #include <memory>
 #include <thread>
 
-#include "client_connection.h"
+#include "snake_client.h"
 #include "qt_ui_iface.h"
 
 class SnakeModel : public QAbstractTableModel
@@ -28,7 +28,8 @@ public:
             emit this->boardDimensionsSet();
         });
 
-        _connection = std::make_unique<client_connection>();
+        _network = std::make_unique<network>();
+        _snake_client = std::make_unique<snake_client>(*_network);
     }
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const override
@@ -36,7 +37,7 @@ public:
         if (parent.isValid())
             return 0;
 
-        return _connection->get_board_height();
+        return _snake_client->get_board_height();
     }
 
     int columnCount(const QModelIndex& parent = QModelIndex()) const override
@@ -44,12 +45,12 @@ public:
         if (parent.isValid())
             return 0;
 
-        return _connection->get_board_width();
+        return _snake_client->get_board_width();
     }
 
     QVariant data(const QModelIndex &index, [[maybe_unused]] int role) const override
     {
-        if (_connection->check_index_present(index.row(), index.column())) {
+        if (_snake_client->check_index_present(index.row(), index.column())) {
             return QColor{"yellow"};
         }
         return QColor{"black"};
@@ -80,7 +81,7 @@ public:
 
 public slots:
     void send_data(int data) {
-        _connection->send_data(data);
+        _snake_client->send_data(data);
     }
 
     void refresh() {
@@ -89,11 +90,11 @@ public slots:
     }
 
     int get_board_height() {
-        return _connection->get_board_height();
+        return _snake_client->get_board_height();
     }
 
     int get_board_width() {
-        return _connection->get_board_width();
+        return _snake_client->get_board_width();
     }
 
 signals:
@@ -103,5 +104,6 @@ signals:
     void boardDimensionsSet();
 
 private:
-    std::unique_ptr<client_connection> _connection;
+    std::unique_ptr<snake_client> _snake_client;
+    std::unique_ptr<network> _network;
 };

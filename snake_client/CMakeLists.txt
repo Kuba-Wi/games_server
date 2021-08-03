@@ -30,7 +30,8 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Quick REQUIRED)
 set(PROJECT_SOURCES
         main.cpp
         snakeModel.cpp
-        client_connection.cpp
+        snake_client.cpp
+        network.cpp
         qt_ui_iface.cpp
         qml.qrc
 )

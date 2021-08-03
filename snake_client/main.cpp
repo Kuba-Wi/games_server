@@ -2,7 +2,6 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include "snakeModel.h"
-#include "client_connection.h"
 
 #include <vector>
 #include <thread>
