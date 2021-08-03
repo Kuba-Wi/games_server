@@ -18,8 +18,8 @@ class snake_client : public Isnake_client {
 public:
     snake_client(network& network);
     void update_snake(const std::vector<int8_t>& data, size_t bytes_received) override;
-    void disconnect() override;
-    void connect() override;
+    void set_disconnected() override;
+    void set_connected() override;
 
     void send_data(uint8_t data);
     bool check_index_present(uint8_t x, uint8_t y) const;

@@ -16,13 +16,13 @@ void snake_client::update_snake(const std::vector<int8_t>& data, size_t bytes_re
     }
 }
 
-void snake_client::disconnect() {
+void snake_client::set_disconnected() {
     _sending_data_enabled = false; 
     wait_for_connection();
 }
 
-void snake_client::connect() {
-    establish_connection();
+void snake_client::set_connected() {
+    connection_established();
 }
 
 void snake_client::send_data(uint8_t data) {

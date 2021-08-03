@@ -31,9 +31,9 @@ public:
     void send_data(const send_type& data);
     bool is_socket_connected() const { return _socket_connected; }
     void end_connection() { _socket_connected = false; }
-    void erase_el_from_queue(const send_iterator& it);
 
 private:
+    void erase_el_from_queue(const send_iterator& it);
     void execute_send();
     void send_loop();
     void notify_servers_observer() const { _servers_observer->update(_data_buffer); }
@@ -46,7 +46,7 @@ private:
     std::list<send_type> _send_queue;
     std::mutex _send_mx;
     std::condition_variable _send_data_cv;
-    std::thread _execute_send_th;
+    std::thread _send_loop_th;
 
     Iservers* _servers_observer;
 };

@@ -64,7 +64,7 @@ ApplicationWindow {
                 set_wait_circle_state(true);
             }
 
-            onEstablishConnection: {
+            onConnectionEstablished: {
                 set_buttons_visibility(false);
                 label_connection.text = "Connected, wait for your turn..."
                 label_connection.visible = true;

@@ -27,8 +27,8 @@ public:
         connect(&qt_ui_if, &qt_ui_iface::waitForConnection, this, [&](){
             emit this->waitForConnection();
         });
-        connect(&qt_ui_if, &qt_ui_iface::establishConnection, this, [&](){
-            emit this->establishConnection();
+        connect(&qt_ui_if, &qt_ui_iface::connectionEstablished, this, [&](){
+            emit this->connectionEstablished();
         });
         connect(&qt_ui_if, &qt_ui_iface::setBoardDimensions, this, [&](){
             emit this->boardDimensionsSet();
@@ -108,7 +108,7 @@ signals:
     void sendingEnabled();
     void sendingStopped();
     void waitForConnection();
-    void establishConnection();
+    void connectionEstablished();
     void boardDimensionsSet();
 
 private:

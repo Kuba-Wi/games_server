@@ -2,7 +2,7 @@
 
 server::server(boost::asio::ip::tcp::socket& socket, Iservers* servers) : _socket{std::move(socket)},
                                                                           _servers_observer{servers} {
-    _execute_send_th = std::thread{[&](){
+    _send_loop_th = std::thread{[&](){
         this->send_loop();
     }};
 }
@@ -10,7 +10,7 @@ server::server(boost::asio::ip::tcp::socket& socket, Iservers* servers) : _socke
 server::~server() {
     this->end_connection();
     _send_data_cv.notify_all();
-    _execute_send_th.join();
+    _send_loop_th.join();
 }
 
 void server::receive_data() {
@@ -67,7 +67,6 @@ void server::send_loop() {
             return;
         }
         this->execute_send();
-        ul.unlock();
     }
 }
 
