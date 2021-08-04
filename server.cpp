@@ -41,7 +41,7 @@ void server::send_data(const send_type& data) {
 }
 
 void server::execute_send() {
-    _sending_blocked = true;
+    _send_executing = true;
     boost::asio::mutable_buffer buf(_send_queue.front().data(), _send_queue.front().size() * sizeof(send_type::value_type));
     auto it = _send_queue.begin();
 
@@ -52,7 +52,7 @@ void server::execute_send() {
                 std::cerr << "Send: " << er.message() << std::endl;
             }
             ptr->erase_el_from_queue(it);
-            ptr->_sending_blocked = false;
+            ptr->_send_executing = false;
             ptr->_send_data_cv.notify_all();
         });
 }
@@ -61,7 +61,7 @@ void server::send_loop() {
     while (_socket_connected) {
         std::unique_lock ul(_send_mx);
         _send_data_cv.wait(ul, [&](){
-            return (_send_queue.size() > 0 && !_sending_blocked) || !_socket_connected;
+            return (_send_queue.size() > 0 && !_send_executing) || !_socket_connected;
         });
         if (!_socket_connected) {
             return;

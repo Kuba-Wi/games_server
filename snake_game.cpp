@@ -4,6 +4,7 @@
 void snake_game::start_new_game() {
     this->stop_current_game();
     _snake.reset_snake();
+    this->start_snake();
 
     _game_in_progress = true;
     _game_end_th = std::thread{
@@ -16,7 +17,6 @@ void snake_game::start_new_game() {
             _timer.stop_timer();
         }
     };
-    this->start_snake();
 }
 
 void snake_game::start_snake() {

@@ -50,7 +50,7 @@ private:
     std::list<uint8_t> _send_queue;
     std::thread _send_loop_th;
     std::condition_variable _send_data_cv;
-    std::atomic<bool> _sending_blocked{false};
+    std::atomic<bool> _send_executing{false};
     std::atomic<bool> _stop_send_loop{false};
 
     std::vector<int8_t> _data_received;

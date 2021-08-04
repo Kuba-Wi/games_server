@@ -86,7 +86,7 @@ void network::send_loop() {
     while (!_stop_send_loop) {
         std::unique_lock ul(_send_queue_mx);
         _send_data_cv.wait(ul, [&](){
-            return (_send_queue.size() > 0 && !_sending_blocked) || _stop_send_loop;
+            return (_send_queue.size() > 0 && !_send_executing) || _stop_send_loop;
         });
         if (_stop_send_loop) {
             return;
@@ -96,7 +96,7 @@ void network::send_loop() {
 }
 
 void network::execute_send() {
-    _sending_blocked = true;
+    _send_executing = true;
     boost::asio::mutable_buffer buf(&_send_queue.front(), sizeof(uint8_t));
     auto it = _send_queue.begin();
 
@@ -109,7 +109,7 @@ void network::execute_send() {
                 this->connect();
             }
             this->erase_el_from_queue(it);
-            _sending_blocked = false;
+            _send_executing = false;
             _send_data_cv.notify_all();
         });
 }

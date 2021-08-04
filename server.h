@@ -40,7 +40,7 @@ private:
 
     boost::asio::ip::tcp::socket _socket;
     std::atomic<bool> _socket_connected{true};
-    std::atomic<bool> _sending_blocked{false};
+    std::atomic<bool> _send_executing{false};
 
     uint8_t _data_buffer;
     std::list<send_type> _send_queue;
