@@ -3,8 +3,8 @@ import QtQuick.Controls 2.12
 import SnakeModel 0.1
 
 ApplicationWindow {
-    property var buttonSize: 50
-    height: 400
+    property var buttonSize: 60
+    height: 420
     width: 220
 
     visible: true
@@ -23,8 +23,46 @@ ApplicationWindow {
         wait_circle.running = bool;
     }
 
-    TableView {
+    TextField {
+        id: text_ip
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        anchors.topMargin: 100
+        width: parent.width - 50
+        text: "Server ip address"
+    }
 
+    Button {
+        id: connect_button
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: text_ip.bottom
+        anchors.topMargin: 20
+        width: 100
+        text: "Connect"
+        
+        onClicked: {
+            if (snake_model.set_ip(text_ip.text)) {
+                snake_model.connect_network();
+
+                connect_button.visible = false;
+                text_ip.visible = false;
+                set_wait_circle_state(true);
+                label_connection.text = "Connecting...";
+                label_connection.visible = true;
+            } else {
+                wrong_ip_dialog.open();
+            }
+        }
+    }
+
+    Dialog {
+        id: wrong_ip_dialog
+        width: parent.width
+        title: "Invalid ip, try again"
+        standardButtons: Dialog.Ok
+    }
+
+    TableView {
         id: table_view
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
@@ -143,7 +181,7 @@ ApplicationWindow {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
         anchors.topMargin: 100
-        visible: true
+        visible: false
         text: "Connecting..."
     }
 
@@ -152,7 +190,7 @@ ApplicationWindow {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: label_connection.bottom
         anchors.topMargin: 20
-        visible: true
+        visible: false
         running: true
     }
 

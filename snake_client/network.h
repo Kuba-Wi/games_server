@@ -6,10 +6,12 @@
 #include <condition_variable>
 #include <list>
 #include <mutex>
+#include <string>
 #include <thread>
 #include <vector>
 
 constexpr int8_t data_delimiter = std::numeric_limits<int8_t>::max();
+constexpr size_t port_number = 30000;
 
 class Isnake_client {
 public:
@@ -23,6 +25,7 @@ class network {
 public:
     network();
     ~network();
+    bool set_server_address(const std::string& ip);
     void connect();
     void receive_data();
     void send_data(uint8_t data);
@@ -45,6 +48,7 @@ private:
     boost::asio::ip::tcp::socket _socket;
     std::thread _io_context_thread;
     std::atomic<bool> _socket_connected{false};
+    std::atomic<bool> _address_set{false};
 
     std::mutex _send_queue_mx;
     std::list<uint8_t> _send_queue;

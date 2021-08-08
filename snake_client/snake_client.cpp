@@ -2,9 +2,10 @@
 #include "ui_iface.h"
 #include <iostream>
 
-snake_client::snake_client(network& network) : _network(network) { 
-    _network.attach_observer(this); 
-    this->connect_network();
+snake_client::snake_client(std::unique_ptr<network>&& ptr) {
+    assert(ptr);
+    _network_ptr = std::move(ptr);
+    _network_ptr->attach_observer(this);
 }
 
 void snake_client::update_snake(const std::vector<int8_t>& data, size_t bytes_received) {
@@ -29,7 +30,7 @@ void snake_client::send_data(uint8_t data) {
     if (!_sending_data_enabled) {
         return;
     }
-    _network.send_data(data);
+    _network_ptr->send_data(data);
 }
 
 void snake_client::process_received_signal(const std::vector<int8_t>& signal) {

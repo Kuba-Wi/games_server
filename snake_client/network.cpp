@@ -3,12 +3,7 @@
 #include <iostream>
 
 network::network() : _socket(_io_context) {
-    boost::system::error_code er_adress;
-    _server_endpoint.address(boost::asio::ip::make_address("localhost", er_adress));
-    _server_endpoint.port(30000);
-    if (er_adress) {
-        std::cerr << "Address: " << er_adress.message() << "\n";
-    }
+    _server_endpoint.port(port_number);
 
     _io_context_thread = std::thread{[&](){
         using work_guard_type = boost::asio::executor_work_guard<boost::asio::io_context::executor_type>;
@@ -30,8 +25,19 @@ network::~network() {
     _io_context_thread.join();
 }
 
+bool network::set_server_address(const std::string& ip) {
+    boost::system::error_code er_adress;
+    auto address = boost::asio::ip::make_address(ip, er_adress);
+    if (er_adress) {
+        return false;
+    }
+    _server_endpoint.address(address);
+    _address_set = true;
+    return true;
+}
+
 void network::connect() {
-    if (!_snake_observer || _socket_connected) {
+    if (!_snake_observer || _socket_connected || !_address_set) {
         return;
     }
     this->prepare_socket_connect();
@@ -39,7 +45,6 @@ void network::connect() {
         if (error) {
             this->connect();
         } else {
-            std::cout << "Connected" << std::endl;
             _socket_connected = true;
             this->notify_connected();
             this->receive_data();

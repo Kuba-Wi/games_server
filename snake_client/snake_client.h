@@ -2,7 +2,9 @@
 
 #include <atomic>
 #include <list>
+#include <memory>
 #include <mutex>
+#include <string>
 #include <thread>
 #include <vector>
 
@@ -16,10 +18,12 @@ enum class client_signal : int8_t {
 
 class snake_client : public Isnake_client {
 public:
-    snake_client(network& network);
+    snake_client(std::unique_ptr<network>&& ptr);
     void update_snake(const std::vector<int8_t>& data, size_t bytes_received) override;
     void set_disconnected() override;
     void set_connected() override;
+    bool set_server_address(const std::string& ip) { return _network_ptr->set_server_address(ip); }
+    void connect_network() { _network_ptr->connect(); }
 
     void send_data(uint8_t data);
     bool check_index_present(uint8_t x, uint8_t y) const;
@@ -27,7 +31,6 @@ public:
     uint8_t get_board_width() const { return _board_width; }
 
 private:
-    void connect_network() { _network.connect(); }
     void process_received_signal(const std::vector<int8_t>& signal);
     void refresh_client_data(const std::vector<int8_t>& data, size_t bytes_received);
 
@@ -37,5 +40,5 @@ private:
     std::atomic<uint8_t> _board_height{0};
     std::atomic<uint8_t> _board_width{0};
 
-    network& _network;
+    std::unique_ptr<network> _network_ptr;
 };

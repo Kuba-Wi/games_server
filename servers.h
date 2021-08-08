@@ -14,6 +14,8 @@ public:
     virtual void update_game(uint8_t byte_received) = 0;
 };
 
+constexpr size_t port_number = 30000;
+
 class servers : public Iservers {
 public:
     using server_iterator = std::list<std::shared_ptr<server>>::iterator;

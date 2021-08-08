@@ -3,9 +3,11 @@
 #include <qqml.h>
 #include <QAbstractTableModel>
 #include <QColor>
+#include <QString>
 
 #include <algorithm>
 #include <memory>
+#include <string>
 #include <thread>
 
 #include "snake_client.h"
@@ -16,7 +18,7 @@ class SnakeModel : public QAbstractTableModel
     Q_OBJECT
 
 public:
-    SnakeModel() {
+    SnakeModel() :_snake_client(std::make_unique<snake_client>(std::make_unique<network>())) {
         connect(&qt_ui_if, &qt_ui_iface::refreshClient, this, &SnakeModel::refresh);
         connect(&qt_ui_if, &qt_ui_iface::enableSending, this, [&](){
             emit this->sendingEnabled();
@@ -33,9 +35,6 @@ public:
         connect(&qt_ui_if, &qt_ui_iface::setBoardDimensions, this, [&](){
             emit this->boardDimensionsSet();
         });
-
-        _network = std::make_unique<network>();
-        _snake_client = std::make_unique<snake_client>(*_network);
     }
 
     int rowCount(const QModelIndex& parent = QModelIndex()) const override
@@ -103,6 +102,14 @@ public slots:
         return _snake_client->get_board_width();
     }
 
+    bool set_ip(const QString& ip) {
+        return _snake_client->set_server_address(ip.toStdString());
+    }
+
+    void connect_network() {
+        _snake_client->connect_network();
+    }
+
 signals:
     void gameFinished();
     void sendingEnabled();
@@ -113,5 +120,4 @@ signals:
 
 private:
     std::unique_ptr<snake_client> _snake_client;
-    std::unique_ptr<network> _network;
 };
