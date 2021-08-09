@@ -18,7 +18,6 @@ constexpr size_t port_number = 30000;
 
 class servers : public Iservers {
 public:
-    using server_iterator = std::list<std::shared_ptr<server>>::iterator;
     servers();
     ~servers();
     void start_servers();
@@ -33,14 +32,13 @@ public:
 private:
     void remove_disconnected_serv();
     void remove_loop();
-    bool clients_connected() const { return _server_list.size() > 0; }
-    void update_receiving_it();
+    void update_receiving_serv();
     void add_accepted_server(boost::asio::ip::tcp::socket& socket);
     void send_initial_data(const std::shared_ptr<server>& server_ptr);
     void send_client_signal(client_signal signal);
 
     std::list<std::shared_ptr<server>> _server_list;
-    server_iterator _receiving_server_it;
+    std::shared_ptr<server> _receiving_server;
     send_type _initial_data;
     std::thread _remove_disconnected_th;
     std::atomic<bool> _servers_running{false};

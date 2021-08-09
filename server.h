@@ -44,6 +44,7 @@ private:
 
     uint8_t _data_buffer;
     std::list<send_type> _send_queue;
+    const size_t _queue_max_size = 1000;
     std::mutex _send_mx;
     std::condition_variable _send_data_cv;
     std::thread _send_loop_th;

@@ -34,6 +34,9 @@ void server::send_data(const send_type& data) {
     }
 
     std::unique_lock ul(_send_mx);
+    if (_send_queue.size() >= _queue_max_size) {
+        return;
+    }
     _send_queue.push_back(data);
     _send_queue.back().push_back(data_delimiter);
     ul.unlock();

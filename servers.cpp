@@ -51,14 +51,14 @@ void servers::add_accepted_server(boost::asio::ip::tcp::socket& socket) {
     _server_list.back()->receive_data();
     this->send_initial_data(_server_list.back());
     if (_server_list.size() == 1) {
-        this->update_receiving_it();
+        this->update_receiving_serv();
     }
 }
 
 void servers::send_data(const send_type& data) {
     std::lock_guard lg(_server_list_mx);
-    if (this->clients_connected()) {
-        (*_receiving_server_it)->send_data(data);
+    if (_server_list.size() > 0) {
+        _receiving_server->send_data(data);
     }
 }
 
@@ -68,28 +68,28 @@ void servers::change_receiving_server() {
         return;
     }
     this->send_client_signal(client_signal::stop_sending);
-    std::shared_ptr<server> ptr = *_receiving_server_it;
-    _server_list.erase(_receiving_server_it);
+    auto ptr = _receiving_server;
+    _server_list.remove(_receiving_server);
     _server_list.push_back(ptr);
-    this->update_receiving_it();
+    this->update_receiving_serv();
 }
 
-void servers::update_receiving_it() {
-    if (this->clients_connected()) {
-        if (_receiving_server_it != _server_list.begin()) {
-            _receiving_server_it = _server_list.begin();
-            this->send_client_signal(client_signal::start_sending);
-        }
-    }
+void servers::update_receiving_serv() {
+    _receiving_server = _server_list.front();
+    this->send_client_signal(client_signal::start_sending);
 }
 
 void servers::remove_disconnected_serv() {
     std::lock_guard lg(_server_list_mx);
-    size_t elements_removed = _server_list.remove_if([&](auto& serv){
+    _server_list.remove_if([&](auto& serv){
             return !serv->is_socket_connected();
         });
-    if (elements_removed > 0) {
-        this->update_receiving_it();
+    if (_server_list.size() > 0) {
+        if (_receiving_server != _server_list.front()) {
+            this->update_receiving_serv();
+        }
+    } else {
+        _receiving_server = nullptr;
     }
 }
 
@@ -106,5 +106,5 @@ void servers::send_initial_data(const std::shared_ptr<server>& server_ptr) {
 }
 
 void servers::send_client_signal(client_signal signal) {
-    (*_receiving_server_it)->send_data({static_cast<int8_t>(signal)});
+    _receiving_server->send_data({static_cast<int8_t>(signal)});
 }
