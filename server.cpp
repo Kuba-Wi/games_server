@@ -19,10 +19,11 @@ void server::receive_data() {
         boost::asio::buffer(&_data_buffer, sizeof(_data_buffer)),
         [ptr = this->shared_from_this()](const boost::system::error_code& er, size_t) {
             if (!er) {
-                ptr->notify_servers_observer();
+                ptr->notify_data_received();
                 ptr->receive_data();
             } else {
                 ptr->end_connection();
+                ptr->notify_server_disconnected();
                 std::cerr << "Receive: " << er.message() << std::endl;
             }
         });
@@ -52,6 +53,7 @@ void server::execute_send() {
         [it, ptr = this->shared_from_this()](const boost::system::error_code& er, size_t){
             if (er) {
                 ptr->end_connection();
+                ptr->notify_server_disconnected();
                 std::cerr << "Send: " << er.message() << std::endl;
             }
             ptr->erase_el_from_queue(it);

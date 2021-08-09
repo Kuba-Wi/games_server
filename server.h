@@ -12,6 +12,8 @@
 #include <thread>
 #include <vector>
 
+class server;
+
 constexpr int8_t data_delimiter = std::numeric_limits<int8_t>::max();
 
 using send_type = std::vector<int8_t>;
@@ -20,7 +22,8 @@ using send_iterator = std::list<send_type>::iterator;
 class Iservers {
 public:
     virtual ~Iservers() = default;
-    virtual void update(uint8_t byte_received) = 0;
+    virtual void update_data_received(uint8_t byte_received) = 0;
+    virtual void update_disconnected(const std::shared_ptr<server>& disconnected) = 0;
 };
 
 class server : public std::enable_shared_from_this<server> {
@@ -29,14 +32,14 @@ public:
     ~server();
     void receive_data();
     void send_data(const send_type& data);
-    bool is_socket_connected() const { return _socket_connected; }
     void end_connection() { _socket_connected = false; }
 
 private:
     void erase_el_from_queue(const send_iterator& it);
     void execute_send();
     void send_loop();
-    void notify_servers_observer() const { _servers_observer->update(_data_buffer); }
+    void notify_data_received() const { _servers_observer->update_data_received(_data_buffer); }
+    void notify_server_disconnected() { _servers_observer->update_disconnected(this->shared_from_this()); }
 
     boost::asio::ip::tcp::socket _socket;
     std::atomic<bool> _socket_connected{true};

@@ -27,20 +27,21 @@ public:
     void change_receiving_server();
     
     void attach_observer(Igame_server* observer) { _game_server_observer = observer; }
-    void update(uint8_t byte_received) override { _game_server_observer->update_game(byte_received); }
+    void update_data_received(uint8_t byte_received) override { _game_server_observer->update_game(byte_received); }
+    void update_disconnected(const std::shared_ptr<server>& disconnected) override;
 
 private:
-    void remove_disconnected_serv();
-    void remove_loop();
+    void remove_disconnected_serv(const std::shared_ptr<server>& disconnected);
     void update_receiving_serv();
     void add_accepted_server(boost::asio::ip::tcp::socket& socket);
     void send_initial_data(const std::shared_ptr<server>& server_ptr);
     void send_client_signal(client_signal signal);
 
     std::list<std::shared_ptr<server>> _server_list;
+    std::mutex _server_list_mx;
     std::shared_ptr<server> _receiving_server;
+
     send_type _initial_data;
-    std::thread _remove_disconnected_th;
     std::atomic<bool> _servers_running{false};
 
     boost::asio::io_context _io_context;
@@ -48,7 +49,6 @@ private:
     boost::asio::ip::tcp::acceptor _acceptor;
 
     std::thread _io_context_th;
-    std::mutex _server_list_mx;
 
     Igame_server* _game_server_observer = nullptr;
 };

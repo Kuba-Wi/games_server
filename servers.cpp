@@ -6,8 +6,6 @@ servers::servers() : _server_endpoint(boost::asio::ip::tcp::v4(), port_number),
 servers::~servers() {
     _io_context.stop();
     _io_context_th.join();
-    _servers_running = false;
-    _remove_disconnected_th.join();
 }
 
 void servers::start_servers() {
@@ -20,10 +18,6 @@ void servers::start_servers() {
         using work_guard_type = boost::asio::executor_work_guard<boost::asio::io_context::executor_type>;
         work_guard_type work_guard(_io_context.get_executor());
         _io_context.run();
-    }};
-
-    _remove_disconnected_th = std::thread{[&](){
-        this->remove_loop();
     }};
 }
 
@@ -79,25 +73,18 @@ void servers::update_receiving_serv() {
     this->send_client_signal(client_signal::start_sending);
 }
 
-void servers::remove_disconnected_serv() {
-    std::lock_guard lg(_server_list_mx);
-    _server_list.remove_if([&](auto& serv){
-            return !serv->is_socket_connected();
-        });
-    if (_server_list.size() > 0) {
-        if (_receiving_server != _server_list.front()) {
-            this->update_receiving_serv();
-        }
-    } else {
-        _receiving_server = nullptr;
-    }
+void servers::update_disconnected(const std::shared_ptr<server>& disconnected) {
+    this->remove_disconnected_serv(disconnected);
 }
 
-void servers::remove_loop() {
-    constexpr size_t sleep_time = 100;
-    while (_servers_running) {
-        this->remove_disconnected_serv();
-        std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+void servers::remove_disconnected_serv(const std::shared_ptr<server>& disconnected) {
+    std::lock_guard lg(_server_list_mx);
+    _server_list.remove(disconnected);
+
+    if (_server_list.size() > 0) {
+        if (_receiving_server == disconnected) {
+            this->update_receiving_serv();
+        }
     }
 }
 
