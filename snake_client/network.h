@@ -25,15 +25,15 @@ class network {
 public:
     network();
     ~network();
+    void attach_observer(Isnake_client* observer) { _snake_observer = observer; }
     bool set_server_address(const std::string& ip);
     void connect();
     void receive_data();
     void send_data(uint8_t data);
-    void attach_observer(Isnake_client* observer) { _snake_observer = observer; }
 
 private:
     void refresh_data_buffer(size_t bytes_with_delimiter);
-    void prepare_socket_connect() { _socket.close(); }
+    void prepare_socket_connect();
 
     void notify_update(size_t bytes_received) { _snake_observer->update_snake(_data_received, bytes_received); }
     void notify_disconnected() const { _snake_observer->set_disconnected(); }
@@ -46,6 +46,7 @@ private:
     boost::asio::io_context _io_context;
     boost::asio::ip::tcp::endpoint _server_endpoint;
     boost::asio::ip::tcp::socket _socket;
+
     std::thread _io_context_thread;
     std::atomic<bool> _socket_connected{false};
     std::atomic<bool> _address_set{false};
@@ -55,7 +56,7 @@ private:
     std::thread _send_loop_th;
     std::condition_variable _send_data_cv;
     std::atomic<bool> _send_executing{false};
-    std::atomic<bool> _stop_send_loop{false};
+    std::atomic<bool> _stop_network{false};
 
     std::vector<int8_t> _data_received;
 

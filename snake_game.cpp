@@ -4,9 +4,10 @@
 void snake_game::start_new_game() {
     this->stop_current_game();
     _snake.reset_snake();
-    this->start_snake();
 
     _game_in_progress = true;
+    this->start_snake();
+
     _game_end_th = std::thread{
         [&](){
             std::mutex mx;

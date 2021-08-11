@@ -41,7 +41,7 @@ void servers::accept_new_clients() {
 
 void servers::add_accepted_server(boost::asio::ip::tcp::socket& socket) {
     std::lock_guard lg(_server_list_mx);
-    _server_list.emplace_back(std::make_shared<server>(socket, this));
+    _server_list.emplace_back(std::make_shared<server>(std::move(socket), this));
     _server_list.back()->receive_data();
     this->send_initial_data(_server_list.back());
     if (_server_list.size() == 1) {

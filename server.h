@@ -28,7 +28,7 @@ public:
 
 class server : public std::enable_shared_from_this<server> {
 public:
-    server(boost::asio::ip::tcp::socket& socket, Iservers* servers);
+    server(boost::asio::ip::tcp::socket&& socket, Iservers* servers);
     ~server();
     void receive_data();
     void send_data(const send_type& data);

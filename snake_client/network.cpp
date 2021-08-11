@@ -17,7 +17,7 @@ network::network() : _socket(_io_context) {
 }
 
 network::~network() {
-    _stop_send_loop = true;
+    _stop_network = true;
     _send_data_cv.notify_all();
     _send_loop_th.join();
 
@@ -53,7 +53,7 @@ void network::connect() {
 }
 
 void network::receive_data() {
-    if (!_snake_observer || !_socket_connected) {
+    if (!_socket_connected) {
         return;
     }
     async_read_until(_socket,
@@ -73,7 +73,7 @@ void network::receive_data() {
 }
 
 void network::send_data(uint8_t data) {
-    if (!_snake_observer || !_socket_connected) {
+    if (!_socket_connected) {
         return;
     }
 
@@ -87,13 +87,18 @@ void network::refresh_data_buffer(size_t bytes_with_delimiter) {
     _data_received.erase(_data_received.begin(), _data_received.begin() + bytes_with_delimiter);
 }
 
+void network::prepare_socket_connect() {
+    boost::system::error_code er;
+    _socket.close(er);
+}
+
 void network::send_loop() {
-    while (!_stop_send_loop) {
+    while (!_stop_network) {
         std::unique_lock ul(_send_queue_mx);
         _send_data_cv.wait(ul, [&](){
-            return (_send_queue.size() > 0 && !_send_executing) || _stop_send_loop;
+            return (_send_queue.size() > 0 && !_send_executing) || _stop_network;
         });
-        if (_stop_send_loop) {
+        if (_stop_network) {
             return;
         }
         this->execute_send();

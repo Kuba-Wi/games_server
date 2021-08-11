@@ -1,7 +1,8 @@
 #include "server.h"
 
-server::server(boost::asio::ip::tcp::socket& socket, Iservers* servers) : _socket{std::move(socket)},
-                                                                          _servers_observer{servers} {
+server::server(boost::asio::ip::tcp::socket&& socket, Iservers* servers) : _socket(std::move(socket)) {
+    assert(servers);
+    _servers_observer = servers;
     _send_loop_th = std::thread{[&](){
         this->send_loop();
     }};
