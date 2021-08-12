@@ -3,6 +3,8 @@
 server::server(boost::asio::ip::tcp::socket&& socket, Iservers* servers) : _socket(std::move(socket)) {
     assert(servers);
     _servers_observer = servers;
+    _socket.set_option(boost::asio::ip::tcp::no_delay(true));
+
     _send_loop_th = std::thread{[&](){
         this->send_loop();
     }};

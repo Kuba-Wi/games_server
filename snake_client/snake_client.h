@@ -19,7 +19,7 @@ enum class client_signal : int8_t {
 class snake_client : public Isnake_client {
 public:
     snake_client(std::unique_ptr<network>&& ptr);
-    void update_snake(const std::vector<int8_t>& data, size_t bytes_received) override;
+    void update_snake(const std::vector<int8_t>& data) override;
     void set_disconnected() override;
     void set_connected() override;
     bool set_server_address(const std::string& ip) { return _network_ptr->set_server_address(ip); }
@@ -32,10 +32,11 @@ public:
 
 private:
     void process_received_signal(const std::vector<int8_t>& signal);
-    void refresh_client_data(const std::vector<int8_t>& data, size_t bytes_received);
+    void refresh_snake_board(const std::vector<int8_t>& data);
+    void set_snake_board_size();
 
-    mutable std::mutex _client_data_mx;
-    std::vector<std::pair<uint8_t, uint8_t>> _client_data;
+    mutable std::mutex _snake_board_mx;
+    std::vector<std::vector<bool>> _snake_board;
     std::atomic<bool> _sending_data_enabled{false};
     std::atomic<uint8_t> _board_height{0};
     std::atomic<uint8_t> _board_width{0};

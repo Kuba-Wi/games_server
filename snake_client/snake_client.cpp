@@ -8,11 +8,11 @@ snake_client::snake_client(std::unique_ptr<network>&& ptr) {
     _network_ptr->attach_observer(this);
 }
 
-void snake_client::update_snake(const std::vector<int8_t>& data, size_t bytes_received) {
+void snake_client::update_snake(const std::vector<int8_t>& data) {
     if (data.front() < 0) {
         this->process_received_signal(data);
     } else {
-        this->refresh_client_data(data, bytes_received);
+        this->refresh_snake_board(data);
         refresh_client();
     }
 }
@@ -43,6 +43,7 @@ void snake_client::process_received_signal(const std::vector<int8_t>& signal) {
     case client_signal::initial_data:
         _board_height = signal[1];
         _board_width = signal[2];
+        this->set_snake_board_size();
         set_board_dimensions();
         break;
     
@@ -54,17 +55,42 @@ void snake_client::process_received_signal(const std::vector<int8_t>& signal) {
 }
 
 bool snake_client::check_index_present(uint8_t x, uint8_t y) const {
-    std::lock_guard lg(_client_data_mx);
-    return std::any_of(_client_data.begin(), _client_data.end(), [x, y](const auto& pair){
-            return pair.first == x && pair.second == y;
-        });
+    std::lock_guard lg(_snake_board_mx);
+    if (_snake_board.size() <= x) {
+        return false;
+    }
+    if (_snake_board[x].size() <= y) {
+        return false;
+    }
+    return _snake_board[x][y];
 }
 
-void snake_client::refresh_client_data(const std::vector<int8_t>& data, size_t bytes_received) {
-    std::lock_guard lg(_client_data_mx);
-    _client_data.resize(bytes_received / sizeof(decltype(_client_data)::value_type));
-    auto it = _client_data.begin();
-    for (size_t i = 0; i < bytes_received - 1; i += 2) {
-        *(it++) = {data[i], data[i + 1]};
+void snake_client::refresh_snake_board(const std::vector<int8_t>& data) {
+    std::lock_guard lg(_snake_board_mx);
+    for (size_t i = 0; i <_snake_board.size(); ++i) {
+        for (size_t j = 0; j < _snake_board[i].size(); ++j) {
+            _snake_board[i][j] = false;
+        }
+    }
+
+    for (size_t i = 0; i < data.size() - 1; i += 2) {
+        if (_snake_board.size() <= uint8_t(data[i])) {
+            return;
+        }
+        if (_snake_board[data[i]].size() <= uint8_t(data[i + 1])) {
+            return;
+        }
+        _snake_board[data[i]][data[i + 1]] = true;
+    }
+}
+
+void snake_client::set_snake_board_size() {
+    if (_board_width == 0 || _board_height == 0) {
+        return;
+    }
+    std::lock_guard lg(_snake_board_mx);
+    _snake_board.resize(_board_height);
+    for (auto& row : _snake_board) {
+        row.resize(_board_width);
     }
 }

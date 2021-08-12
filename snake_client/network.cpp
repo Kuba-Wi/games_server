@@ -14,12 +14,18 @@ network::network() : _socket(_io_context) {
     _send_loop_th = std::thread{[&](){
         this->send_loop();
     }};
+
+    _data_recived_loop_th = std::thread{[&](){
+        this->data_received_loop();
+    }};
 }
 
 network::~network() {
     _stop_network = true;
     _send_data_cv.notify_all();
     _send_loop_th.join();
+    _received_queue_cv.notify_all();
+    _data_recived_loop_th.join();
 
     _io_context.stop();
     _io_context_thread.join();
@@ -60,7 +66,7 @@ void network::receive_data() {
         boost::asio::dynamic_buffer(_data_received), data_delimiter,
         [&](const boost::system::error_code& er, size_t bytes_with_delimiter) {
             if (!er) {
-                this->notify_update(bytes_with_delimiter - 1);
+                this->add_to_received_queue(_data_received, bytes_with_delimiter - 1);
                 this->refresh_data_buffer(bytes_with_delimiter);
                 this->receive_data();
             } else {
@@ -87,6 +93,13 @@ void network::refresh_data_buffer(size_t bytes_with_delimiter) {
     _data_received.erase(_data_received.begin(), _data_received.begin() + bytes_with_delimiter);
 }
 
+void network::add_to_received_queue(const std::vector<int8_t>& data, size_t size) {
+    std::unique_lock ul(_received_queue_mx);
+    _received_queue.emplace_back(data.begin(), data.begin() + size);
+    ul.unlock();
+    _received_queue_cv.notify_all();
+}
+
 void network::prepare_socket_connect() {
     boost::system::error_code er;
     _socket.close(er);
@@ -102,6 +115,27 @@ void network::send_loop() {
             return;
         }
         this->execute_send();
+    }
+}
+
+void network::data_received_loop() {
+    while (!_stop_network) {
+        std::unique_lock ul(_received_queue_mx);
+        _received_queue_cv.wait(ul, [&](){
+            return _received_queue.size() > 0 || _stop_network;
+        });
+        if (_stop_network) {
+            return;
+        }
+
+        auto end = _received_queue.end();
+        ul.unlock();
+
+        for (auto it = _received_queue.begin(); it != end; ++it) {
+            this->notify_update(*it);
+        }
+        std::lock_guard lg(_received_queue_mx);
+        _received_queue.erase(_received_queue.begin(), end);
     }
 }
 

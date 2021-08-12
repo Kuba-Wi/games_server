@@ -16,7 +16,7 @@ constexpr size_t port_number = 30000;
 class Isnake_client {
 public:
     virtual ~Isnake_client() = default;
-    virtual void update_snake(const std::vector<int8_t>& data, size_t bytes_received) = 0;
+    virtual void update_snake(const std::vector<int8_t>& data) = 0;
     virtual void set_disconnected() = 0;
     virtual void set_connected() = 0;
 };
@@ -33,13 +33,15 @@ public:
 
 private:
     void refresh_data_buffer(size_t bytes_with_delimiter);
+    void add_to_received_queue(const std::vector<int8_t>& data, size_t size);
     void prepare_socket_connect();
 
-    void notify_update(size_t bytes_received) { _snake_observer->update_snake(_data_received, bytes_received); }
+    void notify_update(const std::vector<int8_t>& received_data) { _snake_observer->update_snake(received_data); }
     void notify_disconnected() const { _snake_observer->set_disconnected(); }
     void notify_connected() const { _snake_observer->set_connected(); }
 
     void send_loop();
+    void data_received_loop();
     void execute_send();
     void erase_el_from_queue(const std::list<uint8_t>::iterator& it);
 
@@ -59,6 +61,10 @@ private:
     std::atomic<bool> _stop_network{false};
 
     std::vector<int8_t> _data_received;
+    std::list<std::vector<int8_t>> _received_queue;
+    std::mutex _received_queue_mx;
+    std::condition_variable _received_queue_cv;
+    std::thread _data_recived_loop_th;
 
     Isnake_client* _snake_observer = nullptr;
 };
