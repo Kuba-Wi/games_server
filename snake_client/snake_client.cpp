@@ -2,9 +2,7 @@
 #include "ui_iface.h"
 #include <iostream>
 
-snake_client::snake_client(std::unique_ptr<network>&& ptr) {
-    assert(ptr);
-    _network_ptr = std::move(ptr);
+snake_client::snake_client(std::unique_ptr<network>&& ptr) : _network_ptr(std::move(ptr)) {
     _network_ptr->attach_observer(this);
 }
 
@@ -13,7 +11,7 @@ void snake_client::update_snake(const std::vector<int8_t>& data) {
         this->process_received_signal(data);
     } else {
         this->refresh_snake_board(data);
-        refresh_client();
+        refresh_model();
     }
 }
 
@@ -41,10 +39,12 @@ void snake_client::process_received_signal(const std::vector<int8_t>& signal) {
         break;
     
     case client_signal::initial_data:
-        _board_height = signal[1];
-        _board_width = signal[2];
-        this->set_snake_board_size();
-        set_board_dimensions();
+        if (signal.size() >= 3) {
+            _board_height = signal[1];
+            _board_width = signal[2];
+            this->set_snake_board_size();
+            set_board_dimensions();
+        }
         break;
     
     case client_signal::stop_sending:

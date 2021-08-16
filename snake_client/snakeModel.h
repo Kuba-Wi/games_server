@@ -19,7 +19,7 @@ class SnakeModel : public QAbstractTableModel
 
 public:
     SnakeModel() :_snake_client(std::make_unique<snake_client>(std::make_unique<network>())) {
-        connect(&qt_ui_if, &qt_ui_iface::refreshClient, this, &SnakeModel::refresh);
+        connect(&qt_ui_if, &qt_ui_iface::refreshModel, this, &SnakeModel::refresh);
         connect(&qt_ui_if, &qt_ui_iface::enableSending, this, [&](){
             emit this->sendingEnabled();
         });

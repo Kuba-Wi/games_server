@@ -4,13 +4,12 @@
 #include "snake_game.h"
 
 int main() {
-    snake_game sg(500, 10, 12);
-    servers serv;
-    game_server g_server(serv, sg);
-    g_server.add_server_initial_data();
+    auto snake_game_ptr = std::make_unique<snake_game>(300, 10, 12);
+    auto servers_ptr = std::make_unique<servers>();
+    game_server g_server(std::move(servers_ptr), std::move(snake_game_ptr));
     g_server.start_game();
 
     while (true) {}
-    
+
     return 0;
 }

@@ -8,9 +8,9 @@ enum class client_signal : int8_t {
     stop_sending = -3
 };
 
-class Igame_server {
+class Iservers_observer {
 public:
-    virtual ~Igame_server() = default;
+    virtual ~Iservers_observer() = default;
     virtual void update_game(uint8_t byte_received) = 0;
 };
 
@@ -26,8 +26,8 @@ public:
     void send_data(const send_type& data);
     void change_receiving_server();
     
-    void attach_observer(Igame_server* observer) { _game_server_observer = observer; }
-    void update_data_received(uint8_t byte_received) override { _game_server_observer->update_game(byte_received); }
+    void attach_observer(Iservers_observer* observer) { _game_server_observer = observer; }
+    void update_data_received(uint8_t byte_received);
     void update_disconnected(const std::shared_ptr<server>& disconnected) override;
 
 private:
@@ -50,5 +50,5 @@ private:
 
     std::thread _io_context_th;
 
-    Igame_server* _game_server_observer = nullptr;
+    Iservers_observer* _game_server_observer = nullptr;
 };

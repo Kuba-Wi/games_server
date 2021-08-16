@@ -9,7 +9,7 @@ servers::~servers() {
 }
 
 void servers::start_servers() {
-    if (_servers_running || !_game_server_observer) {
+    if (_servers_running) {
         return;
     }
     _servers_running = true;
@@ -71,6 +71,12 @@ void servers::change_receiving_server() {
 void servers::update_receiving_serv() {
     _receiving_server = _server_list.front();
     this->send_client_signal(client_signal::start_sending);
+}
+
+void servers::update_data_received(uint8_t byte_received) {
+    if (_game_server_observer) {
+        _game_server_observer->update_game(byte_received); 
+    }
 }
 
 void servers::update_disconnected(const std::shared_ptr<server>& disconnected) {

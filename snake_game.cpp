@@ -1,6 +1,12 @@
 #include "snake_game.h"
 #include <mutex>
 
+void snake_game::notify_snake_moved() {
+    if (_server_observer) {
+        _server_observer->update_snake_moved(_snake.get_data());
+    }
+}
+
 void snake_game::start_new_game() {
     this->stop_current_game();
     _snake.reset_snake();
@@ -27,6 +33,7 @@ void snake_game::start_snake() {
                 _snake.new_food();
             }
             _snake.move();
+            this->notify_snake_moved();
             if (_snake.is_collision()) {
                 _game_in_progress = false;
                 _game_end_cv.notify_all();

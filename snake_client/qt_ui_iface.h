@@ -5,8 +5,8 @@
 class qt_ui_iface : public QObject {
     Q_OBJECT
 public:
-    void refresh_client() {
-        emit this->refreshClient();
+    void refresh_model() {
+        emit this->refreshModel();
     }
 
     void enable_sending() {
@@ -30,7 +30,7 @@ public:
     }
 
 signals:
-    void refreshClient();
+    void refreshModel();
     void enableSending();
     void stopSending();
     void setBoardDimensions();

@@ -105,6 +105,24 @@ void network::prepare_socket_connect() {
     _socket.close(er);
 }
 
+void network::notify_update(const std::vector<int8_t>& received_data) {
+    if (_snake_observer) {
+        _snake_observer->update_snake(received_data); 
+    }
+}
+
+void network::notify_disconnected() const {
+    if (_snake_observer) {
+        _snake_observer->set_disconnected();
+    }
+}
+
+void network::notify_connected() const {
+    if (_snake_observer) {
+        _snake_observer->set_connected();
+    }
+}
+
 void network::send_loop() {
     while (!_stop_network) {
         std::unique_lock ul(_send_queue_mx);

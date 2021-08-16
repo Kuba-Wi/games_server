@@ -36,9 +36,9 @@ private:
     void add_to_received_queue(const std::vector<int8_t>& data, size_t size);
     void prepare_socket_connect();
 
-    void notify_update(const std::vector<int8_t>& received_data) { _snake_observer->update_snake(received_data); }
-    void notify_disconnected() const { _snake_observer->set_disconnected(); }
-    void notify_connected() const { _snake_observer->set_connected(); }
+    void notify_update(const std::vector<int8_t>& received_data);
+    void notify_disconnected() const;
+    void notify_connected() const;
 
     void send_loop();
     void data_received_loop();

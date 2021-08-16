@@ -1,8 +1,8 @@
 #include "qt_ui_iface.h"
 #include "ui_iface.h"
 
-void refresh_client() {
-    qt_ui_if.refresh_client();
+void refresh_model() {
+    qt_ui_if.refresh_model();
 }
 
 void enable_sending() {
