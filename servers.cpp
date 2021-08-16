@@ -4,6 +4,11 @@ servers::servers() : _server_endpoint(boost::asio::ip::tcp::v4(), port_number),
                      _acceptor(_io_context, _server_endpoint) {}
 
 servers::~servers() {
+    std::unique_lock ul(_server_list_mx);
+    _receiving_server.reset();
+    _server_list.clear();
+    ul.unlock();
+
     _io_context.stop();
     _io_context_th.join();
 }
