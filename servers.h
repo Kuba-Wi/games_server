@@ -15,6 +15,7 @@ public:
 };
 
 constexpr size_t port_number = 30000;
+constexpr size_t timeout_seconds = 20;
 
 class servers : public Iservers {
 public:
@@ -36,6 +37,7 @@ private:
     void add_accepted_server(boost::asio::ip::tcp::socket& socket);
     void send_initial_data(const std::shared_ptr<server>& server_ptr);
     void send_client_signal(client_signal signal);
+    void check_timer();
 
     std::list<std::shared_ptr<server>> _server_list;
     std::mutex _server_list_mx;
@@ -47,7 +49,7 @@ private:
     boost::asio::io_context _io_context;
     boost::asio::ip::tcp::endpoint _server_endpoint;
     boost::asio::ip::tcp::acceptor _acceptor;
-
+    boost::asio::deadline_timer _data_received_timer;
     std::thread _io_context_th;
 
     Iservers_observer* _game_server_observer = nullptr;

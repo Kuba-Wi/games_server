@@ -1,7 +1,8 @@
 #include "servers.h"
 
 servers::servers() : _server_endpoint(boost::asio::ip::tcp::v4(), port_number), 
-                     _acceptor(_io_context, _server_endpoint) {}
+                     _acceptor(_io_context, _server_endpoint), 
+                     _data_received_timer(_io_context) {}
 
 servers::~servers() {
     std::unique_lock ul(_server_list_mx);
@@ -9,6 +10,8 @@ servers::~servers() {
     _server_list.clear();
     ul.unlock();
 
+    _servers_running = false;
+    _data_received_timer.cancel();
     _io_context.stop();
     _io_context_th.join();
 }
@@ -24,6 +27,11 @@ void servers::start_servers() {
         work_guard_type work_guard(_io_context.get_executor());
         _io_context.run();
     }};
+
+    _data_received_timer.expires_at(boost::posix_time::pos_infin);
+    _data_received_timer.async_wait([&](const boost::system::error_code&){
+        this->check_timer();
+    });
 }
 
 void servers::set_initial_data(const send_type& data) {
@@ -76,12 +84,14 @@ void servers::change_receiving_server() {
 void servers::update_receiving_serv() {
     _receiving_server = _server_list.front();
     this->send_client_signal(client_signal::start_sending);
+    _data_received_timer.expires_from_now(boost::posix_time::seconds(timeout_seconds));
 }
 
 void servers::update_data_received(uint8_t byte_received) {
     if (_game_server_observer) {
         _game_server_observer->update_game(byte_received); 
     }
+    _data_received_timer.expires_from_now(boost::posix_time::seconds(timeout_seconds));
 }
 
 void servers::update_disconnected(const std::shared_ptr<server>& disconnected) {
@@ -105,4 +115,19 @@ void servers::send_initial_data(const std::shared_ptr<server>& server_ptr) {
 
 void servers::send_client_signal(client_signal signal) {
     _receiving_server->send_data({static_cast<int8_t>(signal)});
+}
+
+void servers::check_timer() {
+    if (!_servers_running) {
+        return;
+    }
+
+    if (_data_received_timer.expires_at() <= boost::asio::deadline_timer::traits_type::now()) {
+        this->change_receiving_server();
+        _data_received_timer.expires_from_now(boost::posix_time::seconds(timeout_seconds));
+    }
+
+    _data_received_timer.async_wait([&](const boost::system::error_code&){
+        this->check_timer();
+    });
 }

@@ -1,7 +1,7 @@
 #include "server.h"
 
-server::server(boost::asio::ip::tcp::socket&& socket, Iservers* servers) : _socket(std::move(socket)) {
-    _servers_observer = servers;
+server::server(boost::asio::ip::tcp::socket&& socket, Iservers* servers) : _socket(std::move(socket)),
+                                                                           _servers_observer(servers) {
     boost::system::error_code er;
     _socket.set_option(boost::asio::ip::tcp::no_delay(true), er);
     if (er) {
