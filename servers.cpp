@@ -44,7 +44,7 @@ void servers::accept_new_clients() {
     _acceptor.async_accept(
         [&](boost::system::error_code er, boost::asio::ip::tcp::socket socket) {
             if (!er) {
-                this->add_accepted_server(socket);
+                this->add_accepted_server(std::move(socket));
                 this->accept_new_clients();
             } else {
                 std::cerr << "Accept: " << er.message() << std::endl;
@@ -52,7 +52,7 @@ void servers::accept_new_clients() {
         });
 }
 
-void servers::add_accepted_server(boost::asio::ip::tcp::socket& socket) {
+void servers::add_accepted_server(boost::asio::ip::tcp::socket&& socket) {
     std::lock_guard lg(_server_list_mx);
     _server_list.emplace_back(std::make_shared<server>(std::move(socket), this));
     _server_list.back()->receive_data();

@@ -1,6 +1,5 @@
 #include "snake_client.h"
 #include "ui_iface.h"
-#include <iostream>
 
 snake_client::snake_client(std::unique_ptr<network>&& ptr) : _network_ptr(std::move(ptr)) {
     _network_ptr->attach_observer(this);

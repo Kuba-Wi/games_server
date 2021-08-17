@@ -1,7 +1,5 @@
 #include "network.h"
 
-#include <iostream>
-
 network::network() : _socket(_io_context) {
     _server_endpoint.port(port_number);
 
@@ -70,7 +68,6 @@ void network::receive_data() {
                 this->refresh_data_buffer(bytes_with_delimiter);
                 this->receive_data();
             } else {
-                std::cerr << "Receive: " << er.message() << std::endl;
                 _socket_connected = false;
                 this->notify_disconnected();
                 this->connect();
@@ -165,18 +162,17 @@ void network::execute_send() {
     boost::asio::async_write(_socket, buf, 
         [&, it](const boost::system::error_code& er, size_t){
             if (er) {
-                std::cerr << "Send: " << er.message() << std::endl;
                 _socket_connected = false;
                 this->notify_disconnected();
                 this->connect();
             }
-            this->erase_el_from_queue(it);
+            this->erase_from_send_queue(it);
             _send_executing = false;
             _send_data_cv.notify_all();
         });
 }
 
-void network::erase_el_from_queue(const std::list<uint8_t>::iterator& it) {
+void network::erase_from_send_queue(const std::list<uint8_t>::iterator& it) {
     std::lock_guard lg(_send_queue_mx);
     _send_queue.erase(it);
 }

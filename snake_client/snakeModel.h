@@ -5,10 +5,8 @@
 #include <QColor>
 #include <QString>
 
-#include <algorithm>
 #include <memory>
 #include <string>
-#include <thread>
 
 #include "snake_client.h"
 #include "qt_ui_iface.h"
