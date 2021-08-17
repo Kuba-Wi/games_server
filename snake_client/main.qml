@@ -41,17 +41,7 @@ ApplicationWindow {
         text: "Connect"
         
         onClicked: {
-            if (snake_model.set_ip(text_ip.text)) {
-                snake_model.connect_network();
-
-                connect_button.visible = false;
-                text_ip.visible = false;
-                set_wait_circle_state(true);
-                label_connection.text = "Connecting...";
-                label_connection.visible = true;
-            } else {
-                wrong_ip_dialog.open();
-            }
+            snake_model.set_ip(text_ip.text)
         }
     }
 
@@ -77,10 +67,17 @@ ApplicationWindow {
             id: snake_model
             property var boardHeight: 0
             property var boardWidth: 0
-            onGameFinished: {
-                table_view.visible = false;
-                label_score.visible = true;
-                label_score.text = "Score: "
+
+            onIpSet: {
+                connect_button.visible = false;
+                text_ip.visible = false;
+                set_wait_circle_state(true);
+                label_connection.text = "Connecting...";
+                label_connection.visible = true;
+            }
+
+            onIpNotSet: {
+                wrong_ip_dialog.open();
             }
 
             onSendingEnabled: {

@@ -102,16 +102,18 @@ public slots:
         return _snake_client->get_board_width();
     }
 
-    bool set_ip(const QString& ip) {
-        return _snake_client->set_server_address(ip.toStdString());
-    }
-
-    void connect_network() {
-        _snake_client->connect_network();
+    void set_ip(const QString& ip) {
+        if (_snake_client->set_server_address(ip.toStdString())) {
+            _snake_client->connect_network();
+            emit this->ipSet();
+        } else {
+            emit this->ipNotSet();
+        }
     }
 
 signals:
-    void gameFinished();
+    void ipSet();
+    void ipNotSet();
     void sendingEnabled();
     void sendingStopped();
     void waitForConnection();
