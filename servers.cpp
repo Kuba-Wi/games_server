@@ -1,5 +1,7 @@
 #include "servers.h"
 
+#include <spdlog/spdlog.h>
+
 servers::servers() : _server_endpoint(boost::asio::ip::tcp::v4(), port_number), 
                      _acceptor(_io_context, _server_endpoint), 
                      _data_received_timer(_io_context) {}
@@ -47,7 +49,7 @@ void servers::accept_new_clients() {
                 this->add_accepted_server(std::move(socket));
                 this->accept_new_clients();
             } else {
-                std::cerr << "Accept: " << er.message() << std::endl;
+                spdlog::info("Accepting new client failed: {}", er.message());
             }
         });
 }

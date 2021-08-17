@@ -1,11 +1,13 @@
 #include "server.h"
 
+#include <spdlog/spdlog.h>
+
 server::server(boost::asio::ip::tcp::socket&& socket, Iservers* servers) : _socket(std::move(socket)),
                                                                            _servers_observer(servers) {
     boost::system::error_code er;
     _socket.set_option(boost::asio::ip::tcp::no_delay(true), er);
     if (er) {
-        std::cerr << "Set option - no delay:" << er.message() << std::endl;
+        spdlog::error("Set socket option (no delay): {}", er.message());
     }
 
     _send_loop_th = std::thread{[&](){
@@ -30,7 +32,7 @@ void server::receive_data() {
             } else {
                 ptr->end_connection();
                 ptr->notify_server_disconnected();
-                std::cerr << "Receive: " << er.message() << std::endl;
+                spdlog::info("Receive: {}. Client server disconnected", er.message());
             }
         });
 }
@@ -60,7 +62,7 @@ void server::execute_send() {
             if (er) {
                 ptr->end_connection();
                 ptr->notify_server_disconnected();
-                std::cerr << "Send: " << er.message() << std::endl;
+                spdlog::info("Send: {}. Client server disconnected", er.message());
             }
             ptr->erase_el_from_queue(it);
             ptr->_send_executing = false;
