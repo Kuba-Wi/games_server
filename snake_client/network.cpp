@@ -52,6 +52,7 @@ void network::connect() {
                 this->connect();
             } else {
                 _socket_connected = true;
+                this->set_no_delay_option();
                 this->notify_connected();
                 this->receive_data();
             }
@@ -172,4 +173,9 @@ void network::execute_send() {
 void network::erase_from_send_queue(const std::list<uint8_t>::iterator& it) {
     std::lock_guard lg(_send_queue_mx);
     _send_queue.erase(it);
+}
+
+void network::set_no_delay_option() {
+    boost::system::error_code er;
+    _socket.set_option(boost::asio::ip::tcp::no_delay(true), er);
 }

@@ -44,6 +44,8 @@ private:
     void execute_send();
     void erase_from_send_queue(const std::list<uint8_t>::iterator& it);
 
+    void set_no_delay_option();
+
     boost::asio::io_context _io_context;
     std::list<boost::asio::ip::tcp::endpoint> _server_endpoint;
     boost::asio::ip::tcp::socket _socket;
