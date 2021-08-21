@@ -33,6 +33,7 @@ public:
     void update_disconnected(const std::shared_ptr<server>& disconnected) override;
 
 private:
+    void send_signal(const send_type& data);
     void remove_disconnected_serv(const std::shared_ptr<server>& disconnected);
     void update_receiving_serv();
     void add_accepted_server(boost::asio::ip::tcp::socket&& socket);

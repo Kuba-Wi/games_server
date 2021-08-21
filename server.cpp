@@ -2,9 +2,25 @@
 
 #include <spdlog/spdlog.h>
 
-server::server(boost::asio::ip::tcp::socket&& socket, Iservers* servers) : _socket(std::move(socket)),
+server::server(boost::asio::ip::tcp::socket&& socket, boost::asio::io_context& io, Iservers* servers) : 
+                                                                           _socket(std::move(socket)),
+                                                                           _socket_udp(io),
                                                                            _servers_observer(servers) {
+    
     boost::system::error_code er;
+    _socket_udp.open(boost::asio::ip::udp::v4(), er);
+    if (er) {
+        spdlog::error("Opening udp socket failed: {}", er.message());
+    }
+    auto addr = _socket.remote_endpoint(er).address();
+    if (er) {
+        spdlog::error("Setting udp endpoint address failed: {}", er.message());
+    } else {
+        _client_endpoint.address(addr);
+    }
+
+    _client_endpoint.port(30000);
+
     _socket.set_option(boost::asio::ip::tcp::no_delay(true), er);
     if (er) {
         spdlog::error("Set socket option (no delay): {}", er.message());
@@ -44,6 +60,26 @@ void server::send_data(const send_type& data) {
     if (!_socket_connected) {
         return;
     }
+    for (int i = 0; i < 50; ++i) {
+        std::lock_guard lg(_send_udp_mx);
+        _send_queue_udp.push_back(data);
+        boost::asio::mutable_buffer buf(_send_queue_udp.back().data(), _send_queue_udp.back().size() * sizeof(send_type::value_type));
+        auto it = std::prev(_send_queue_udp.end());
+
+        _socket_udp.async_send_to(buf, _client_endpoint,
+            [it, ptr = this->shared_from_this()](const boost::system::error_code& er, size_t){
+                if (er) {
+                    spdlog::info("Udp send failed: {}", er.message());
+                }
+                ptr->erase_el_from_udp_queue(it);
+            });
+    }
+}
+
+void server::send_signal(const send_type& data) {
+    if (!_socket_connected) {
+        return;
+    }
 
     std::unique_lock ul(_send_mx);
     if (_send_queue.size() >= _queue_max_size) {
@@ -55,7 +91,7 @@ void server::send_data(const send_type& data) {
     _send_data_cv.notify_all();
 }
 
-void server::execute_send() {
+void server::execute_send_signal() {
     _send_executing = true;
     boost::asio::mutable_buffer buf(_send_queue.front().data(), _send_queue.front().size() * sizeof(send_type::value_type));
     auto it = _send_queue.begin();
@@ -82,11 +118,16 @@ void server::send_loop() {
         if (!_socket_connected) {
             return;
         }
-        this->execute_send();
+        this->execute_send_signal();
     }
 }
 
 void server::erase_el_from_queue(const send_iterator& it) {
     std::lock_guard lg(_send_mx);
     _send_queue.erase(it);
+}
+
+void server::erase_el_from_udp_queue(const send_iterator& it) {
+    std::lock_guard lg(_send_udp_mx);
+    _send_queue_udp.erase(it);
 }

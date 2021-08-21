@@ -27,22 +27,29 @@ public:
 
 class server : public std::enable_shared_from_this<server> {
 public:
-    server(boost::asio::ip::tcp::socket&& socket, Iservers* servers);
+    server(boost::asio::ip::tcp::socket&& socket, boost::asio::io_context& io, Iservers* servers);
     ~server();
     void receive_data();
     void send_data(const send_type& data);
+    void send_signal(const send_type& data);
     void end_connection() { _socket_connected = false; }
 
 private:
     void erase_el_from_queue(const send_iterator& it);
-    void execute_send();
+    void erase_el_from_udp_queue(const send_iterator& it);
+    void execute_send_signal();
     void send_loop();
     void notify_data_received() const { _servers_observer->update_data_received(_data_buffer); }
     void notify_server_disconnected() { _servers_observer->update_disconnected(this->shared_from_this()); }
 
     boost::asio::ip::tcp::socket _socket;
+    boost::asio::ip::udp::socket _socket_udp;
+    boost::asio::ip::udp::endpoint _client_endpoint;
     std::atomic<bool> _socket_connected{true};
     std::atomic<bool> _send_executing{false};
+
+    std::mutex _send_udp_mx;
+    std::list<send_type> _send_queue_udp;
 
     uint8_t _data_buffer;
     std::list<send_type> _send_queue;

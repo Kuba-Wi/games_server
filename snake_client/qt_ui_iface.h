@@ -29,6 +29,10 @@ public:
         emit this->connectionEstablished();
     }
 
+    void debug() {
+        emit this->debu();
+    }
+
 signals:
     void refreshModel();
     void enableSending();
@@ -36,4 +40,5 @@ signals:
     void setBoardDimensions();
     void waitForConnection();
     void connectionEstablished();
+    void debu();
 } inline qt_ui_if;

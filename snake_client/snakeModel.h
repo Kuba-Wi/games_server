@@ -11,6 +11,8 @@
 #include "snake_client.h"
 #include "qt_ui_iface.h"
 
+#include <iostream>
+
 class SnakeModel : public QAbstractTableModel
 {
     Q_OBJECT
@@ -32,6 +34,10 @@ public:
         });
         connect(&qt_ui_if, &qt_ui_iface::setBoardDimensions, this, [&](){
             emit this->boardDimensionsSet();
+        });
+
+        connect(&qt_ui_if, &qt_ui_iface::debu, this, [&](){
+            emit this->debug();
         });
     }
 
@@ -117,6 +123,8 @@ signals:
     void waitForConnection();
     void connectionEstablished();
     void boardDimensionsSet();
+
+    void debug();
 
 private:
     std::unique_ptr<snake_client> _snake_client;

@@ -1,8 +1,10 @@
 #include "network.h"
 
-network::network() : _socket(_io_context), _run_thread_pool(run_pool_size) {
+network::network() : _socket(_io_context), _run_thread_pool(run_pool_size),
+                     _socket_udp(_io_context, boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), 30000)) {
     _server_endpoint.emplace_back(boost::asio::ip::tcp::endpoint{});
     _server_endpoint.back().port(port_number);
+    _data_received_udp.resize(1000);
 
     for (auto& th : _run_thread_pool) {
         th = std::thread{[&](){
@@ -49,7 +51,6 @@ void network::connect() {
     if (!_snake_observer || _socket_connected || !_address_set) {
         return;
     }
-
     boost::asio::async_connect(_socket, _server_endpoint, 
         [&](const boost::system::error_code& error, const boost::asio::ip::tcp::endpoint&){
             if (error) {
@@ -59,11 +60,12 @@ void network::connect() {
                 this->set_no_delay_option();
                 this->notify_connected();
                 this->receive_data();
+                this->receive_signal();
             }
     });
 }
 
-void network::receive_data() {
+void network::receive_signal() {
     if (!_socket_connected) {
         return;
     }
@@ -73,7 +75,7 @@ void network::receive_data() {
             if (!er) {
                 this->add_to_received_queue(_data_received, bytes_with_delimiter - 1);
                 this->refresh_data_buffer(bytes_with_delimiter);
-                this->receive_data();
+                this->receive_signal();
             } else {
                 _socket_connected = false;
                 this->notify_disconnected();

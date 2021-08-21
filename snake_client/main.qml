@@ -3,7 +3,9 @@ import QtQuick.Controls 2.12
 import SnakeModel 0.1
 
 ApplicationWindow {
+    id: app
     property var buttonSize: 60
+    property var col: true
     height: 420
     width: 220
 
@@ -115,6 +117,18 @@ ApplicationWindow {
             onBoardDimensionsSet: {
                 boardHeight = snake_model.get_board_height();
                 boardWidth = snake_model.get_board_width();
+            }
+
+            onDebug: {
+                if (col) {
+                    app.color = "blue";
+                    col = false;
+                }
+                else {
+                    app.color = "red";
+                    col = true;
+                }
+                
             }
         }
 

@@ -33,6 +33,7 @@ public:
 
 private:
     void receive_data();
+    void receive_signal();
     void refresh_data_buffer(size_t bytes_with_delimiter);
     void add_to_received_queue(const std::vector<int8_t>& data, size_t size);
 
@@ -50,6 +51,8 @@ private:
     boost::asio::io_context _io_context;
     std::list<boost::asio::ip::tcp::endpoint> _server_endpoint;
     boost::asio::ip::tcp::socket _socket;
+    boost::asio::ip::udp::endpoint _server_udp_endpoint;
+    boost::asio::ip::udp::socket _socket_udp;
 
     std::vector<std::thread> _run_thread_pool;
     std::atomic<bool> _socket_connected{false};
@@ -62,6 +65,7 @@ private:
     std::thread _send_loop_th;
     std::condition_variable _send_data_cv;
 
+    std::vector<int8_t> _data_received_udp;
     std::vector<int8_t> _data_received;
     std::list<std::vector<int8_t>> _received_queue;
     std::mutex _received_queue_mx;

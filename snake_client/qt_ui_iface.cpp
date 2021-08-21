@@ -24,3 +24,7 @@ void wait_for_connection() {
 void connection_established() {
     qt_ui_if.connection_established();
 }
+
+void debug() {
+    qt_ui_if.debug();
+}
