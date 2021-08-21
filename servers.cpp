@@ -3,8 +3,21 @@
 #include <spdlog/spdlog.h>
 
 servers::servers() : _server_endpoint(boost::asio::ip::tcp::v4(), port_number), 
-                     _acceptor(_io_context, _server_endpoint), 
-                     _data_received_timer(_io_context) {}
+                     _acceptor(_io_context, _server_endpoint.protocol()), 
+                     _data_received_timer(_io_context) {
+
+    boost::system::error_code er;
+    _acceptor.bind(_server_endpoint, er);
+    if (er) {
+        spdlog::error("Acceptor bind failed: {}. Terminate", er.message());
+        std::terminate();
+    }
+    _acceptor.listen(boost::asio::socket_base::max_listen_connections, er);
+    if (er) {
+        spdlog::error("Acceptor listen failed: {}. Terminate", er.message());
+        std::terminate();
+    }
+}
 
 servers::~servers() {
     std::unique_lock ul(_server_list_mx);
