@@ -23,6 +23,10 @@ ApplicationWindow {
         wait_circle.running = bool;
     }
 
+    Label {
+        id: label_ip_connect
+    }
+
     TextField {
         id: text_ip
         anchors.horizontalCenter: parent.horizontalCenter
@@ -69,6 +73,7 @@ ApplicationWindow {
             property var boardWidth: 0
 
             onIpSet: {
+                label_ip_connect.text = "connecting with " + text_ip.text
                 connect_button.visible = false;
                 text_ip.visible = false;
                 set_wait_circle_state(true);
@@ -104,6 +109,7 @@ ApplicationWindow {
                 label_connection.text = "Connected, wait for your turn..."
                 label_connection.visible = true;
                 set_wait_circle_state(false);
+                label_ip_connect.visible = false;
             }
 
             onBoardDimensionsSet: {
@@ -189,13 +195,5 @@ ApplicationWindow {
         anchors.topMargin: 20
         visible: false
         running: true
-    }
-
-    Label {
-        id: label_score
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: parent.top
-        anchors.topMargin: 100
-        visible: false
     }
 }
