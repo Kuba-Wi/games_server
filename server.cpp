@@ -22,6 +22,9 @@ server::~server() {
 }
 
 void server::receive_data() {
+    if (!_socket_connected) {
+        return;
+    }
     boost::asio::async_read(
         _socket,
         boost::asio::buffer(&_data_buffer, sizeof(_data_buffer)),
@@ -32,7 +35,7 @@ void server::receive_data() {
             } else {
                 ptr->end_connection();
                 ptr->notify_server_disconnected();
-                spdlog::info("Receive: {}. Client server disconnected", er.message());
+                spdlog::info("Receive: {}. Client disconnected", er.message());
             }
         });
 }
@@ -62,7 +65,7 @@ void server::execute_send() {
             if (er) {
                 ptr->end_connection();
                 ptr->notify_server_disconnected();
-                spdlog::info("Send: {}. Client server disconnected", er.message());
+                spdlog::info("Send: {}. Client disconnected", er.message());
             }
             ptr->erase_el_from_queue(it);
             ptr->_send_executing = false;

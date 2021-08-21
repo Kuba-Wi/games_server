@@ -46,6 +46,7 @@ void servers::accept_new_clients() {
     _acceptor.async_accept(
         [&](boost::system::error_code er, boost::asio::ip::tcp::socket socket) {
             if (!er) {
+                spdlog::info("New client accepted");
                 this->add_accepted_server(std::move(socket));
                 this->accept_new_clients();
             } else {
