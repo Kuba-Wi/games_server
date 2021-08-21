@@ -1,7 +1,8 @@
 #include "network.h"
 
 network::network() : _socket(_io_context) {
-    _server_endpoint.port(port_number);
+    _server_endpoint.emplace_back(boost::asio::ip::tcp::endpoint{});
+    _server_endpoint.back().port(port_number);
 
     _io_context_thread = std::thread{[&](){
         using work_guard_type = boost::asio::executor_work_guard<boost::asio::io_context::executor_type>;
@@ -35,7 +36,7 @@ bool network::set_server_address(const std::string& ip) {
     if (er_adress) {
         return false;
     }
-    _server_endpoint.address(address);
+    _server_endpoint.back().address(address);
     _address_set = true;
     return true;
 }
@@ -44,15 +45,16 @@ void network::connect() {
     if (!_snake_observer || _socket_connected || !_address_set) {
         return;
     }
-    this->prepare_socket_connect();
-    _socket.async_connect(_server_endpoint, [&](const boost::system::error_code& error){
-        if (error) {
-            this->connect();
-        } else {
-            _socket_connected = true;
-            this->notify_connected();
-            this->receive_data();
-        }
+
+    boost::asio::async_connect(_socket, _server_endpoint, 
+        [&](const boost::system::error_code& error, const boost::asio::ip::tcp::endpoint&){
+            if (error) {
+                this->connect();
+            } else {
+                _socket_connected = true;
+                this->notify_connected();
+                this->receive_data();
+            }
     });
 }
 
@@ -95,11 +97,6 @@ void network::add_to_received_queue(const std::vector<int8_t>& data, size_t size
     _received_queue.emplace_back(data.begin(), data.begin() + size);
     ul.unlock();
     _received_queue_cv.notify_all();
-}
-
-void network::prepare_socket_connect() {
-    boost::system::error_code er;
-    _socket.close(er);
 }
 
 void network::notify_update(const std::vector<int8_t>& received_data) {

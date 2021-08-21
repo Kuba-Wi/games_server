@@ -34,7 +34,6 @@ private:
     void receive_data();
     void refresh_data_buffer(size_t bytes_with_delimiter);
     void add_to_received_queue(const std::vector<int8_t>& data, size_t size);
-    void prepare_socket_connect();
 
     void notify_update(const std::vector<int8_t>& received_data);
     void notify_disconnected() const;
@@ -46,7 +45,7 @@ private:
     void erase_from_send_queue(const std::list<uint8_t>::iterator& it);
 
     boost::asio::io_context _io_context;
-    boost::asio::ip::tcp::endpoint _server_endpoint;
+    std::list<boost::asio::ip::tcp::endpoint> _server_endpoint;
     boost::asio::ip::tcp::socket _socket;
 
     std::thread _io_context_thread;
