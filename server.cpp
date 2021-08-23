@@ -66,10 +66,7 @@ void server::send_data(const send_type& data) {
         auto it = std::prev(_send_queue_udp.end());
 
         _socket_udp.async_send_to(buf, _client_endpoint,
-            [it, ptr = this->shared_from_this()](const boost::system::error_code& er, size_t){
-                if (er) {
-                    spdlog::info("Udp send failed: {}", er.message());
-                }
+            [it, ptr = this->shared_from_this()](const boost::system::error_code&, size_t){
                 ptr->erase_el_from_udp_queue(it);
             });
     }

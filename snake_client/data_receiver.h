@@ -27,6 +27,7 @@ public:
     void start_receiver(size_t receiver_port);
 
 private:
+    void prepare_receive(size_t receiver_port);
     void receive_data();
     void add_to_received_queue(size_t size);
     void notify_update(const std::vector<int8_t>& data) const;

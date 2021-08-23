@@ -1,19 +1,17 @@
 #include "network.h"
 
-network::network() : _socket(_io_context), _run_thread_pool(run_pool_size) {
-    _server_endpoint.emplace_back(boost::asio::ip::tcp::endpoint{});
+network::network() : _socket(_io_context) {
+    _server_endpoint.emplace_back();
     _server_endpoint.back().port(port_number);
 
     _receiver_ptr = std::make_unique<data_receiver>(_io_context);
     _receiver_ptr->attach_observer(this);
 
-    for (auto& th : _run_thread_pool) {
-        th = std::thread{[&](){
-            using work_guard_type = boost::asio::executor_work_guard<boost::asio::io_context::executor_type>;
-            work_guard_type work_guard(_io_context.get_executor());
-            _io_context.run();
-        }};
-    }
+    _io_context_th = std::thread{[&](){
+        using work_guard_type = boost::asio::executor_work_guard<boost::asio::io_context::executor_type>;
+        work_guard_type work_guard(_io_context.get_executor());
+        _io_context.run();
+    }};
 
     _send_loop_th = std::thread{[&](){
         this->send_loop();
@@ -26,9 +24,7 @@ network::~network() {
     _send_loop_th.join();
 
     _io_context.stop();
-    for (auto& th : _run_thread_pool) {
-        th.join();
-    }
+    _io_context_th.join();
 }
 
 bool network::set_server_address(const std::string& ip) {

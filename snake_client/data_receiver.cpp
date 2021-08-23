@@ -1,12 +1,6 @@
 #include "data_receiver.h"
 
 data_receiver::data_receiver(boost::asio::io_context& io) : _socket(io), _data_received(buffer_size) {
-    boost::system::error_code er;
-    _socket.open(udp::v4(), er);
-    if (er) {
-        std::terminate();
-    }
-
     _data_received_loop_th = std::thread{[&](){
         this->data_received_loop();
     }};
@@ -19,12 +13,20 @@ data_receiver::~data_receiver() {
 }
 
 void data_receiver::start_receiver(size_t receiver_port) {
+    this->prepare_receive(receiver_port);
+    this->receive_data();
+}
+
+void data_receiver::prepare_receive(size_t receiver_port) {
     boost::system::error_code er;
+    if (_socket.is_open()) {
+        _socket.close(er);
+    }
+    _socket.open(udp::v4(), er);
     _socket.bind(udp::endpoint(udp::v4(), receiver_port), er);
     if (er) {
         std::terminate();
     }
-    this->receive_data();
 }
 
 void data_receiver::receive_data() {
@@ -33,9 +35,9 @@ void data_receiver::receive_data() {
     } 
     _socket.async_receive_from(
         boost::asio::mutable_buffer(_data_received.data(), _data_received.size()), _server_endpoint,
-        [&](const boost::system::error_code&, size_t bytes_received) {
-                this->add_to_received_queue(bytes_received);
-                if (!_stop_receiver) {
+        [&](const boost::system::error_code& er, size_t bytes_received) {
+                if (!er) {
+                    this->add_to_received_queue(bytes_received);
                     this->receive_data();
                 }
         });
