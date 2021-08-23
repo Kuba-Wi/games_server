@@ -19,6 +19,7 @@ set(PROJECT_SOURCES
         snakeModel.cpp
         snake_client.cpp
         network.cpp
+        data_receiver.cpp
         qt_ui_iface.cpp
         qml.qrc
 )

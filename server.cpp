@@ -12,14 +12,13 @@ server::server(boost::asio::ip::tcp::socket&& socket, boost::asio::io_context& i
     if (er) {
         spdlog::error("Opening udp socket failed: {}", er.message());
     }
-    auto addr = _socket.remote_endpoint(er).address();
+    auto endpoint = _socket.remote_endpoint(er);
     if (er) {
-        spdlog::error("Setting udp endpoint address failed: {}", er.message());
+        spdlog::error("Setting udp endpoint address and port failed: {}", er.message());
     } else {
-        _client_endpoint.address(addr);
+        _client_endpoint.address(endpoint.address());
+        _client_endpoint.port(endpoint.port());
     }
-
-    _client_endpoint.port(30000);
 
     _socket.set_option(boost::asio::ip::tcp::no_delay(true), er);
     if (er) {
@@ -60,7 +59,7 @@ void server::send_data(const send_type& data) {
     if (!_socket_connected) {
         return;
     }
-    for (int i = 0; i < 50; ++i) {
+    for (size_t i = 0; i < retransmition_count; ++i) {
         std::lock_guard lg(_send_udp_mx);
         _send_queue_udp.push_back(data);
         boost::asio::mutable_buffer buf(_send_queue_udp.back().data(), _send_queue_udp.back().size() * sizeof(send_type::value_type));

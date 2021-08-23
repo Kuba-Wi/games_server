@@ -1,10 +1,11 @@
 #include "network.h"
 
-network::network() : _socket(_io_context), _run_thread_pool(run_pool_size),
-                     _socket_udp(_io_context, boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), 30000)) {
+network::network() : _socket(_io_context), _run_thread_pool(run_pool_size) {
     _server_endpoint.emplace_back(boost::asio::ip::tcp::endpoint{});
     _server_endpoint.back().port(port_number);
-    _data_received_udp.resize(1000);
+
+    _receiver_ptr = std::make_unique<data_receiver>(_io_context);
+    _receiver_ptr->attach_observer(this);
 
     for (auto& th : _run_thread_pool) {
         th = std::thread{[&](){
@@ -17,18 +18,12 @@ network::network() : _socket(_io_context), _run_thread_pool(run_pool_size),
     _send_loop_th = std::thread{[&](){
         this->send_loop();
     }};
-
-    _data_recived_loop_th = std::thread{[&](){
-        this->data_received_loop();
-    }};
 }
 
 network::~network() {
     _stop_network = true;
     _send_data_cv.notify_all();
     _send_loop_th.join();
-    _received_queue_cv.notify_all();
-    _data_recived_loop_th.join();
 
     _io_context.stop();
     for (auto& th : _run_thread_pool) {
@@ -59,10 +54,18 @@ void network::connect() {
                 _socket_connected = true;
                 this->set_no_delay_option();
                 this->notify_connected();
-                this->receive_data();
                 this->receive_signal();
+                this->start_data_receiver();
             }
     });
+}
+
+void network::start_data_receiver() {
+    boost::system::error_code er;
+    auto endpoint = _socket.local_endpoint(er);
+    if (!er) {
+        _receiver_ptr->start_receiver(endpoint.port());
+    }
 }
 
 void network::receive_signal() {
@@ -73,7 +76,7 @@ void network::receive_signal() {
         boost::asio::dynamic_buffer(_data_received), data_delimiter,
         [&](const boost::system::error_code& er, size_t bytes_with_delimiter) {
             if (!er) {
-                this->add_to_received_queue(_data_received, bytes_with_delimiter - 1);
+                this->pass_received_data(bytes_with_delimiter - 1);
                 this->refresh_data_buffer(bytes_with_delimiter);
                 this->receive_signal();
             } else {
@@ -82,6 +85,10 @@ void network::receive_signal() {
                 this->connect();
             }
         });
+}
+
+void network::pass_received_data(size_t size) const {
+    this->notify_update(std::vector(_data_received.begin(), _data_received.begin() + size));
 }
 
 void network::send_data(uint8_t data) {
@@ -99,16 +106,9 @@ void network::refresh_data_buffer(size_t bytes_with_delimiter) {
     _data_received.erase(_data_received.begin(), _data_received.begin() + bytes_with_delimiter);
 }
 
-void network::add_to_received_queue(const std::vector<int8_t>& data, size_t size) {
-    std::unique_lock ul(_received_queue_mx);
-    _received_queue.emplace_back(data.begin(), data.begin() + size);
-    ul.unlock();
-    _received_queue_cv.notify_all();
-}
-
-void network::notify_update(const std::vector<int8_t>& received_data) {
+void network::notify_update(const std::vector<int8_t>& data_received) const {
     if (_snake_observer) {
-        _snake_observer->update_snake(received_data); 
+        _snake_observer->update_snake(data_received); 
     }
 }
 
@@ -124,6 +124,10 @@ void network::notify_connected() const {
     }
 }
 
+void network::update_data_received(const std::vector<int8_t>& data) {
+    this->notify_update(data);
+}
+
 void network::send_loop() {
     while (!_stop_network) {
         std::unique_lock ul(_send_queue_mx);
@@ -134,27 +138,6 @@ void network::send_loop() {
             return;
         }
         this->execute_send();
-    }
-}
-
-void network::data_received_loop() {
-    while (!_stop_network) {
-        std::unique_lock ul(_received_queue_mx);
-        _received_queue_cv.wait(ul, [&](){
-            return _received_queue.size() > 0 || _stop_network;
-        });
-        if (_stop_network) {
-            return;
-        }
-
-        auto end = _received_queue.end();
-        ul.unlock();
-
-        for (auto it = _received_queue.begin(); it != end; ++it) {
-            this->notify_update(*it);
-        }
-        std::lock_guard lg(_received_queue_mx);
-        _received_queue.erase(_received_queue.begin(), end);
     }
 }
 
