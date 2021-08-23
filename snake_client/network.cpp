@@ -1,14 +1,16 @@
 #include "network.h"
 
-network::network() : _socket(_io_context) {
+network::network() : _socket(_io_context), _run_thread_pool(run_pool_size) {
     _server_endpoint.emplace_back(boost::asio::ip::tcp::endpoint{});
     _server_endpoint.back().port(port_number);
 
-    _io_context_thread = std::thread{[&](){
-        using work_guard_type = boost::asio::executor_work_guard<boost::asio::io_context::executor_type>;
-        work_guard_type work_guard(_io_context.get_executor());
-        _io_context.run();
-    }};
+    for (auto& th : _run_thread_pool) {
+        th = std::thread{[&](){
+            using work_guard_type = boost::asio::executor_work_guard<boost::asio::io_context::executor_type>;
+            work_guard_type work_guard(_io_context.get_executor());
+            _io_context.run();
+        }};
+    }
 
     _send_loop_th = std::thread{[&](){
         this->send_loop();
@@ -27,7 +29,9 @@ network::~network() {
     _data_recived_loop_th.join();
 
     _io_context.stop();
-    _io_context_thread.join();
+    for (auto& th : _run_thread_pool) {
+        th.join();
+    }
 }
 
 bool network::set_server_address(const std::string& ip) {

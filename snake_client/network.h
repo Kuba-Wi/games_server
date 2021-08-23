@@ -12,6 +12,7 @@
 
 constexpr int8_t data_delimiter = std::numeric_limits<int8_t>::max();
 constexpr size_t port_number = 30000;
+constexpr size_t run_pool_size = 2;
 
 class Isnake_client {
 public:
@@ -50,7 +51,7 @@ private:
     std::list<boost::asio::ip::tcp::endpoint> _server_endpoint;
     boost::asio::ip::tcp::socket _socket;
 
-    std::thread _io_context_thread;
+    std::vector<std::thread> _run_thread_pool;
     std::atomic<bool> _socket_connected{false};
     std::atomic<bool> _address_set{false};
     std::atomic<bool> _send_executing{false};

@@ -16,6 +16,7 @@ public:
 
 constexpr size_t port_number = 30000;
 constexpr size_t timeout_seconds = 20;
+constexpr size_t run_pool_size = 2;
 
 class servers : public Iservers {
 public:
@@ -50,7 +51,7 @@ private:
     boost::asio::ip::tcp::endpoint _server_endpoint;
     boost::asio::ip::tcp::acceptor _acceptor;
     boost::asio::deadline_timer _data_received_timer;
-    std::thread _io_context_th;
+    std::vector<std::thread> _run_thread_pool;
 
     Iservers_observer* _game_server_observer = nullptr;
 };
