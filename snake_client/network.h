@@ -51,7 +51,7 @@ private:
     std::list<boost::asio::ip::tcp::endpoint> _server_endpoint;
     boost::asio::ip::tcp::socket _socket;
 
-    std::vector<std::thread> _run_thread_pool;
+    std::thread _io_context_th;
     std::atomic<bool> _socket_connected{false};
     std::atomic<bool> _address_set{false};
     std::atomic<bool> _send_executing{false};

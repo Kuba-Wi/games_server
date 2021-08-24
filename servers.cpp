@@ -4,8 +4,7 @@
 
 servers::servers() : _server_endpoint(boost::asio::ip::tcp::v4(), port_number), 
                      _acceptor(_io_context, _server_endpoint.protocol()), 
-                     _data_received_timer(_io_context),
-                     _run_thread_pool(run_pool_size) {
+                     _data_received_timer(_io_context) {
 
     boost::system::error_code er;
     _acceptor.bind(_server_endpoint, er);
@@ -29,9 +28,7 @@ servers::~servers() {
     _servers_running = false;
     _data_received_timer.cancel();
     _io_context.stop();
-    for (auto& th : _run_thread_pool) {
-        th.join();
-    }
+    _io_context_th.join();
 }
 
 void servers::start_servers() {
@@ -40,13 +37,11 @@ void servers::start_servers() {
     }
     _servers_running = true;
     this->accept_new_clients();
-    for (auto& th : _run_thread_pool) {
-        th = std::thread{[&](){
-            using work_guard_type = boost::asio::executor_work_guard<boost::asio::io_context::executor_type>;
-            work_guard_type work_guard(_io_context.get_executor());
-            _io_context.run();
-        }};
-    }
+    _io_context_th = std::thread{[&](){
+        using work_guard_type = boost::asio::executor_work_guard<boost::asio::io_context::executor_type>;
+        work_guard_type work_guard(_io_context.get_executor());
+        _io_context.run();
+    }};
 
     _data_received_timer.expires_at(boost::posix_time::pos_infin);
     _data_received_timer.async_wait([&](const boost::system::error_code&){
