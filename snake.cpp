@@ -71,6 +71,7 @@ std::vector<int8_t> snake::get_data() const {
 
 void snake::move() {
     std::lock_guard lg(_snake_mutex);
+    this->move_setup();
     switch (_current_direction) {
     case move_direction::up:
         move_up();
@@ -98,7 +99,6 @@ void snake::move() {
 }
 
 void snake::move_up() {
-    move_setup();
     auto pos = _snake_index.front().first;
     if (pos == 0) {
         pos = _height - 1;
@@ -109,7 +109,6 @@ void snake::move_up() {
 }
 
 void snake::move_down() {
-    move_setup();
     auto pos = _snake_index.front().first;
     if (pos == _height - 1) {
         pos = 0;
@@ -120,7 +119,6 @@ void snake::move_down() {
 }
 
 void snake::move_right() {
-    move_setup();
     auto pos = _snake_index.front().second;
     if (pos == _width - 1) {
         pos = 0;
@@ -131,7 +129,6 @@ void snake::move_right() {
 }
 
 void snake::move_left() {
-    move_setup();
     auto pos = _snake_index.front().second;
     if (pos == 0) {
         pos = _width - 1;

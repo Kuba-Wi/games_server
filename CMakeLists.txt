@@ -11,13 +11,14 @@ set(FILES
     game_server.cpp
     snake_game.cpp
 )
-set(FLAGS -Wall -pedantic -Wextra)
+set(COMPILE_FLAGS -Wall -pedantic -Wextra)
 
-add_library(lib_core STATIC ${FILES})
-target_compile_options(lib_core PRIVATE ${FLAGS})
+add_library(server_core_lib STATIC ${FILES})
+target_compile_options(server_core_lib PRIVATE ${COMPILE_FLAGS})
 
 add_executable(${PROJECT_NAME} main.cpp)
-target_link_libraries(${PROJECT_NAME} lib_core pthread)
-target_compile_options(${PROJECT_NAME} PRIVATE ${FLAGS})
+target_link_libraries(${PROJECT_NAME} server_core_lib pthread)
+target_compile_options(${PROJECT_NAME} PRIVATE ${COMPILE_FLAGS})
 
 add_subdirectory(snake_client)
+add_subdirectory(tests)
