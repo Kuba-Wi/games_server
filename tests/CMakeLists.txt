@@ -4,6 +4,7 @@ project(tests_server)
 
 set(FILES_UT
     snake_ut.cpp
+    timer_ut.cpp
 )
 
 include_directories(..)
