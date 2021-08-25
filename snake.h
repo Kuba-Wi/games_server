@@ -18,7 +18,6 @@ public:
     void reset_snake();
     void new_food();
     bool is_food_eaten() const;
-    bool is_index_present(uint8_t row, uint8_t column) const;
     bool is_collision() const;
     void add_snake_index();
 
