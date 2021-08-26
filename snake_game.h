@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "snake.h"
 #include "timer.h"
 
@@ -12,11 +14,9 @@ public:
 
 class snake_game {
 public:
-    snake_game(size_t interval_ms, uint8_t height, uint8_t width) : _snake(height, width), _interval_ms(interval_ms) {}
+    snake_game(std::unique_ptr<Itimer>&& timer, size_t interval_ms, uint8_t height, uint8_t width);
     ~snake_game();
     void attach_observer(Igame_observer* observer) { _server_observer = observer; }
-    void notify_snake_moved();
-    void notify_game_finished();
     void start_new_game();
     void set_snake_direction(uint8_t direction) { _snake.set_current_direction(static_cast<move_direction>(direction)); }
 
@@ -27,9 +27,11 @@ public:
 
 private:
     void start_snake();
+    void notify_snake_moved() const;
+    void notify_game_finished() const;
 
+    std::unique_ptr<Itimer> _timer_ptr;
     snake _snake;
-    timer _timer;
     size_t _interval_ms;
 
     Igame_observer* _server_observer = nullptr;

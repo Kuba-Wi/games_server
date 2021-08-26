@@ -1,27 +1,32 @@
 #include "snake_game.h"
 #include <mutex>
 
-void snake_game::notify_snake_moved() {
+snake_game::snake_game(std::unique_ptr<Itimer>&& timer, size_t interval_ms, uint8_t height, uint8_t width) :
+    _timer_ptr(std::move(timer)),
+    _snake(height, width), 
+    _interval_ms(interval_ms) {}
+
+void snake_game::notify_snake_moved() const {
     if (_server_observer) {
         _server_observer->update_snake_moved(_snake.get_data());
     }
 }
 
-void snake_game::notify_game_finished() {
+void snake_game::notify_game_finished() const {
     if (_server_observer) {
         _server_observer->update_game_finished();
     }
 }
 
 void snake_game::start_new_game() {
-    _timer.stop_timer();
+    _timer_ptr->stop_timer();
     _snake.reset_snake();
 
     this->start_snake();
 }
 
 void snake_game::start_snake() {
-        _timer.start_timer([&](){
+        _timer_ptr->start_timer([&](){
             if (_snake.is_food_eaten()) {
             _snake.add_snake_index();
             _snake.new_food();
@@ -37,5 +42,5 @@ void snake_game::start_snake() {
 }
 
 snake_game::~snake_game() {
-    _timer.stop_timer();
+    _timer_ptr->stop_timer();
 }
