@@ -23,15 +23,15 @@ public:
     ~servers();
     void start_servers();
     void set_initial_data(const send_type& data);
-    void accept_new_clients();
     void send_data(const send_type& data);
     void change_receiving_server();
-    
+
     void attach_observer(Iservers_observer* observer) { _game_server_observer = observer; }
-    void update_data_received(uint8_t byte_received);
+    void update_data_received(uint8_t byte_received) override;
     void update_disconnected(const std::shared_ptr<server>& disconnected) override;
 
 private:
+    void accept_new_clients();
     void remove_disconnected_serv(const std::shared_ptr<server>& disconnected);
     void update_receiving_serv();
     void add_accepted_server(boost::asio::ip::tcp::socket&& socket);

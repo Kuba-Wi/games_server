@@ -6,6 +6,9 @@ snake_client::snake_client(std::unique_ptr<network>&& ptr) : _network_ptr(std::m
 }
 
 void snake_client::update_snake(const std::vector<int8_t>& data) {
+    if (data.size() == 0) {
+        return;
+    }
     if (data.front() < 0) {
         this->process_received_signal(data);
     } else {

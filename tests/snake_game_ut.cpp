@@ -16,6 +16,24 @@ struct snakeGameTest : public Test {
     std::unique_ptr<TimerMock> mock = std::make_unique<TimerMock>();
 };
 
+TEST_F(snakeGameTest, constructorShouldSetBoardSizesTimeIntervalAndSnake) {
+    snake_game s_game{std::move(mock), interval_ms, height, width};
+    ASSERT_EQ(s_game.get_board_height(), height);
+    ASSERT_EQ(s_game.get_board_width(), width);
+    ASSERT_EQ(s_game.get_snake_move_time_ms(), interval_ms);
+
+    constexpr size_t data_size = 6;
+    auto data = s_game.get_snake_data();
+    ASSERT_EQ(data.size(), data_size);
+    std::pair head{data[0], data[1]};
+    std::pair tail{data[2], data[3]};
+    std::pair food{data[4], data[5]};
+    ASSERT_EQ(head.first, tail.first - 1);
+    ASSERT_EQ(head.second, tail.second);
+    ASSERT_NE(food, head);
+    ASSERT_NE(food, tail);
+}
+
 TEST_F(snakeGameTest, startNewGameShouldStopAndStartTimer) {
     EXPECT_CALL(*mock, start_timer(_, interval_ms)).Times(1);
     EXPECT_CALL(*mock, stop_timer()).Times(2);
