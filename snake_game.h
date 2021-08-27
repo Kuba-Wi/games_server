@@ -13,8 +13,9 @@ public:
 };
 
 class snake_game {
+    friend class timer_function<snake_game>;
 public:
-    snake_game(std::unique_ptr<Itimer>&& timer, size_t interval_ms, uint8_t height, uint8_t width);
+    snake_game(std::unique_ptr<Itimer<snake_game>>&& timer, size_t interval_ms, uint8_t height, uint8_t width);
     ~snake_game();
     void attach_observer(Igame_observer* observer) { _server_observer = observer; }
     void start_new_game();
@@ -30,7 +31,7 @@ private:
     void notify_snake_moved() const;
     void notify_game_finished() const;
 
-    std::unique_ptr<Itimer> _timer_ptr;
+    std::unique_ptr<Itimer<snake_game>> _timer_ptr;
     snake _snake;
     size_t _interval_ms;
 

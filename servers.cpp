@@ -28,7 +28,9 @@ servers::~servers() {
     _servers_running = false;
     _data_received_timer.cancel();
     _io_context.stop();
-    _io_context_th.join();
+    if (_io_context_th.joinable()) {
+        _io_context_th.join();
+    }
 }
 
 void servers::start_servers() {

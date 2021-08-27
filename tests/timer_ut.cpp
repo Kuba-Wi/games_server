@@ -2,16 +2,23 @@
 
 #include "timer.h"
 
+struct Fake {};
+
+template <>
+void timer_function<Fake>::operator()() {}
+
 TEST(timerTest, timerShouldStartAndStopWithoutCrash) {
-    timer time;
+    constexpr size_t execution_count = 10;
+    Fake fake;
+    timer<Fake> time;
+
     time.stop_timer();
-    size_t i = 10;
-    while (i-- > 0) {
-        time.start_timer([](){}, i);
+    for (size_t i = 0; i < execution_count; ++i) {
+        time.start_timer(timer_function{fake}, i);
     }
-    i = 10;
-    while (i-- > 0) {
-        time.start_timer([](){}, i);
+
+    for (size_t i = 0; i < execution_count; ++i) {
+        time.start_timer(timer_function{fake}, i);
         time.stop_timer();
     }
 }

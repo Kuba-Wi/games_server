@@ -31,9 +31,9 @@ public:
     ~server();
     void receive_data();
     void send_data(const send_type& data);
-    void end_connection() { _socket_connected = false; }
 
 private:
+    void end_connection() { _socket_connected = false; }
     void erase_el_from_queue(const send_iterator& it);
     void execute_send();
     void send_loop();

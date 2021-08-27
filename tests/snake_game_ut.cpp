@@ -10,13 +10,14 @@ constexpr size_t height = 10;
 constexpr size_t width = 10;
 
 using namespace ::testing;
-using TimerMock = NaggyMock<timer_mock>;
+using TimerMock = NaggyMock<timer_mock<snake_game>>;
 
 struct snakeGameTest : public Test {
     std::unique_ptr<TimerMock> mock = std::make_unique<TimerMock>();
 };
 
 TEST_F(snakeGameTest, constructorShouldSetBoardSizesTimeIntervalAndSnake) {
+    EXPECT_CALL(*mock, stop_timer()).Times(1);
     snake_game s_game{std::move(mock), interval_ms, height, width};
     ASSERT_EQ(s_game.get_board_height(), height);
     ASSERT_EQ(s_game.get_board_width(), width);
