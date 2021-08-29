@@ -158,12 +158,7 @@ void network::execute_send() {
     auto it = _send_queue.begin();
 
     boost::asio::async_write(_socket, buf, 
-        [&, it](const boost::system::error_code& er, size_t){
-            if (er) {
-                _socket_connected = false;
-                this->notify_disconnected();
-                this->connect();
-            }
+        [&, it](const boost::system::error_code&, size_t){
             this->erase_from_send_queue(it);
             _send_executing = false;
             _send_data_cv.notify_all();

@@ -22,9 +22,6 @@ server::~server() {
 }
 
 void server::receive_data() {
-    if (!_socket_connected) {
-        return;
-    }
     boost::asio::async_read(
         _socket,
         boost::asio::buffer(&_data_buffer, sizeof(_data_buffer)),
@@ -41,10 +38,6 @@ void server::receive_data() {
 }
 
 void server::send_data(const send_type& data) {
-    if (!_socket_connected) {
-        return;
-    }
-
     std::unique_lock ul(_send_mx);
     if (_send_queue.size() >= _queue_max_size) {
         return;
@@ -61,12 +54,7 @@ void server::execute_send() {
     auto it = _send_queue.begin();
 
     boost::asio::async_write(_socket, buf, 
-        [it, ptr = this->shared_from_this()](const boost::system::error_code& er, size_t){
-            if (er) {
-                ptr->end_connection();
-                ptr->notify_server_disconnected();
-                spdlog::info("Send: {}. Client disconnected", er.message());
-            }
+        [it, ptr = this->shared_from_this()](const boost::system::error_code&, size_t){
             ptr->erase_el_from_queue(it);
             ptr->_send_executing = false;
             ptr->_send_data_cv.notify_all();
