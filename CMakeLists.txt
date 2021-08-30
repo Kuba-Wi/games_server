@@ -10,6 +10,7 @@ set(FILES
     servers.cpp
     game_server.cpp
     snake_game.cpp
+    send_task.cpp
 )
 set(COMPILE_FLAGS -Wall -pedantic -Wextra)
 
