@@ -8,16 +8,12 @@ enum class client_signal : int8_t {
     stop_sending = -3
 };
 
-class Iservers_observer {
-public:
-    virtual ~Iservers_observer() = default;
-    virtual void update_game(uint8_t byte_received) = 0;
-};
+class game_server;
 
 constexpr size_t port_number = 30000;
 constexpr size_t timeout_seconds = 20;
 
-class servers : public Iservers {
+class servers {
 public:
     servers();
     ~servers();
@@ -26,9 +22,9 @@ public:
     void send_data(const send_type& data);
     void change_receiving_server();
 
-    void attach_observer(Iservers_observer* observer) { _game_server_observer = observer; }
-    void update_data_received(uint8_t byte_received) override;
-    void update_disconnected(const std::shared_ptr<server>& disconnected) override;
+    void attach_observer(game_server* observer) { _game_server_observer = observer; }
+    void update_data_received(uint8_t byte_received);
+    void update_disconnected(const std::shared_ptr<server>& disconnected);
 
 private:
     void accept_new_clients();
@@ -52,5 +48,5 @@ private:
     boost::asio::deadline_timer _data_received_timer;
     std::thread _io_context_th;
 
-    Iservers_observer* _game_server_observer = nullptr;
+    game_server* _game_server_observer = nullptr;
 };

@@ -5,19 +5,14 @@
 #include "snake.h"
 #include "timer.h"
 
-class Igame_observer {
-public:
-    virtual ~Igame_observer() = default;
-    virtual void update_snake_moved(const std::vector<int8_t>& snake_data) = 0;
-    virtual void update_game_finished() = 0;
-};
+class game_server;
 
 class snake_game {
     friend class timer_function<snake_game>;
 public:
     snake_game(std::unique_ptr<Itimer<snake_game>>&& timer, size_t interval_ms, uint8_t height, uint8_t width);
     ~snake_game();
-    void attach_observer(Igame_observer* observer) { _server_observer = observer; }
+    void attach_observer(game_server* observer) { _server_observer = observer; }
     void start_new_game();
     void set_snake_direction(uint8_t direction) { _snake.set_current_direction(static_cast<move_direction>(direction)); }
 
@@ -35,5 +30,5 @@ private:
     snake _snake;
     size_t _interval_ms;
 
-    Igame_observer* _server_observer = nullptr;
+    game_server* _server_observer = nullptr;
 };

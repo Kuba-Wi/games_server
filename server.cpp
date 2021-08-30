@@ -1,8 +1,9 @@
 #include "server.h"
+#include "servers.h"
 
 #include <spdlog/spdlog.h>
 
-server::server(boost::asio::ip::tcp::socket&& socket, Iservers* servers) : 
+server::server(boost::asio::ip::tcp::socket&& socket, servers* servers) : 
                _socket(std::move(socket)),
                _servers_observer(servers),
                _send_task_ptr(std::make_shared<send_task>(_socket)) {
@@ -31,4 +32,12 @@ void server::receive_data() {
 
 void server::send_data(const send_type& data) {
     _send_task_ptr->send_data(data);
+}
+
+void server::notify_data_received() const {
+    _servers_observer->update_data_received(_data_buffer); 
+}
+
+void server::notify_server_disconnected() {
+    _servers_observer->update_disconnected(this->shared_from_this());
 }

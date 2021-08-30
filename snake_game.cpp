@@ -1,4 +1,6 @@
+#include "game_server.h"
 #include "snake_game.h"
+
 #include <mutex>
 
 snake_game::snake_game(std::unique_ptr<Itimer<snake_game>>&& timer, size_t interval_ms, uint8_t height, uint8_t width) :

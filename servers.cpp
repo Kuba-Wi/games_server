@@ -1,3 +1,4 @@
+#include "game_server.h"
 #include "servers.h"
 
 #include <spdlog/spdlog.h>
