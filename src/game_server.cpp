@@ -9,7 +9,6 @@ game_server::game_server(std::unique_ptr<servers>&& servers, std::unique_ptr<sna
 }
 
 void game_server::start_game() {
-    _servers_ptr->start_servers();
     _snake_game_ptr->start_new_game();
 }
 

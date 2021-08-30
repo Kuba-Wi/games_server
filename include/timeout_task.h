@@ -1,0 +1,29 @@
+#pragma once
+
+#include <boost/asio.hpp>
+
+#include <atomic>
+#include <thread>
+
+constexpr size_t timeout_seconds = 20;
+
+class servers;
+
+class timeout_task {
+public:
+    timeout_task();
+    ~timeout_task();
+    void attach_observer(servers* observer) { _servers_observer = observer; }
+    void reset_deadline();
+
+private:
+    void check_timer();
+    void notify_timeout();
+
+    std::atomic<bool> _timer_stopped{false};
+    boost::asio::io_context _io_context;
+    boost::asio::deadline_timer _timer;
+    std::thread _io_context_th;
+
+    servers* _servers_observer = nullptr;
+};
