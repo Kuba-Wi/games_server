@@ -18,6 +18,17 @@ servers::servers() : _server_endpoint(boost::asio::ip::tcp::v4(), port_number),
         spdlog::error("Acceptor listen failed: {}. Terminate", er.message());
         std::terminate();
     }
+
+    _io_context_th = std::thread{[&](){
+        using work_guard_type = boost::asio::executor_work_guard<boost::asio::io_context::executor_type>;
+        work_guard_type work_guard(_io_context.get_executor());
+        _io_context.run();
+    }};
+
+    _data_received_timer.expires_at(boost::posix_time::pos_infin);
+    _data_received_timer.async_wait([&](const boost::system::error_code&){
+        this->check_timer();
+    });
 }
 
 servers::~servers() {
@@ -29,9 +40,7 @@ servers::~servers() {
     _servers_running = false;
     _data_received_timer.cancel();
     _io_context.stop();
-    if (_io_context_th.joinable()) {
-        _io_context_th.join();
-    }
+    _io_context_th.join();
 }
 
 void servers::start_servers() {
@@ -40,16 +49,6 @@ void servers::start_servers() {
     }
     _servers_running = true;
     this->accept_new_clients();
-    _io_context_th = std::thread{[&](){
-        using work_guard_type = boost::asio::executor_work_guard<boost::asio::io_context::executor_type>;
-        work_guard_type work_guard(_io_context.get_executor());
-        _io_context.run();
-    }};
-
-    _data_received_timer.expires_at(boost::posix_time::pos_infin);
-    _data_received_timer.async_wait([&](const boost::system::error_code&){
-        this->check_timer();
-    });
 }
 
 void servers::set_initial_data(const send_type& data) {
@@ -63,7 +62,7 @@ void servers::accept_new_clients() {
         [&](boost::system::error_code er, boost::asio::ip::tcp::socket socket) {
             if (!er) {
                 spdlog::info("New client accepted");
-                this->add_accepted_server(std::move(socket));
+                this->add_accepted_server(socket);
                 this->accept_new_clients();
             } else {
                 spdlog::info("Accepting new client failed: {}", er.message());
@@ -71,9 +70,9 @@ void servers::accept_new_clients() {
         });
 }
 
-void servers::add_accepted_server(boost::asio::ip::tcp::socket&& socket) {
+void servers::add_accepted_server(boost::asio::ip::tcp::socket& socket) {
     std::lock_guard lg(_server_list_mx);
-    _server_list.emplace_back(std::make_shared<server>(std::move(socket), this));
+    _server_list.emplace_back(std::make_shared<server>(socket, this));
     _server_list.back()->receive_data();
     this->send_initial_data(_server_list.back());
     if (_server_list.size() == 1) {

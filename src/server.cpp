@@ -3,7 +3,7 @@
 
 #include <spdlog/spdlog.h>
 
-server::server(boost::asio::ip::tcp::socket&& socket, servers* servers) : 
+server::server(boost::asio::ip::tcp::socket& socket, servers* servers) : 
                _socket(std::move(socket)),
                _servers_observer(servers),
                _send_task_ptr(std::make_shared<send_task>(_socket)) {

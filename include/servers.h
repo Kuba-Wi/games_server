@@ -30,7 +30,7 @@ private:
     void accept_new_clients();
     void remove_disconnected_serv(const std::shared_ptr<server>& disconnected);
     void update_receiving_serv();
-    void add_accepted_server(boost::asio::ip::tcp::socket&& socket);
+    void add_accepted_server(boost::asio::ip::tcp::socket& socket);
     void send_initial_data(const std::shared_ptr<server>& server_ptr);
     void send_client_signal(client_signal signal);
     void check_timer();
