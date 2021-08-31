@@ -12,9 +12,9 @@ class servers;
 class timeout_task {
 public:
     timeout_task();
-    ~timeout_task();
-    void attach_observer(servers* observer) { _servers_observer = observer; }
-    void reset_deadline();
+    virtual ~timeout_task();
+    virtual void attach_observer(servers* observer) { _servers_observer = observer; }
+    virtual void reset_deadline();
 
 private:
     void check_timer();

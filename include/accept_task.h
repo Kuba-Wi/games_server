@@ -8,13 +8,14 @@ using tcp = boost::asio::ip::tcp;
 
 constexpr size_t port_number = 30000;
 
+class server;
 class servers;
 
 class accept_task {
 public:
     accept_task();
-    ~accept_task();
-    void attach_observer(servers* observer) { _servers_observer = observer; }
+    virtual ~accept_task();
+    virtual void attach_observer(servers* observer) { _servers_observer = observer; }
 
 private:
     void accept_connections();

@@ -34,7 +34,7 @@ accept_task::~accept_task() {
 
 void accept_task::accept_connections() {
     _acceptor.async_accept(
-        [&](boost::system::error_code er, boost::asio::ip::tcp::socket socket) {
+        [&](boost::system::error_code er, tcp::socket socket) {
             if (!er) {
                 spdlog::info("New client accepted");
                 this->notify_client_accepted(socket);
@@ -47,6 +47,6 @@ void accept_task::accept_connections() {
 
 void accept_task::notify_client_accepted(tcp::socket& socket) {
     if (_servers_observer) {
-        _servers_observer->update_server_accepted(socket);
+        _servers_observer->update_server_accepted(std::make_shared<server>(std::move(socket), _servers_observer));
     }
 }

@@ -10,9 +10,10 @@ class servers;
 
 class server : public std::enable_shared_from_this<server> {
 public:
-    server(boost::asio::ip::tcp::socket& socket, servers* servers);
-    void receive_data();
-    void send_data(const send_type& data);
+    server(boost::asio::ip::tcp::socket&& socket, servers* servers);
+    virtual ~server() = default;
+    virtual void receive_data();
+    virtual void send_data(const send_type& data);
 
 private:
     void notify_data_received() const;

@@ -24,7 +24,7 @@ public:
 
     void update_data_received(uint8_t byte_received);
     void update_disconnected(const std::shared_ptr<server>& disconnected);
-    void update_server_accepted(tcp::socket& socket);
+    void update_server_accepted(const std::shared_ptr<server>& server);
     void update_timeout() { this->change_receiving_server(); }
 
 private:

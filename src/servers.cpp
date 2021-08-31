@@ -24,9 +24,9 @@ void servers::set_initial_data(const send_type& data) {
     std::copy(data.begin(), data.end(), _initial_data.begin() + 1);
 }
 
-void servers::update_server_accepted(tcp::socket& socket) {
+void servers::update_server_accepted(const std::shared_ptr<server>& server) {
     std::lock_guard lg(_server_list_mx);
-    _server_list.emplace_back(std::make_shared<server>(socket, this));
+    _server_list.emplace_back(server);
     _server_list.back()->receive_data();
     this->send_initial_data(_server_list.back());
     if (_server_list.size() == 1) {
