@@ -13,7 +13,7 @@ class timeout_task {
 public:
     timeout_task();
     virtual ~timeout_task();
-    virtual void attach_observer(servers* observer) { _servers_observer = observer; }
+    virtual void attach_observer(servers* observer);
     virtual void reset_deadline();
 
 private:
@@ -26,4 +26,5 @@ private:
     std::thread _io_context_th;
 
     servers* _servers_observer = nullptr;
+    std::mutex _observer_mx;
 };

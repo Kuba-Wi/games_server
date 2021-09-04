@@ -8,13 +8,20 @@ snake_game::snake_game(std::unique_ptr<Itimer<snake_game>>&& timer, size_t inter
     _snake(height, width), 
     _interval_ms(interval_ms) {}
 
+void snake_game::attach_observer(game_server* observer) {
+    std::lock_guard lg(_observer_mx);
+    _server_observer = observer;
+}
+
 void snake_game::notify_snake_moved() const {
+    std::lock_guard lg(_observer_mx);
     if (_server_observer) {
         _server_observer->update_snake_moved(_snake.get_data());
     }
 }
 
 void snake_game::notify_game_finished() const {
+    std::lock_guard lg(_observer_mx);
     if (_server_observer) {
         _server_observer->update_game_finished();
     }

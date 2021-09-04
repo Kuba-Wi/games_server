@@ -8,13 +8,14 @@ snake::snake(uint8_t height, uint8_t width) : _height(height), _width(width) {
 }
 
 void snake::reset_snake() {
-    std::unique_lock ul(_snake_mutex);
-    _direction_queue.clear();
-    _current_direction = move_direction::up;
-    _snake_index.clear();
-    _snake_index.emplace_back(_height / 2, _width / 2);
-    _snake_index.emplace_back(_height / 2 + 1, _width / 2);
-    ul.unlock();
+    {
+        std::scoped_lock sl(_snake_mutex, _direction_mx);
+        _direction_queue.clear();
+        _current_direction = move_direction::up;
+        _snake_index.clear();
+        _snake_index.emplace_back(_height / 2, _width / 2);
+        _snake_index.emplace_back(_height / 2 + 1, _width / 2);
+    }
     this->new_food();
 }
 
@@ -27,7 +28,7 @@ void snake::new_food() {
     do {
         _food_index.first = distrib_row(gen);
         _food_index.second = distrib_column(gen);
-    } while(is_snake_index(_food_index.first, _food_index.second));
+    } while(is_snake_index(_food_index));
 }
 
 bool snake::is_food_eaten() const {
@@ -37,7 +38,7 @@ bool snake::is_food_eaten() const {
 
 bool snake::is_collision() const {
     std::lock_guard lg(_snake_mutex);
-    return std::find_if(std::next(_snake_index.begin()), _snake_index.end(), [&](auto& index){
+    return std::find_if(std::next(_snake_index.begin()), _snake_index.end(), [&](auto index){
         return index == _snake_index.front();
     }) != _snake_index.end();
 }
@@ -62,7 +63,7 @@ std::vector<int8_t> snake::get_data() const {
 }
 
 void snake::move() {
-    std::lock_guard lg(_snake_mutex);
+    std::scoped_lock sl(_snake_mutex, _direction_mx);
     this->move_setup();
     switch (_current_direction) {
     case move_direction::up:
@@ -136,9 +137,9 @@ void snake::move_setup() {
     }
 }
 
-bool snake::is_snake_index(uint8_t row, uint8_t column) const {
-    return std::find_if(_snake_index.begin(), _snake_index.end(), [=](auto& index){
-        return index.first == row && index.second == column;
+bool snake::is_snake_index(std::pair<uint8_t, uint8_t> index) const {
+    return std::find_if(_snake_index.begin(), _snake_index.end(), [=](auto snake_ind){
+        return snake_ind == index;
     }) != _snake_index.end();
 }
 
@@ -147,7 +148,7 @@ void snake::set_current_direction(move_direction direction) {
     std::unordered_map<md, md> opposite_dir{{md::up, md::down}, {md::down, md::up},
                                             {md::left, md::right}, {md::right, md::left}};
 
-    std::lock_guard lg(_snake_mutex);
+    std::lock_guard lg(_direction_mx);
     if (_direction_queue.size() == 0) {
         if (opposite_dir[direction] != _current_direction && direction != _current_direction) {
             _direction_queue.push_back(direction);

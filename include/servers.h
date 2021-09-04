@@ -16,7 +16,7 @@ class servers {
 public:
     servers(std::unique_ptr<accept_task>&& accept, std::unique_ptr<timeout_task>&& timeout);
     ~servers();
-    void attach_observer(game_server* observer) { _game_server_observer = observer; }
+    void attach_observer(game_server* observer);
 
     void set_initial_data(const send_type& data);
     void send_data(const send_type& data);
@@ -34,12 +34,15 @@ private:
     void send_client_signal(client_signal signal);
 
     std::list<std::shared_ptr<server>> _server_list;
-    std::mutex _server_list_mx;
     std::shared_ptr<server> _receiving_server;
+    std::mutex _server_mx;
 
     send_type _initial_data;
+    std::mutex _initial_data_mx;
 
     game_server* _game_server_observer = nullptr;
+    std::mutex _observer_mx;
+
     std::unique_ptr<accept_task> _accept_task_ptr;
     std::unique_ptr<timeout_task> _timeout_task_ptr;
 };

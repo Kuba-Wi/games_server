@@ -33,7 +33,7 @@ private:
     void move_down();
     void move_right();
     void move_left();
-    bool is_snake_index(uint8_t row, uint8_t column) const;
+    bool is_snake_index(std::pair<uint8_t, uint8_t> index) const;
 
     const uint8_t _height;
     const uint8_t _width;
@@ -44,4 +44,5 @@ private:
 
     mutable std::mutex _snake_mutex;
     mutable std::mutex _food_mutex;
+    std::mutex _direction_mx;
 };

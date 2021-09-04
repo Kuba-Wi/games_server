@@ -12,7 +12,7 @@ class snake_game {
 public:
     snake_game(std::unique_ptr<Itimer<snake_game>>&& timer, size_t interval_ms, uint8_t height, uint8_t width);
     ~snake_game();
-    void attach_observer(game_server* observer) { _server_observer = observer; }
+    void attach_observer(game_server* observer);
     void start_new_game();
     void set_snake_direction(uint8_t direction) { _snake.set_current_direction(static_cast<move_direction>(direction)); }
 
@@ -31,4 +31,5 @@ private:
     size_t _interval_ms;
 
     game_server* _server_observer = nullptr;
+    mutable std::mutex _observer_mx;
 };

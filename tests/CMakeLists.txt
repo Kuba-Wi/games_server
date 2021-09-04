@@ -6,6 +6,7 @@ set(FILES_UT
     snake_ut.cpp
     timer_ut.cpp
     snake_game_ut.cpp
+    servers_ut.cpp
 )
 
 include_directories(..)

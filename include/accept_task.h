@@ -2,6 +2,7 @@
 
 #include <boost/asio.hpp>
 
+#include <mutex>
 #include <thread>
 
 using tcp = boost::asio::ip::tcp;
@@ -15,7 +16,7 @@ class accept_task {
 public:
     accept_task();
     virtual ~accept_task();
-    virtual void attach_observer(servers* observer) { _servers_observer = observer; }
+    virtual void attach_observer(servers* observer);
 
 private:
     void accept_connections();
@@ -27,4 +28,5 @@ private:
     std::thread _io_context_th;
 
     servers* _servers_observer = nullptr;
+    std::mutex _observer_mx;
 };

@@ -32,6 +32,11 @@ accept_task::~accept_task() {
     _io_context_th.join();
 }
 
+void accept_task::attach_observer(servers* observer) {
+    std::lock_guard lg(_observer_mx);
+    _servers_observer = observer;
+}
+
 void accept_task::accept_connections() {
     _acceptor.async_accept(
         [&](boost::system::error_code er, tcp::socket socket) {
@@ -46,6 +51,7 @@ void accept_task::accept_connections() {
 }
 
 void accept_task::notify_client_accepted(tcp::socket& socket) {
+    std::lock_guard lg(_observer_mx);
     if (_servers_observer) {
         _servers_observer->update_server_accepted(std::make_shared<server>(std::move(socket), _servers_observer));
     }

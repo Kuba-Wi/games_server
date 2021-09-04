@@ -21,6 +21,11 @@ timeout_task::~timeout_task() {
     _io_context_th.join();
 }
 
+void timeout_task::attach_observer(servers* observer) {
+    std::lock_guard lg(_observer_mx);
+    _servers_observer = observer;
+}
+
 void timeout_task::reset_deadline() {
     _timer.expires_from_now(boost::posix_time::seconds(timeout_seconds));
 }
@@ -41,6 +46,7 @@ void timeout_task::check_timer() {
 }
 
 void timeout_task::notify_timeout() {
+    std::lock_guard lg(_observer_mx);
     if (_servers_observer) {
         _servers_observer->update_timeout();
     }
