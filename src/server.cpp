@@ -1,5 +1,6 @@
 #include "server.h"
 #include "servers.h"
+#include "socket_option.h"
 
 #include <spdlog/spdlog.h>
 
@@ -8,11 +9,7 @@ server::server(boost::asio::ip::tcp::socket&& socket, servers* servers) :
                _servers_observer(servers),
                _send_task_ptr(std::make_shared<send_task>(_socket)) {
 
-    boost::system::error_code er;
-    _socket.set_option(boost::asio::ip::tcp::no_delay(true), er);
-    if (er) {
-        spdlog::error("Set socket option (no delay): {}", er.message());
-    }
+    set_socket_no_delay_option(_socket);
 }
 
 void server::receive_data() {

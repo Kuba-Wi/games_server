@@ -14,14 +14,14 @@ set(FILES
     src/accept_task.cpp
     src/timeout_task.cpp
 )
-set(COMPILE_FLAGS -Wall -pedantic -Wextra)
 
+set(COMPILE_FLAGS -Wall -pedantic -Wextra)
 include_directories(include)
 
 add_library(server_core_lib STATIC ${FILES})
 target_compile_options(server_core_lib PRIVATE ${COMPILE_FLAGS})
 
-add_executable(${PROJECT_NAME} src/main.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/socket_option.cpp)
 target_link_libraries(${PROJECT_NAME} server_core_lib pthread)
 target_compile_options(${PROJECT_NAME} PRIVATE ${COMPILE_FLAGS})
 

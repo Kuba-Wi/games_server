@@ -31,6 +31,18 @@ struct serversTest : public Test {
         servers_tested->update_server_accepted(s_mock);
     }
 
+    void accept_two_server_mocks(std::shared_ptr<ServerMock>& first, 
+                                 std::shared_ptr<ServerMock>& second) {
+
+        first = std::make_shared<ServerMock>(std::move(fake_socket), servers_tested.get());
+        second = std::make_shared<ServerMock>(std::move(fake_socket), servers_tested.get());
+
+        update_first_server_accepted(first);
+
+        EXPECT_CALL(*second, receive_data());
+        servers_tested->update_server_accepted(second);
+    }
+
     std::unique_ptr<AcceptTaskMock> accept_mock = std::make_unique<AcceptTaskMock>();
     std::unique_ptr<TimeoutMock> timeout_mock = std::make_unique<TimeoutMock>();
     std::unique_ptr<servers> servers_tested;
@@ -77,17 +89,60 @@ TEST_F(serversTest, sendDataShouldInvokeSendMethodFromServer) {
 TEST_F(serversTest, changeReceivingServerShouldSendStopSignalToFirstServerOnListAndStartSignalToSecondServer) {
     const send_type stop_send_signal{static_cast<int8_t>(client_signal::stop_sending)};
     constexpr size_t reset_deadline_times = 2;
+    std::shared_ptr<ServerMock> serv_mock;
+    std::shared_ptr<ServerMock> serv_mock_second;
     create_servers_tested(reset_deadline_times);
 
-    auto serv_mock = std::make_shared<ServerMock>(std::move(fake_socket), servers_tested.get());
-    auto serv_mock_second = std::make_shared<ServerMock>(std::move(fake_socket), servers_tested.get());
-
-    update_first_server_accepted(serv_mock);
-
-    EXPECT_CALL(*serv_mock_second, receive_data());
-    servers_tested->update_server_accepted(serv_mock_second);
+    accept_two_server_mocks(serv_mock, serv_mock_second);
 
     EXPECT_CALL(*serv_mock, send_data(stop_send_signal));
     EXPECT_CALL(*serv_mock_second, send_data(start_send_signal));
     servers_tested->change_receiving_server();
+}
+
+TEST_F(serversTest, updateDataReceivedShouldResetDeadline) {
+    constexpr uint8_t data_received = 1;
+    constexpr size_t reset_deadline_times = 2;
+    create_servers_tested(reset_deadline_times);
+    auto serv_mock = std::make_shared<ServerMock>(std::move(fake_socket), servers_tested.get());
+    update_first_server_accepted(serv_mock);
+
+    servers_tested->update_data_received(data_received);
+}
+
+TEST_F(serversTest, updateDisconnectedWithNotReceivingServerShouldNotResetDeadlineSecondTime) {
+    constexpr size_t reset_deadline_times = 1;
+    std::shared_ptr<ServerMock> serv_mock;
+    std::shared_ptr<ServerMock> serv_mock_second;
+    create_servers_tested(reset_deadline_times);
+
+    accept_two_server_mocks(serv_mock, serv_mock_second);
+
+    servers_tested->update_disconnected(serv_mock_second);
+}
+
+TEST_F(serversTest, updateDisconnectedWithReceivingServerShouldUpdateReceivingServer) {
+    constexpr size_t reset_deadline_times = 2;
+    std::shared_ptr<ServerMock> serv_mock;
+    std::shared_ptr<ServerMock> serv_mock_second;
+    create_servers_tested(reset_deadline_times);
+
+    accept_two_server_mocks(serv_mock, serv_mock_second);
+
+    EXPECT_CALL(*serv_mock_second, send_data(start_send_signal));
+    servers_tested->update_disconnected(serv_mock);
+}
+
+TEST_F(serversTest, updateTimeoutShouldChangeReceivingServer) {
+    const send_type stop_send_signal{static_cast<int8_t>(client_signal::stop_sending)};
+    constexpr size_t reset_deadline_times = 2;
+    std::shared_ptr<ServerMock> serv_mock;
+    std::shared_ptr<ServerMock> serv_mock_second;
+    create_servers_tested(reset_deadline_times);
+
+    accept_two_server_mocks(serv_mock, serv_mock_second);
+
+    EXPECT_CALL(*serv_mock, send_data(stop_send_signal));
+    EXPECT_CALL(*serv_mock_second, send_data(start_send_signal));
+    servers_tested->update_timeout();
 }
