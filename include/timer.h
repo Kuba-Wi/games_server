@@ -14,17 +14,9 @@ private:
 };
 
 template <typename T>
-class Itimer {
+class timer {
 public:
-    virtual ~Itimer() = default;
-    virtual void start_timer(timer_function<T>&& f, size_t interval_ms) = 0;
-    virtual void stop_timer() = 0;
-};
-
-template <typename T>
-class timer : public Itimer<T> {
-public:
-    void start_timer(timer_function<T>&& f, size_t interval_ms) override {
+    virtual void start_timer(timer_function<T>&& f, size_t interval_ms) {
         this->stop_timer();
         _active = true;
         th = std::thread{[=, this]() mutable {
@@ -38,14 +30,14 @@ public:
         }};
     }
 
-    void stop_timer() override {
+    virtual void stop_timer() {
         _active = false;
         if (th.joinable()) {
             th.join();
         }
     }
     
-    ~timer() {
+    virtual ~timer() {
         this->stop_timer();
     }
 

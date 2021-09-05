@@ -3,7 +3,7 @@
 
 #include <mutex>
 
-snake_game::snake_game(std::unique_ptr<Itimer<snake_game>>&& timer, size_t interval_ms, uint8_t height, uint8_t width) :
+snake_game::snake_game(std::unique_ptr<timer<snake_game>>&& timer, size_t interval_ms, uint8_t height, uint8_t width) :
     _timer_ptr(std::move(timer)),
     _snake(height, width), 
     _interval_ms(interval_ms) {}
