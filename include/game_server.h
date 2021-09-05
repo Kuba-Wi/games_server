@@ -13,7 +13,6 @@ public:
 
 private:
     void add_server_initial_data();
-    void start_accepting_clients();
 
     std::unique_ptr<servers> _servers_ptr;
     std::unique_ptr<snake_game> _snake_game_ptr;

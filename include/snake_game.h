@@ -11,10 +11,10 @@ class snake_game {
     friend class timer_function<snake_game>;
 public:
     snake_game(std::unique_ptr<Itimer<snake_game>>&& timer, size_t interval_ms, uint8_t height, uint8_t width);
-    ~snake_game();
-    void attach_observer(game_server* observer);
-    void start_new_game();
-    void set_snake_direction(uint8_t direction) { _snake.set_current_direction(static_cast<move_direction>(direction)); }
+    virtual ~snake_game();
+    virtual void attach_observer(game_server* observer);
+    virtual void start_new_game();
+    virtual void set_snake_direction(uint8_t direction) { _snake.set_current_direction(static_cast<move_direction>(direction)); }
 
     auto get_snake_data() { return _snake.get_data(); }
     size_t get_snake_move_time_ms() const { return _interval_ms; }

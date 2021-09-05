@@ -15,12 +15,12 @@ class game_server;
 class servers {
 public:
     servers(std::unique_ptr<accept_task>&& accept, std::unique_ptr<timeout_task>&& timeout);
-    ~servers();
-    void attach_observer(game_server* observer);
+    virtual ~servers();
+    virtual void attach_observer(game_server* observer);
 
-    void set_initial_data(const send_type& data);
-    void send_data(const send_type& data);
-    void change_receiving_server();
+    virtual void set_initial_data(const send_type& data);
+    virtual void send_data(const send_type& data);
+    virtual void change_receiving_server();
 
     void update_data_received(uint8_t byte_received);
     void update_disconnected(const std::shared_ptr<server>& disconnected);

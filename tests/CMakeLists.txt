@@ -7,6 +7,7 @@ set(FILES_UT
     timer_ut.cpp
     snake_game_ut.cpp
     servers_ut.cpp
+    game_server_ut.cpp
     socket_option_fake.cpp
 )
 
