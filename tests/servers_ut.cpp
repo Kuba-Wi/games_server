@@ -15,31 +15,79 @@ using AcceptTaskMock = NaggyMock<accept_task_mock>;
 using TimeoutMock = NaggyMock<timeout_task_mock>;
 
 struct serversTest : public Test {
-    serversTest() : fake_socket(io_context) {}
+    serversTest() : start_send_signal{static_cast<int8_t>(client_signal::start_sending)},
+                    fake_socket(io_context) {}
+
+    void create_servers_tested(size_t reset_deadline_times) {
+        EXPECT_CALL(*timeout_mock, attach_observer(_));
+        EXPECT_CALL(*timeout_mock, reset_deadline()).Times(reset_deadline_times);
+        EXPECT_CALL(*accept_mock, attach_observer(_));
+        servers_tested = std::make_unique<servers>(std::move(accept_mock), std::move(timeout_mock));
+    }
+
+    void update_first_server_accepted(std::shared_ptr<ServerMock>& s_mock) {
+        EXPECT_CALL(*s_mock, send_data(start_send_signal));
+        EXPECT_CALL(*s_mock, receive_data());
+        servers_tested->update_server_accepted(s_mock);
+    }
 
     std::unique_ptr<AcceptTaskMock> accept_mock = std::make_unique<AcceptTaskMock>();
     std::unique_ptr<TimeoutMock> timeout_mock = std::make_unique<TimeoutMock>();
+    std::unique_ptr<servers> servers_tested;
+    const send_type start_send_signal;
 
     boost::asio::io_context io_context;
     tcp::socket fake_socket;
 };
 
+TEST_F(serversTest, updateServerAcceptedShouldInvokeSendAndReceiveFunctionsFromServer) {
+    constexpr size_t reset_deadline_times = 1;
+    create_servers_tested(reset_deadline_times);
+
+    auto serv_mock = std::make_shared<ServerMock>(std::move(fake_socket), servers_tested.get());
+    update_first_server_accepted(serv_mock);
+}
 
 TEST_F(serversTest, setInitialDataShouldSetDataThatWillBeSentToNewAcceptedServer) {
-    EXPECT_CALL(*timeout_mock, attach_observer(_));
-    EXPECT_CALL(*timeout_mock, reset_deadline());
-    EXPECT_CALL(*accept_mock, attach_observer(_));
-    servers servers_tested(std::move(accept_mock), std::move(timeout_mock));
+    const send_type init_data{1, 2};
+    const send_type init_data_sent{static_cast<int8_t>(client_signal::initial_data), 1, 2};
+    constexpr size_t reset_deadline_times = 1;
+    create_servers_tested(reset_deadline_times);
 
-    const send_type init_data{1, 2, 3};
-    const send_type init_data_sent{static_cast<int8_t>(client_signal::initial_data), 1, 2, 3};
-    const send_type start_send_signal{static_cast<int8_t>(client_signal::start_sending)};
+    auto serv_mock = std::make_shared<ServerMock>(std::move(fake_socket), servers_tested.get());
 
-    auto serv_mock = std::make_shared<ServerMock>(std::move(fake_socket), &servers_tested);
     EXPECT_CALL(*serv_mock, send_data(init_data_sent));
-    EXPECT_CALL(*serv_mock, send_data(start_send_signal));
-    EXPECT_CALL(*serv_mock, receive_data());
+    servers_tested->set_initial_data(init_data);
+    update_first_server_accepted(serv_mock);
+}
 
-    servers_tested.set_initial_data(init_data);
-    servers_tested.update_server_accepted(serv_mock);
+TEST_F(serversTest, sendDataShouldInvokeSendMethodFromServer) {
+    const send_type data{1, 2, 3, 4};
+    constexpr size_t reset_deadline_times = 1;
+    create_servers_tested(reset_deadline_times);
+
+    auto serv_mock = std::make_shared<ServerMock>(std::move(fake_socket), servers_tested.get());
+
+    update_first_server_accepted(serv_mock);
+
+    EXPECT_CALL(*serv_mock, send_data(data));
+    servers_tested->send_data(data);
+}
+
+TEST_F(serversTest, changeReceivingServerShouldSendStopSignalToFirstServerOnListAndStartSignalToSecondServer) {
+    const send_type stop_send_signal{static_cast<int8_t>(client_signal::stop_sending)};
+    constexpr size_t reset_deadline_times = 2;
+    create_servers_tested(reset_deadline_times);
+
+    auto serv_mock = std::make_shared<ServerMock>(std::move(fake_socket), servers_tested.get());
+    auto serv_mock_second = std::make_shared<ServerMock>(std::move(fake_socket), servers_tested.get());
+
+    update_first_server_accepted(serv_mock);
+
+    EXPECT_CALL(*serv_mock_second, receive_data());
+    servers_tested->update_server_accepted(serv_mock_second);
+
+    EXPECT_CALL(*serv_mock, send_data(stop_send_signal));
+    EXPECT_CALL(*serv_mock_second, send_data(start_send_signal));
+    servers_tested->change_receiving_server();
 }

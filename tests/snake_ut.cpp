@@ -8,29 +8,29 @@ constexpr size_t width = 6;
 struct snakeTest : public ::testing::Test {
     snakeTest() : sn(height, width) {}
 
+    void check_initial_data(const std::vector<int8_t>& data) {
+        constexpr size_t initial_data_size = 6;
+
+        ASSERT_EQ(data.size(), initial_data_size);
+        std::pair snake_head{data[0], data[1]};
+        std::pair snake_tail{data[2], data[3]};
+        std::pair food_index{data[4], data[5]};
+
+        ASSERT_EQ(snake_head.first, height / 2);
+        ASSERT_EQ(snake_head.second, width / 2);
+        ASSERT_EQ(snake_tail.first, height / 2 + 1);
+        ASSERT_EQ(snake_tail.second, width / 2);
+
+        ASSERT_NE(food_index, snake_head);
+        ASSERT_NE(food_index, snake_tail);
+    }
+
     snake sn;
 };
 
 TEST_F(snakeTest, constructorShouldSetBoardSize) {
     ASSERT_EQ(sn.get_board_height(), height);
     ASSERT_EQ(sn.get_board_width(), width);
-}
-
-void check_initial_data(const std::vector<int8_t>& data) {
-    constexpr size_t initial_data_size = 6;
-
-    ASSERT_EQ(data.size(), initial_data_size);
-    std::pair snake_head{data[0], data[1]};
-    std::pair snake_tail{data[2], data[3]};
-    std::pair food_index{data[4], data[5]};
-
-    ASSERT_EQ(snake_head.first, height / 2);
-    ASSERT_EQ(snake_head.second, width / 2);
-    ASSERT_EQ(snake_tail.first, height / 2 + 1);
-    ASSERT_EQ(snake_tail.second, width / 2);
-
-    ASSERT_NE(food_index, snake_head);
-    ASSERT_NE(food_index, snake_tail);
 }
 
 TEST_F(snakeTest, getDataShouldReturnSnakeData) {
