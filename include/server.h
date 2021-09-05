@@ -5,15 +5,16 @@
 #include <vector>
 
 #include "send_task.h"
+#include "test_iface.h"
 
 class servers;
 
 class server : public std::enable_shared_from_this<server> {
 public:
     server(boost::asio::ip::tcp::socket&& socket, servers* servers);
-    virtual ~server() = default;
-    virtual void receive_data();
-    virtual void send_data(const send_type& data);
+    TEST_IFACE ~server() = default;
+    TEST_IFACE void receive_data();
+    TEST_IFACE void send_data(const send_type& data);
 
 private:
     void notify_data_received() const;

@@ -5,6 +5,8 @@
 #include <mutex>
 #include <thread>
 
+#include "test_iface.h"
+
 using tcp = boost::asio::ip::tcp;
 
 constexpr size_t port_number = 30000;
@@ -15,8 +17,8 @@ class servers;
 class accept_task {
 public:
     accept_task();
-    virtual ~accept_task();
-    virtual void attach_observer(servers* observer);
+    TEST_IFACE ~accept_task();
+    TEST_IFACE void attach_observer(servers* observer);
 
 private:
     void accept_connections();

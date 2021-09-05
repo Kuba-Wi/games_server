@@ -2,6 +2,7 @@
 
 #include "accept_task.h"
 #include "server.h"
+#include "test_iface.h"
 #include "timeout_task.h"
 
 enum class client_signal : int8_t {
@@ -15,12 +16,12 @@ class game_server;
 class servers {
 public:
     servers(std::unique_ptr<accept_task>&& accept, std::unique_ptr<timeout_task>&& timeout);
-    virtual ~servers();
-    virtual void attach_observer(game_server* observer);
+    TEST_IFACE ~servers();
+    TEST_IFACE void attach_observer(game_server* observer);
 
-    virtual void set_initial_data(const send_type& data);
-    virtual void send_data(const send_type& data);
-    virtual void change_receiving_server();
+    TEST_IFACE void set_initial_data(const send_type& data);
+    TEST_IFACE void send_data(const send_type& data);
+    TEST_IFACE void change_receiving_server();
 
     void update_data_received(uint8_t byte_received);
     void update_disconnected(const std::shared_ptr<server>& disconnected);

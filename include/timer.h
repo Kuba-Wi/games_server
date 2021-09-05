@@ -4,6 +4,8 @@
 #include <chrono>
 #include <thread>
 
+#include "test_iface.h"
+
 template <typename T>
 class timer_function {
 public:
@@ -16,7 +18,7 @@ private:
 template <typename T>
 class timer {
 public:
-    virtual void start_timer(timer_function<T>&& f, size_t interval_ms) {
+    TEST_IFACE void start_timer(timer_function<T>&& f, size_t interval_ms) {
         this->stop_timer();
         _active = true;
         th = std::thread{[=, this]() mutable {
@@ -30,14 +32,14 @@ public:
         }};
     }
 
-    virtual void stop_timer() {
+    TEST_IFACE void stop_timer() {
         _active = false;
         if (th.joinable()) {
             th.join();
         }
     }
     
-    virtual ~timer() {
+    TEST_IFACE ~timer() {
         this->stop_timer();
     }
 
