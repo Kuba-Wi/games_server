@@ -1,13 +1,13 @@
 #pragma once
 
-#include <boost/asio.hpp>
-
 #include <atomic>
 #include <condition_variable>
 #include <list>
 #include <memory>
 #include <mutex>
 #include <thread>
+
+#include <boost/asio.hpp>
 
 constexpr int8_t data_delimiter = std::numeric_limits<int8_t>::max();
 

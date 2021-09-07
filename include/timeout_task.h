@@ -1,9 +1,9 @@
 #pragma once
 
-#include <boost/asio.hpp>
-
 #include <atomic>
 #include <thread>
+
+#include <boost/asio.hpp>
 
 #include "test_iface.h"
 

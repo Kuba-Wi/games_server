@@ -1,7 +1,8 @@
-#include "game_server.h"
 #include "servers.h"
 
 #include <spdlog/spdlog.h>
+
+#include "game_server.h"
 
 servers::servers(std::unique_ptr<accept_task>&& accept, std::unique_ptr<timeout_task>&& timeout) : 
         _accept_task_ptr(std::move(accept)),

@@ -1,7 +1,8 @@
 #pragma once
 
-#include <boost/asio.hpp>
 #include <gmock/gmock.h>
+
+#include <boost/asio.hpp>
 
 #include "accept_task.h"
 #include "server_mock.h"

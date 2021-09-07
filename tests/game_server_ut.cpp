@@ -1,3 +1,6 @@
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+
 #include "game_server.h"
 #include "mocks/accept_task_mock.h"
 #include "mocks/servers_mock.h"
@@ -5,8 +8,6 @@
 #include "mocks/timeout_task_mock.h"
 #include "mocks/timer_mock.h"
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
 
 using namespace ::testing;
 using AcceptTaskMock = NaggyMock<accept_task_mock>;

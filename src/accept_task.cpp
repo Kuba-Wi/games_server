@@ -1,7 +1,8 @@
 #include "accept_task.h"
-#include "servers.h"
 
 #include <spdlog/spdlog.h>
+
+#include "servers.h"
 
 accept_task::accept_task() : _server_endpoint(boost::asio::ip::tcp::v4(), port_number), 
                              _acceptor(_io_context, _server_endpoint.protocol()) {

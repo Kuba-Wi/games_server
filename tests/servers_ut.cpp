@@ -1,8 +1,9 @@
-#include <boost/asio.hpp>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include <memory>
+
+#include <boost/asio.hpp>
 
 #include "mocks/server_mock.h"
 #include "mocks/accept_task_mock.h"

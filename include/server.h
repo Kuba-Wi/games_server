@@ -1,8 +1,8 @@
 #pragma once
 
-#include <boost/asio.hpp>
-
 #include <vector>
+
+#include <boost/asio.hpp>
 
 #include "send_task.h"
 #include "test_iface.h"

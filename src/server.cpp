@@ -1,8 +1,9 @@
 #include "server.h"
-#include "servers.h"
-#include "socket_option.h"
 
 #include <spdlog/spdlog.h>
+
+#include "servers.h"
+#include "socket_option.h"
 
 server::server(boost::asio::ip::tcp::socket&& socket, servers* servers) : 
                _socket(std::move(socket)),

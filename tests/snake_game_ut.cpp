@@ -2,7 +2,6 @@
 #include <gtest/gtest.h>
 
 #include "mocks/timer_mock.h"
-
 #include "snake_game.h"
 
 constexpr size_t interval_ms = 1;

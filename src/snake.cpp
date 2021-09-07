@@ -1,4 +1,5 @@
 #include "snake.h"
+
 #include <algorithm>
 #include <random>
 #include <unordered_map>

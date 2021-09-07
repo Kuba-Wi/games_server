@@ -1,7 +1,8 @@
-#include "game_server.h"
 #include "snake_game.h"
 
 #include <mutex>
+
+#include "game_server.h"
 
 snake_game::snake_game(std::unique_ptr<timer<snake_game>>&& timer, size_t interval_ms, uint8_t height, uint8_t width) :
     _timer_ptr(std::move(timer)),
