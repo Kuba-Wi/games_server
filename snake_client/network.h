@@ -14,19 +14,13 @@ constexpr int8_t data_delimiter = std::numeric_limits<int8_t>::max();
 constexpr size_t port_number = 30000;
 constexpr size_t run_pool_size = 2;
 
-class Isnake_client {
-public:
-    virtual ~Isnake_client() = default;
-    virtual void update_snake(const std::vector<int8_t>& data) = 0;
-    virtual void set_disconnected() = 0;
-    virtual void set_connected() = 0;
-};
+class snake_client;
 
 class network {
 public:
     network();
     ~network();
-    void attach_observer(Isnake_client* observer) { _snake_observer = observer; }
+    void attach_observer(snake_client* observer) { _snake_observer = observer; }
     bool set_server_address(const std::string& ip);
     void connect();
     void send_data(uint8_t data);
@@ -68,5 +62,5 @@ private:
     std::condition_variable _received_queue_cv;
     std::thread _data_recived_loop_th;
 
-    Isnake_client* _snake_observer = nullptr;
+    snake_client* _snake_observer = nullptr;
 };

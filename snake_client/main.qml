@@ -45,7 +45,7 @@ ApplicationWindow {
         text: "Connect"
         
         onClicked: {
-            snake_model.set_ip(text_ip.text)
+            snake_model.connect_to_ip(text_ip.text)
         }
     }
 

@@ -16,12 +16,14 @@ enum class client_signal : int8_t {
     stop_sending = -3
 };
 
-class snake_client : public Isnake_client {
+class snake_client {
 public:
     snake_client(std::unique_ptr<network>&& ptr);
-    void update_snake(const std::vector<int8_t>& data) override;
-    void set_disconnected() override;
-    void set_connected() override;
+
+    void update_snake(const std::vector<int8_t>& data);
+    void set_disconnected();
+    void set_connected();
+
     bool set_server_address(const std::string& ip) { return _network_ptr->set_server_address(ip); }
     void connect_network() { _network_ptr->connect(); }
 

@@ -1,4 +1,5 @@
 #include "network.h"
+#include "snake_client.h"
 
 network::network() : _socket(_io_context) {
     _server_endpoint.emplace_back(boost::asio::ip::tcp::endpoint{});
