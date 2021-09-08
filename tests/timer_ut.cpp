@@ -13,11 +13,11 @@ TEST(timerTest, timerShouldStartAndStopWithoutCrash) {
     timer<Fake> time;
 
     time.stop_timer();
-    for (size_t i = 0; i < execution_count; ++i) {
+    for (size_t i = 1; i < execution_count; ++i) {
         time.start_timer(timer_function{fake}, i);
     }
 
-    for (size_t i = 0; i < execution_count; ++i) {
+    for (size_t i = 1; i < execution_count; ++i) {
         time.start_timer(timer_function{fake}, i);
         time.stop_timer();
     }
