@@ -17,7 +17,7 @@ using send_iterator = std::list<send_type>::iterator;
 
 class send_task : public std::enable_shared_from_this<send_task> {
 public:
-    send_task(tcp::socket& sock);
+    send_task(const std::shared_ptr<tcp::socket>& sock);
     ~send_task();
     void send_data(const send_type& data);
 
@@ -26,7 +26,7 @@ private:
     void execute_send();
     void send_loop();
 
-    tcp::socket& _socket;
+    std::shared_ptr<tcp::socket> _socket;
     std::atomic<bool> _send_executing{false};
     std::atomic<bool> _end_task{false};
 

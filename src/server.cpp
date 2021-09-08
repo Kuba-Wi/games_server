@@ -5,17 +5,17 @@
 #include "servers.h"
 #include "socket_option.h"
 
-server::server(boost::asio::ip::tcp::socket&& socket, servers* servers) : 
-               _socket(std::move(socket)),
+server::server(tcp::socket&& socket, servers* servers) : 
+               _socket(std::make_shared<tcp::socket>(std::move(socket))),
                _servers_observer(servers),
                _send_task_ptr(std::make_shared<send_task>(_socket)) {
 
-    set_socket_no_delay_option(_socket);
+    set_socket_no_delay_option(*_socket);
 }
 
 void server::receive_data() {
     boost::asio::async_read(
-        _socket,
+        *_socket,
         boost::asio::buffer(&_data_buffer, sizeof(_data_buffer)),
         [ptr = this->shared_from_this()](const boost::system::error_code& er, size_t) {
             if (!er) {

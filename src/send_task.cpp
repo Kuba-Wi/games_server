@@ -1,6 +1,6 @@
 #include "send_task.h"
 
-send_task::send_task(tcp::socket& sock) : _socket{sock} {
+send_task::send_task(const std::shared_ptr<tcp::socket>& sock) : _socket(sock) {
     _send_loop_th = std::thread{[&](){
         this->send_loop();
     }};
@@ -28,7 +28,7 @@ void send_task::execute_send() {
     boost::asio::mutable_buffer buf(_send_queue.front().data(), _send_queue.front().size() * sizeof(send_type::value_type));
     auto it = _send_queue.begin();
 
-    boost::asio::async_write(_socket, buf, 
+    boost::asio::async_write(*_socket, buf, 
         [it, ptr = this->shared_from_this()](const boost::system::error_code&, size_t){
             ptr->erase_el_from_queue(it);
             ptr->_send_executing = false;
