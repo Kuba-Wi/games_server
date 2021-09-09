@@ -20,6 +20,8 @@ set(PROJECT_SOURCES
         snake_client.cpp
         network.cpp
         qt_ui_iface.cpp
+        receive_worker.cpp
+        send_worker.cpp
         qml.qrc
 )
 set(FLAGS -pedantic -Wall -Wextra)
