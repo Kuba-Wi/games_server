@@ -15,16 +15,20 @@ find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Quick REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Quick REQUIRED)
 
 set(PROJECT_SOURCES
-        main.cpp
-        snakeModel.cpp
-        snake_client.cpp
-        network.cpp
-        qt_ui_iface.cpp
-        receive_worker.cpp
-        send_worker.cpp
-        qml.qrc
+        src/main.cpp
+        src/snake_client.cpp
+        src/network.cpp
+        src/receive_worker.cpp
+        src/send_worker.cpp
+        ui/qt_ui_iface.cpp
+        ui/snakeModel.cpp
+        ui/qml.qrc
 )
+
 set(FLAGS -pedantic -Wall -Wextra)
+
+include_directories(include)
+include_directories(ui)
 
 if(ANDROID)
     include_directories(/home/kuba/Boost-for-Android/boost_1_76_0)
@@ -55,4 +59,3 @@ target_compile_options(snake PRIVATE ${FLAGS})
 if(NOT ANDROID)
     target_link_libraries(snake PRIVATE pthread)
 endif()
-#target_link_directories(snake PRIVATE /home/kuba/Boost-for-Android/boost_1_76_0/stage/lib)
