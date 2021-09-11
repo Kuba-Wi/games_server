@@ -12,7 +12,7 @@ class servers;
 class server : public std::enable_shared_from_this<server> {
 public:
     server(tcp::socket&& socket, servers* servers);
-    TEST_IFACE ~server() = default;
+    TEST_IFACE ~server() { _send_task_ptr->stop_task(); }
     TEST_IFACE void receive_data();
     TEST_IFACE void send_data(const send_type& data);
 

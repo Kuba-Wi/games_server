@@ -1,15 +1,25 @@
 #include "send_task.h"
 
-send_task::send_task(const std::shared_ptr<tcp::socket>& sock) : _socket(sock) {
+send_task::send_task(const std::shared_ptr<tcp::socket>& sock) : _socket(sock) {}
+
+send_task::~send_task() {
+    this->stop_task();
+}
+
+void send_task::start_task() {
     _send_loop_th = std::thread{[&](){
         this->send_loop();
     }};
 }
 
-send_task::~send_task() {
+void send_task::stop_task() {
+    std::unique_lock ul(_send_mx);
     _end_task = true;
+    ul.unlock();
     _send_data_cv.notify_all();
-    _send_loop_th.join();
+    if (_send_loop_th.joinable()) {
+        _send_loop_th.join();
+    }
 }
 
 void send_task::send_data(const send_type& data) {
@@ -23,10 +33,11 @@ void send_task::send_data(const send_type& data) {
     _send_data_cv.notify_all();
 }
 
-void send_task::execute_send() {
+void send_task::execute_send(std::unique_lock<std::mutex>&& ul_send_mx) {
     _send_executing = true;
     boost::asio::mutable_buffer buf(_send_queue.front().data(), _send_queue.front().size() * sizeof(send_type::value_type));
     auto it = _send_queue.begin();
+    ul_send_mx.unlock();
 
     boost::asio::async_write(*_socket, buf, 
         [it, ptr = this->shared_from_this()](const boost::system::error_code&, size_t){
@@ -38,14 +49,14 @@ void send_task::execute_send() {
 
 void send_task::send_loop() {
     while (!_end_task) {
-        std::unique_lock ul(_send_mx);
-        _send_data_cv.wait(ul, [&](){
+        std::unique_lock ul_send_mx(_send_mx);
+        _send_data_cv.wait(ul_send_mx, [&](){
             return (_send_queue.size() > 0 && !_send_executing) || _end_task;
         });
         if (_end_task) {
             return;
         }
-        this->execute_send();
+        this->execute_send(std::move(ul_send_mx));
     }
 }
 

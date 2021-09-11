@@ -83,10 +83,10 @@ void servers::remove_disconnected_serv(const std::shared_ptr<server>& disconnect
     std::lock_guard lg(_server_mx);
     _server_list.remove(disconnected);
 
-    if (_server_list.size() > 0) {
-        if (_receiving_server == disconnected) {
-            this->update_receiving_serv();
-        }
+    if (_server_list.size() == 0) {
+        _receiving_server.reset();
+    } else if (_receiving_server == disconnected) {
+        this->update_receiving_serv();
     }
 }
 
