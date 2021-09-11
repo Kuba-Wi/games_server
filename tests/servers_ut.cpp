@@ -111,6 +111,15 @@ TEST_F(serversTest, updateDataReceivedShouldResetDeadline) {
     servers_tested->update_data_received(data_received);
 }
 
+TEST_F(serversTest, updateDisconnectedWithOneServerShouldNotUpdateReceivingServer) {
+    constexpr size_t reset_deadline_times = 1;
+    create_servers_tested(reset_deadline_times);
+    auto serv_mock = std::make_shared<ServerMock>(std::move(fake_socket), servers_tested.get());
+    update_first_server_accepted(serv_mock);
+
+    servers_tested->update_disconnected(serv_mock);
+}
+
 TEST_F(serversTest, updateDisconnectedWithNotReceivingServerShouldNotResetDeadlineSecondTime) {
     constexpr size_t reset_deadline_times = 1;
     std::shared_ptr<ServerMock> serv_mock;
