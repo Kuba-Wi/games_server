@@ -8,7 +8,7 @@ timeout_task::timeout_task() : _timer(_io_context) {
         _io_context.run();
     }};
 
-    _timer.expires_at(boost::posix_time::pos_infin);
+    this->reset_deadline();
     _timer.async_wait([&](const boost::system::error_code&){
         this->check_timer();
     });
@@ -27,7 +27,8 @@ void timeout_task::attach_observer(servers* observer) {
 }
 
 void timeout_task::reset_deadline() {
-    _timer.expires_from_now(boost::posix_time::seconds(timeout_seconds));
+    boost::system::error_code er;
+    _timer.expires_from_now(boost::posix_time::seconds(timeout_seconds), er);
 }
 
 void timeout_task::check_timer() {
