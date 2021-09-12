@@ -11,4 +11,5 @@
 class accept_task_mock : public accept_task {
 public:
     MOCK_METHOD(void, attach_observer, (servers* observer), (override));
+    MOCK_METHOD(void, accept_connections, (), (override));
 };

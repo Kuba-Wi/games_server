@@ -28,9 +28,10 @@ struct gameServerTest : public Test {
     }
 
     void SetUp() {
-        EXPECT_CALL(*accept_mock_ptr, attach_observer(_));
         EXPECT_CALL(*timeout_mock_ptr, attach_observer(_));
         EXPECT_CALL(*timer_mock_ptr, stop_timer());
+        EXPECT_CALL(*accept_mock_ptr, attach_observer(_));
+        EXPECT_CALL(*accept_mock_ptr, accept_connections());
         servers_mock_ptr = std::make_unique<ServersMock>(std::move(accept_mock_ptr), std::move(timeout_mock_ptr));
         sn_game_mock_ptr = std::make_unique<SnakeGameMock>(std::move(timer_mock_ptr), interval_ms, height, width);
     }

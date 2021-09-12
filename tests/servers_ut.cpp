@@ -23,6 +23,7 @@ struct serversTest : public Test {
         EXPECT_CALL(*timeout_mock, attach_observer(_));
         EXPECT_CALL(*timeout_mock, reset_deadline()).Times(reset_deadline_times);
         EXPECT_CALL(*accept_mock, attach_observer(_));
+        EXPECT_CALL(*accept_mock, accept_connections());
         servers_tested = std::make_unique<servers>(std::move(accept_mock), std::move(timeout_mock));
     }
 

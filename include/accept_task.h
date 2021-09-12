@@ -19,9 +19,9 @@ public:
     accept_task();
     TEST_IFACE ~accept_task();
     TEST_IFACE void attach_observer(servers* observer);
+    TEST_IFACE void accept_connections();
 
 private:
-    void accept_connections();
     void notify_client_accepted(tcp::socket& socket);
 
     boost::asio::io_context _io_context;

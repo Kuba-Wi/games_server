@@ -10,6 +10,8 @@ servers::servers(std::unique_ptr<accept_task>&& accept, std::unique_ptr<timeout_
 
     _accept_task_ptr->attach_observer(this);
     _timeout_task_ptr->attach_observer(this);
+
+    _accept_task_ptr->accept_connections();
 }
 
 servers::~servers() {

@@ -24,8 +24,6 @@ accept_task::accept_task() : _server_endpoint(boost::asio::ip::tcp::v4(), port_n
         work_guard_type work_guard(_io_context.get_executor());
         _io_context.run();
     }};
-
-    this->accept_connections();
 }
 
 accept_task::~accept_task() {
