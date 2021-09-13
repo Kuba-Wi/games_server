@@ -17,7 +17,7 @@ class network;
 
 class receive_worker {
 public:
-    receive_worker(tcp::socket& socket, network* observer);
+    receive_worker(std::shared_ptr<tcp::socket>& socket, network* observer);
     ~receive_worker();
 
     void receive_data();
@@ -38,7 +38,7 @@ private:
 
     std::atomic<bool> _stop_worker{false};
 
-    tcp::socket& _socket;
+    std::shared_ptr<tcp::socket> _socket_ptr;
 
     network* _network_observer;
 };

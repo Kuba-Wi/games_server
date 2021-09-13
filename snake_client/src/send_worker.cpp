@@ -1,13 +1,15 @@
 #include "send_worker.h"
 
-send_worker::send_worker(tcp::socket& socket) : _socket(socket) {
+send_worker::send_worker(std::shared_ptr<tcp::socket>& socket) : _socket_ptr(socket) {
     _send_loop_th = std::thread{[&](){
         this->send_loop();
     }};
 }
 
 send_worker::~send_worker() {
+    std::unique_lock ul(_send_queue_mx);
     _stop_worker = true;
+    ul.unlock();
     _send_data_cv.notify_all();
     _send_loop_th.join();
 }
@@ -37,7 +39,7 @@ void send_worker::execute_send() {
     boost::asio::mutable_buffer buf(&_send_queue.front(), sizeof(uint8_t));
     auto it = _send_queue.begin();
 
-    boost::asio::async_write(_socket, buf, 
+    boost::asio::async_write(*_socket_ptr, buf, 
         [&, it](const boost::system::error_code&, size_t){
             this->erase_from_send_queue(it);
             _send_executing = false;

@@ -1,7 +1,9 @@
 #include "network.h"
 #include "snake_client.h"
+#include "socket_option.h"
 
-network::network() : _socket(_io_context), _receive_worker(_socket, this), _send_worker(_socket) {
+network::network() : _socket_ptr(std::make_shared<tcp::socket>(_io_context)), 
+                     _receive_worker(_socket_ptr, this), _send_worker(_socket_ptr) {
     _server_endpoint.emplace_back(boost::asio::ip::tcp::endpoint{});
     _server_endpoint.back().port(port_number);
 
@@ -34,17 +36,17 @@ bool network::set_server_address(const std::string& ip) {
 }
 
 void network::connect() {
-    if (!_address_set) {
+    if (!_address_set || _socket_connected) {
         return;
     }
 
-    boost::asio::async_connect(_socket, _server_endpoint, 
+    boost::asio::async_connect(*_socket_ptr, _server_endpoint, 
         [&](const boost::system::error_code& error, const boost::asio::ip::tcp::endpoint&){
             if (error) {
                 this->connect();
             } else {
                 _socket_connected = true;
-                this->set_no_delay_option();
+                set_socket_no_delay_option(*_socket_ptr);
                 this->notify_connected();
                 _receive_worker.receive_data();
             }
@@ -82,9 +84,4 @@ void network::notify_connected() const {
     if (_snake_observer) {
         _snake_observer->set_connected();
     }
-}
-
-void network::set_no_delay_option() {
-    boost::system::error_code er;
-    _socket.set_option(boost::asio::ip::tcp::no_delay(true), er);
 }

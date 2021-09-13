@@ -1,20 +1,25 @@
 #include "receive_worker.h"
 #include "network.h"
 
-receive_worker::receive_worker(tcp::socket& socket, network* observer) : _socket(socket), _network_observer(observer) {
+receive_worker::receive_worker(std::shared_ptr<tcp::socket>& socket, network* observer) : 
+                               _socket_ptr(socket), 
+                               _network_observer(observer) {
+
     _data_recived_loop_th = std::thread{[&](){
         this->data_received_loop();
     }};
 }
 
 receive_worker::~receive_worker() {
+    std::unique_lock ul(_received_queue_mx);
     _stop_worker = true;
+    ul.unlock();
     _received_queue_cv.notify_all();
     _data_recived_loop_th.join();
 }
 
 void receive_worker::receive_data() {
-    async_read_until(_socket,
+    async_read_until(*_socket_ptr,
         boost::asio::dynamic_buffer(_data_received), data_delimiter,
         [&](const boost::system::error_code& er, size_t bytes_with_delimiter) {
             if (!er) {

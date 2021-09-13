@@ -14,48 +14,49 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Quick REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Quick REQUIRED)
 
-set(PROJECT_SOURCES
-        src/main.cpp
-        src/snake_client.cpp
-        src/network.cpp
-        src/receive_worker.cpp
-        src/send_worker.cpp
-        ui/qt_ui_iface.cpp
-        ui/snakeModel.cpp
-        ui/qml.qrc
+set(PROJECT_SOURCES_CORE
+    src/snake_client.cpp
+    src/network.cpp
+    src/receive_worker.cpp
+    src/send_worker.cpp
 )
 
-set(FLAGS -pedantic -Wall -Wextra)
+set(PROJECT_SOURCES
+    src/main.cpp
+    src/socket_option.cpp
+    ui/qt_ui_iface.cpp
+    ui/snakeModel.cpp
+    ui/qml.qrc
+)
+
+set(COMPILE_FLAGS -pedantic -Wall -Wextra)
 
 include_directories(include)
 include_directories(ui)
 
 if(ANDROID)
     include_directories(/home/kuba/Boost-for-Android/boost_1_76_0)
-endif()
-
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(snake
-        ${PROJECT_SOURCES}
-    )
+    add_library(snake SHARED ${PROJECT_SOURCES} ${PROJECT_SOURCES_CORE})
 else()
-    if(ANDROID)
-        add_library(snake SHARED
-            ${PROJECT_SOURCES}
-        )
+    add_library(snake_core_lib STATIC ${PROJECT_SOURCES_CORE})
+    target_compile_options(snake_core_lib PRIVATE ${COMPILE_FLAGS})
+
+    if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+        qt_add_executable(snake ${PROJECT_SOURCES})
     else()
-        add_executable(snake
-          ${PROJECT_SOURCES}
-        )
+        add_executable(snake ${PROJECT_SOURCES})
     endif()
 endif()
 
+target_compile_options(snake PRIVATE ${COMPILE_FLAGS})
+
 target_compile_definitions(snake
-  PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
+    PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
+
 target_link_libraries(snake
-  PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick)
-target_compile_options(snake PRIVATE ${FLAGS})
+    PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick)
 
 if(NOT ANDROID)
-    target_link_libraries(snake PRIVATE pthread)
+    target_link_libraries(snake PRIVATE snake_core_lib pthread)
+    add_subdirectory(tests)
 endif()

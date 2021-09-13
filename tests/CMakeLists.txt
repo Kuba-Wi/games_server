@@ -11,8 +11,6 @@ set(FILES_UT
     socket_option_fake.cpp
 )
 
-include_directories(..)
-
 add_executable(${PROJECT_NAME} ${FILES_UT})
 target_link_libraries(${PROJECT_NAME} server_core_lib gtest_main gtest gmock pthread)
 target_compile_options(${PROJECT_NAME} PRIVATE ${COMPILE_FLAGS})

@@ -31,11 +31,10 @@ public:
 
 private:
     void notify_connected() const;
-    void set_no_delay_option();
 
     boost::asio::io_context _io_context;
-    std::list<boost::asio::ip::tcp::endpoint> _server_endpoint;
-    boost::asio::ip::tcp::socket _socket;
+    std::list<tcp::endpoint> _server_endpoint;
+    std::shared_ptr<tcp::socket> _socket_ptr;
 
     std::thread _io_context_th;
     std::atomic<bool> _socket_connected{false};

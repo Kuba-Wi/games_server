@@ -12,7 +12,7 @@ using tcp = boost::asio::ip::tcp;
 
 class send_worker {
 public:
-    send_worker(tcp::socket& socket);
+    send_worker(std::shared_ptr<tcp::socket>& socket);
     ~send_worker();
     void send_data(uint8_t data);
 
@@ -28,5 +28,5 @@ private:
     std::atomic<bool> _send_executing{false};
     std::atomic<bool> _stop_worker{false};
 
-    tcp::socket& _socket;
+    std::shared_ptr<tcp::socket> _socket_ptr;
 };
