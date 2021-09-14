@@ -20,14 +20,14 @@ class snake_client;
 class network {
 public:
     network();
-    ~network();
-    void attach_observer(snake_client* observer);
-    bool set_server_address(const std::string& ip);
-    void connect();
-    void send_data(uint8_t data);
+    virtual ~network();
+    virtual void attach_observer(snake_client* observer);
+    virtual bool set_server_address(const std::string& ip);
+    virtual void connect();
+    virtual void send_data(uint8_t data);
 
-    void update_data_received(const std::vector<int8_t>& received_data);
-    void update_disconnected();
+    virtual void update_data_received(const std::vector<int8_t>& received_data);
+    virtual void update_disconnected();
 
 private:
     void notify_connected() const;

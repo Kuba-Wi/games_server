@@ -6,6 +6,6 @@
 
 class timeout_task_mock : public timeout_task {
 public:
-    MOCK_METHOD(void, attach_observer, (servers* observer), (override));
+    MOCK_METHOD(void, attach_observer, (servers*), (override));
     MOCK_METHOD(void, reset_deadline, (), (override));
 };
