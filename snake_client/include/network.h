@@ -22,7 +22,7 @@ public:
     network();
     virtual ~network();
     virtual void attach_observer(snake_client* observer);
-    virtual bool set_server_address(const std::string& ip);
+    bool set_server_address(const std::string& ip);
     virtual void connect();
     virtual void send_data(uint8_t data);
 
