@@ -3,6 +3,7 @@
 
 #include "snake_client.h"
 #include "mocks/network_mock.h"
+#include "mocks/ui_iface_mock.h"
 
 using namespace ::testing;
 using NetworkMock = NaggyMock<network_mock>;
@@ -13,12 +14,36 @@ struct SnakeClientTest : public Test {
         snake_client_ptr = std::make_unique<snake_client>(std::move(mock));
     }
 
+    void SetUp() {
+        ui_mock_holder.mock_ptr = std::make_unique<ui_iface_mock>();
+    }
+
+    void TearDown() {
+        ui_mock_holder.mock_ptr.reset();
+    }
+
     std::unique_ptr<snake_client> snake_client_ptr;
 };
 
 TEST_F(SnakeClientTest, constructorShouldInvokeNetworkAttachObserverMethod) {
     auto mock = std::make_unique<NetworkMock>();
     create_snake_client(mock);
+}
+
+TEST_F(SnakeClientTest, setDisconnectedMethodShouldInvokeWaitForConnectionFreeFunction) {
+    auto net_mock = std::make_unique<NetworkMock>();
+    create_snake_client(net_mock);
+
+    EXPECT_CALL(*ui_mock_holder.mock_ptr, wait_for_connection());
+    snake_client_ptr->set_disconnected();
+}
+
+TEST_F(SnakeClientTest, setConnectedMethodShouldInvokeConnectionEstablishedFreeFunction) {
+    auto net_mock = std::make_unique<NetworkMock>();
+    create_snake_client(net_mock);
+
+    EXPECT_CALL(*ui_mock_holder.mock_ptr, connection_established());
+    snake_client_ptr->set_connected();
 }
 
 // TODO: add TEST_P with more examples
