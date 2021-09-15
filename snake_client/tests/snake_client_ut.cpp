@@ -9,6 +9,8 @@ using namespace ::testing;
 using NetworkMock = NaggyMock<network_mock>;
 using UiMock = NaggyMock<ui_iface_mock>;
 
+using pair_str_bool = std::pair<std::string, bool>;
+
 struct SnakeClientTest : public Test {
     void create_snake_client(std::unique_ptr<NetworkMock>& mock) {
         EXPECT_CALL(*mock, attach_observer(_));
@@ -47,19 +49,28 @@ TEST_F(SnakeClientTest, setConnectedMethodShouldInvokeConnectionEstablishedFreeF
     snake_client_ptr->set_connected();
 }
 
-// TODO: add TEST_P with more examples
-TEST_F(SnakeClientTest, setServerAddressShouldReturnTrueIfIpAddressIsCorrect) {
-    const std::string server_ip{"1.1.1.1"};
-    auto mock = std::make_unique<NetworkMock>();
-    create_snake_client(mock);
-    ASSERT_TRUE(snake_client_ptr->set_server_address(server_ip));
-}
+struct SnakeClientParametrizedTest : SnakeClientTest, 
+                                     WithParamInterface<pair_str_bool> {};
 
-TEST_F(SnakeClientTest, setServerAddressShouldReturnFalseIfIpAddressIsInCorrect) {
-    const std::string server_ip{"256.1.1.1"};
+INSTANTIATE_TEST_CASE_P(TestsWithTrueResult, 
+                        SnakeClientParametrizedTest,
+                        Values(pair_str_bool{"0.0.0.0", true}, 
+                               pair_str_bool{"1.1.1.1", true}, 
+                               pair_str_bool{"255.255.255.255", true}, 
+                               pair_str_bool{"123.65.34.90", true}));
+
+INSTANTIATE_TEST_CASE_P(TestsWithFalseResult, 
+                        SnakeClientParametrizedTest,
+                        Values(pair_str_bool{"256.0.0.0", false},
+                               pair_str_bool{"-1.0.0.0", false},
+                               pair_str_bool{"123456789", false},
+                               pair_str_bool{"some text", false}));
+
+TEST_P(SnakeClientParametrizedTest, setServerAddressShouldReturnTrueIfIpAddressIsCorrectAndFalseOtherwise) {
     auto mock = std::make_unique<NetworkMock>();
     create_snake_client(mock);
-    ASSERT_FALSE(snake_client_ptr->set_server_address(server_ip));
+    const auto& [input, result] = GetParam();
+    ASSERT_EQ(snake_client_ptr->set_server_address(input), result);
 }
 
 TEST_F(SnakeClientTest, connectNetworkShouldInvokeConnectMethodFromNetwork) {
