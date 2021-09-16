@@ -29,11 +29,11 @@ add_executable(${PROJECT_NAME} src/main.cpp src/socket_option.cpp)
 target_link_libraries(${PROJECT_NAME} server_core_lib pthread)
 target_compile_options(${PROJECT_NAME} PRIVATE ${COMPILE_FLAGS})
 
-if (BUILD_TESTS)
+if(BUILD_TESTS)
     add_compile_definitions(${PROJECT_NAME} UNITTEST)
     add_subdirectory(tests)
 endif()
 
-if (BUILD_CLIENT)
+if(BUILD_CLIENT)
     add_subdirectory(snake_client)
 endif()

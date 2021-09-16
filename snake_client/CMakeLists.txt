@@ -58,5 +58,9 @@ target_link_libraries(snake
 
 if(NOT ANDROID)
     target_link_libraries(snake PRIVATE snake_core_lib pthread)
+endif()
+
+if(BUILD_TESTS)
+    add_compile_definitions(snake UNITTEST)
     add_subdirectory(tests)
 endif()

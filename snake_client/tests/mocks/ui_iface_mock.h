@@ -1,8 +1,8 @@
 #pragma once
 
-#include <gmock/gmock.h>
-
 #include <memory>
+
+#include <gmock/gmock.h>
 
 class ui_iface_mock;
 

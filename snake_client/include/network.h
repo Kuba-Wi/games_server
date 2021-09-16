@@ -12,6 +12,7 @@
 
 #include "receive_worker.h"
 #include "send_worker.h"
+#include "test_iface.h"
 
 constexpr size_t port_number = 30000;
 
@@ -20,14 +21,14 @@ class snake_client;
 class network {
 public:
     network();
-    virtual ~network();
-    virtual void attach_observer(snake_client* observer);
+    TEST_IFACE ~network();
+    TEST_IFACE void attach_observer(snake_client* observer);
     bool set_server_address(const std::string& ip);
-    virtual void connect();
-    virtual void send_data(uint8_t data);
+    TEST_IFACE void connect();
+    TEST_IFACE void send_data(uint8_t data);
 
-    virtual void update_data_received(const std::vector<int8_t>& received_data);
-    virtual void update_disconnected();
+    TEST_IFACE void update_data_received(const std::vector<int8_t>& received_data);
+    TEST_IFACE void update_disconnected();
 
 private:
     void notify_connected() const;
