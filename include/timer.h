@@ -20,11 +20,11 @@ class timer {
 public:
     TEST_IFACE void start_timer(timer_function<T>&& f, size_t interval_ms) {
         this->stop_timer();
-        _active = true;
+        this->_active = true;
         th = std::thread{[=, this]() mutable {
-            while (_active) {
+            while (this->_active) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(interval_ms));
-                if (!_active) {
+                if (!this->_active) {
                     return;
                 }
                 f();
@@ -33,7 +33,7 @@ public:
     }
 
     TEST_IFACE void stop_timer() {
-        _active = false;
+        this->_active = false;
         if (th.joinable()) {
             th.join();
         }
