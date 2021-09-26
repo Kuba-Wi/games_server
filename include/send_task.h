@@ -20,10 +20,10 @@ public:
     send_task(const std::shared_ptr<tcp::socket>& sock);
     ~send_task();
     void send_data(const send_type& data);
-    void start_task();
     void stop_task();
 
 private:
+    void start_task();
     void erase_el_from_queue(const send_iterator& it);
     void execute_send(std::unique_lock<std::mutex>&& ul_send_mx);
     void send_loop();

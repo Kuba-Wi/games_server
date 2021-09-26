@@ -11,7 +11,6 @@ using tcp = boost::asio::ip::tcp;
 
 constexpr size_t port_number = 30000;
 
-class server;
 class servers;
 
 class accept_task {

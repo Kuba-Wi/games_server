@@ -1,6 +1,8 @@
 #include "send_task.h"
 
-send_task::send_task(const std::shared_ptr<tcp::socket>& sock) : _socket(sock) {}
+send_task::send_task(const std::shared_ptr<tcp::socket>& sock) : _socket(sock) {
+    this->start_task();
+}
 
 send_task::~send_task() {
     this->stop_task();

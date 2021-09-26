@@ -11,7 +11,6 @@ server::server(tcp::socket&& socket, servers* servers) :
                _send_task_ptr(std::make_shared<send_task>(_socket)) {
 
     set_socket_no_delay_option(*_socket);
-    _send_task_ptr->start_task();
 }
 
 void server::receive_data() {
