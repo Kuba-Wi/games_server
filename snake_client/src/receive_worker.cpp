@@ -18,6 +18,11 @@ receive_worker::~receive_worker() {
     _data_recived_loop_th.join();
 }
 
+void receive_worker::start_receive_data() {
+    _data_received.clear();
+    this->receive_data();
+}
+
 void receive_worker::receive_data() {
     async_read_until(*_socket_ptr,
         boost::asio::dynamic_buffer(_data_received), data_delimiter,

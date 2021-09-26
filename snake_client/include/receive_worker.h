@@ -20,9 +20,10 @@ public:
     receive_worker(std::shared_ptr<tcp::socket>& socket, network* observer);
     ~receive_worker();
 
-    void receive_data();
+    void start_receive_data();
 
 private:
+    void receive_data();
     void refresh_data_buffer(size_t bytes_with_delimiter);
     void add_to_received_queue(const std::vector<int8_t>& data, size_t size);
     void data_received_loop();

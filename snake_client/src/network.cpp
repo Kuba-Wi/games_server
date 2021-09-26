@@ -48,7 +48,7 @@ void network::connect() {
                 _socket_connected = true;
                 set_socket_no_delay_option(*_socket_ptr);
                 this->notify_connected();
-                _receive_worker.receive_data();
+                _receive_worker.start_receive_data();
             }
     });
 }
