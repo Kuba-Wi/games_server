@@ -19,6 +19,10 @@ set(FILES
     src/send_task.cpp
     src/accept_task.cpp
     src/timeout_task.cpp
+
+    src/privileged_accept_task.cpp
+    src/privileged_connection.cpp
+    src/privileged_server.cpp
 )
 
 set(COMPILE_FLAGS -Wall -pedantic -Wextra)
