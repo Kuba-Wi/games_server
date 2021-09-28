@@ -35,6 +35,20 @@ void send_task::send_data(const send_type& data) {
     _send_data_cv.notify_all();
 }
 
+void send_task::send_large_number(size_t number, int8_t signal) {
+    send_type data_to_send;
+    if (signal != data_delimiter) {
+        data_to_send.emplace_back(signal);
+    }
+
+    while(number >= data_delimiter) {
+        data_to_send.emplace_back(data_delimiter - 1);
+        number -= (data_delimiter - 1);
+    }
+    data_to_send.emplace_back(number);
+    this->send_data(data_to_send);
+}
+
 void send_task::execute_send(std::unique_lock<std::mutex>&& ul_send_mx) {
     _send_executing = true;
     boost::asio::mutable_buffer buf(_send_queue.front().data(), _send_queue.front().size() * sizeof(send_type::value_type));

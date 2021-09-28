@@ -58,9 +58,9 @@ TEST_F(gameServerTest, gameServerConstructorShouldAttachObserversAndSetInitialDa
 }
 
 TEST_F(gameServerTest, startGameFunctionShouldInvokeMethodFromSnakeGame) {
-    EXPECT_CALL(*sn_game_mock_ptr, start_new_game());
+    EXPECT_CALL(*sn_game_mock_ptr, restart_game());
     constructGameServer();
-    game_server_tested->start_game();
+    game_server_tested->restart_game();
 }
 
 TEST_F(gameServerTest, updateGameShouldInvokeMethodFromSnakeGame) {

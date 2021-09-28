@@ -8,8 +8,8 @@ game_server::game_server(std::unique_ptr<servers>&& servers, std::unique_ptr<sna
     this->add_server_initial_data();
 }
 
-void game_server::start_game() {
-    _snake_game_ptr->start_new_game();
+void game_server::restart_game() {
+    _snake_game_ptr->restart_game();
 }
 
 void game_server::add_server_initial_data() {
@@ -29,4 +29,12 @@ void game_server::update_snake_moved(const std::vector<int8_t>& snake_data) {
 
 void game_server::update_game_finished() {
     _servers_ptr->change_receiving_server();
+}
+
+size_t game_server::get_clients_count() const {
+    //TODO:implement
+}
+
+void game_server::set_board_size(uint8_t height, uint8_t width) {
+    //TODO::implement
 }

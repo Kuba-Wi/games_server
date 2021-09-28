@@ -16,6 +16,7 @@ public:
     ~privileged_server() { _send_task_ptr->stop_task(); }
     void receive_data();
     void send_data(const std::vector<int8_t>& data);
+    void send_large_number(size_t number, int8_t signal);
 
 private:
     void refresh_data_buffer(size_t bytes_with_delimiter);

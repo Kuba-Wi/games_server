@@ -10,6 +10,6 @@ public:
                     snake_game(std::move(timer), interval_ms, height, width) {}
     
     MOCK_METHOD(void, attach_observer, (game_server*), (override));
-    MOCK_METHOD(void, start_new_game, (), (override));
+    MOCK_METHOD(void, restart_game, (), (override));
     MOCK_METHOD(void, set_snake_direction, (uint8_t), (override));
 };

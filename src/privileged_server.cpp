@@ -32,6 +32,10 @@ void privileged_server::send_data(const std::vector<int8_t>& data) {
     _send_task_ptr->send_data(data);
 }
 
+void privileged_server::send_large_number(size_t number, int8_t signal) {
+    _send_task_ptr->send_large_number(number, signal);
+}
+
 void privileged_server::refresh_data_buffer(size_t bytes_with_delimiter) {
     _data_buffer.erase(_data_buffer.begin(), _data_buffer.begin() + bytes_with_delimiter);
 }

@@ -40,7 +40,7 @@ TEST_F(snakeGameTest, startNewGameShouldStopAndStartTimer) {
     EXPECT_CALL(*mock, start_timer(_, interval_ms)).Times(1);
     EXPECT_CALL(*mock, stop_timer()).Times(2);
     snake_game s_game{std::move(mock), interval_ms, height, width};
-    s_game.start_new_game();
+    s_game.restart_game();
 }
 
 TEST_F(snakeGameTest, multipleStartNewGameShouldStartTimerMultipleTimes) {
@@ -52,6 +52,6 @@ TEST_F(snakeGameTest, multipleStartNewGameShouldStartTimerMultipleTimes) {
     snake_game s_game{std::move(mock), interval_ms, height, width};
 
     for (size_t i = 0; i < start_calls_count; ++i) {
-        s_game.start_new_game();
+        s_game.restart_game();
     }
 }

@@ -14,7 +14,7 @@ public:
     snake_game(std::unique_ptr<timer<snake_game>>&& timer, size_t interval_ms, uint8_t height, uint8_t width);
     TEST_IFACE ~snake_game();
     TEST_IFACE void attach_observer(game_server* observer);
-    TEST_IFACE void start_new_game();
+    TEST_IFACE void restart_game();
     TEST_IFACE void set_snake_direction(uint8_t direction) { _snake.set_current_direction(static_cast<move_direction>(direction)); }
 
     auto get_snake_data() { return _snake.get_data(); }

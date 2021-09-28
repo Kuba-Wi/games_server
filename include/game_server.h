@@ -7,10 +7,14 @@
 class game_server  {
 public:
     game_server(std::unique_ptr<servers>&& servers, std::unique_ptr<snake_game>&& snake_game);
-    void start_game();
+    void restart_game();
+    void stop_game();
     void update_game(uint8_t byte_received);
     void update_snake_moved(const std::vector<int8_t>& snake_data);
     void update_game_finished();
+
+    size_t get_clients_count() const;
+    void set_board_size(uint8_t height, uint8_t width);
 
 private:
     void add_server_initial_data();

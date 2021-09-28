@@ -20,6 +20,7 @@ public:
     send_task(const std::shared_ptr<tcp::socket>& sock);
     ~send_task();
     void send_data(const send_type& data);
+    void send_large_number(size_t number, int8_t signal);
     void stop_task();
 
 private:

@@ -28,7 +28,7 @@ void snake_game::notify_game_finished() const {
     }
 }
 
-void snake_game::start_new_game() {
+void snake_game::restart_game() {
     _timer_ptr->stop_timer();
     _snake.reset_snake();
 
