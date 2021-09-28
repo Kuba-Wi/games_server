@@ -4,14 +4,21 @@
 
 #include "game_server.h"
 
-snake_game::snake_game(std::unique_ptr<timer<snake_game>>&& timer, size_t interval_ms, uint8_t height, uint8_t width) :
+snake_game::snake_game(std::unique_ptr<timer<snake_game>>&& timer, size_t interval_ms) :
     _timer_ptr(std::move(timer)),
-    _snake(height, width), 
     _interval_ms(interval_ms) {}
 
 void snake_game::attach_observer(game_server* observer) {
     std::lock_guard lg(_observer_mx);
     _server_observer = observer;
+}
+
+void snake_game::set_board_size(uint8_t height, uint8_t width) {
+    if (height == 0 || width == 0) {
+        return;
+    }
+    _snake.set_board_size(height, width);
+    _snake.reset_snake();
 }
 
 void snake_game::notify_snake_moved() const {
@@ -29,13 +36,23 @@ void snake_game::notify_game_finished() const {
 }
 
 void snake_game::restart_game() {
-    _timer_ptr->stop_timer();
-    _snake.reset_snake();
-
+    this->stop_game();
     this->start_snake();
 }
 
+void snake_game::stop_game() {
+    _timer_ptr->stop_timer();
+
+    if (_snake.get_board_height() == 0 || _snake.get_board_width() == 0) {
+        return;
+    }
+    _snake.reset_snake();
+}
+
 void snake_game::start_snake() {
+    if (_snake.get_board_height() == 0 || _snake.get_board_width() == 0) {
+        return;
+    }
     _timer_ptr->start_timer(timer_function{*this}, _interval_ms);
 }
 

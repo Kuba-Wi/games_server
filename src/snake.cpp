@@ -4,8 +4,9 @@
 #include <random>
 #include <unordered_map>
 
-snake::snake(uint8_t height, uint8_t width) : _height(height), _width(width) {
-    this->reset_snake();
+void snake::set_board_size(uint8_t height, uint8_t width) {
+    _height = height;
+    _width = width;
 }
 
 void snake::reset_snake() {

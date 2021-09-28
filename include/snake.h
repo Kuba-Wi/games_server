@@ -14,8 +14,7 @@ enum class move_direction {
 
 class snake {
 public:
-    snake(uint8_t height, uint8_t width);
-
+    void set_board_size(uint8_t height, uint8_t width);
     void reset_snake();
     void new_food();
     bool is_food_eaten() const;
@@ -36,8 +35,8 @@ private:
     void move_left();
     bool is_snake_index(std::pair<uint8_t, uint8_t> index) const;
 
-    const uint8_t _height;
-    const uint8_t _width;
+    std::atomic<uint8_t> _height{0};
+    std::atomic<uint8_t> _width{0};
     std::vector<std::pair<uint8_t, uint8_t>> _snake_index;
     std::pair<uint8_t, uint8_t> _food_index;
     move_direction _current_direction;

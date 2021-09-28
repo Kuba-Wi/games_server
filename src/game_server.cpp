@@ -12,6 +12,10 @@ void game_server::restart_game() {
     _snake_game_ptr->restart_game();
 }
 
+void game_server::stop_game() {
+    _snake_game_ptr->stop_game();
+}
+
 void game_server::add_server_initial_data() {
     std::vector<int8_t> board_dimensions{static_cast<int8_t>(_snake_game_ptr->get_board_height()), 
                                          static_cast<int8_t>(_snake_game_ptr->get_board_width())};
@@ -36,5 +40,6 @@ size_t game_server::get_clients_count() const {
 }
 
 void game_server::set_board_size(uint8_t height, uint8_t width) {
-    //TODO::implement
+    _snake_game_ptr->set_board_size(height, width);
+    //TODO: implement sending new size to clients
 }
