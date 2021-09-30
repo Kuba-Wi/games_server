@@ -31,6 +31,10 @@ void privileged_connection::update_data_received(const std::vector<int8_t>& data
     using signal = privileged_serv_signals;
     
     std::lock_guard lg(_observer_mx);
+    if (!_game_observer) {
+        return;
+    }
+
     switch(static_cast<signal>(data_received.front())) {
     case signal::restart_game:
         _game_observer->restart_game();
@@ -39,11 +43,11 @@ void privileged_connection::update_data_received(const std::vector<int8_t>& data
         _game_observer->stop_game();
         break;
     case signal::get_clients_count:
-        this->send_large_number(_game_observer->get_clients_count());
+        this->send_clients_count(_game_observer->get_clients_count());
         break;
     case signal::board_size:
         if (data_received.size() >= 3) {
-            _game_observer->set_board_size(data_received[1], data_received[2]);
+            _game_observer->update_board_size(data_received[1], data_received[2]);
         }
         break;
     }
@@ -53,6 +57,6 @@ void privileged_connection::send_data(const std::vector<int8_t>& data) {
     _priv_server->send_data(data);
 }
 
-void privileged_connection::send_large_number(size_t number, int8_t signal) {
-    _priv_server->send_large_number(number, signal);
+void privileged_connection::send_clients_count(size_t count) {
+    _priv_server->send_large_number(count, static_cast<int8_t>(privileged_serv_signals::get_clients_count));
 }

@@ -25,11 +25,15 @@ void servers::attach_observer(game_server* observer) {
     _game_server_observer = observer; 
 }
 
-void servers::set_initial_data(const send_type& data) {
-    std::lock_guard lg(_initial_data_mx);
+void servers::update_initial_data(const send_type& data) {
+    std::scoped_lock sl(_initial_data_mx, _server_mx);
     _initial_data.resize(data.size() + 1);
     _initial_data.front() = static_cast<int8_t>(client_signal::initial_data);
     std::copy(data.begin(), data.end(), _initial_data.begin() + 1);
+
+    for (auto& serv : _server_list) {
+        this->send_initial_data(serv);
+    }
 }
 
 void servers::update_server_accepted(const std::shared_ptr<server>& server) {
@@ -37,6 +41,7 @@ void servers::update_server_accepted(const std::shared_ptr<server>& server) {
     _server_list.emplace_back(server);
     _server_list.back()->receive_data();
     this->send_initial_data(_server_list.back());
+
     if (_server_list.size() == 1) {
         this->update_receiving_serv();
     }
@@ -100,4 +105,9 @@ void servers::send_initial_data(const std::shared_ptr<server>& server_ptr) {
 
 void servers::send_client_signal(client_signal signal) {
     _receiving_server->send_data({static_cast<int8_t>(signal)});
+}
+
+size_t servers::get_clients_count() {
+    std::lock_guard lg(_server_mx);
+    return _server_list.size();
 }

@@ -24,8 +24,7 @@ public:
     void update_data_received(const std::vector<int8_t>& data_received);
 
     void send_data(const std::vector<int8_t>& data);
-    void send_large_number(size_t number, 
-                           int8_t signal = static_cast<int8_t>(privileged_serv_signals::get_clients_count));
+    void send_clients_count(size_t count);
 
 private:
     std::shared_ptr<privileged_server> _priv_server;
@@ -33,6 +32,6 @@ private:
 
     std::unique_ptr<privileged_accept_task> _accept_task_ptr;
 
-    game_server* _game_observer;
+    game_server* _game_observer = nullptr;
     std::mutex _observer_mx;
 };

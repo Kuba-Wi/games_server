@@ -10,7 +10,7 @@ using tcp = boost::asio::ip::tcp;
 
 class privileged_connection;
 
-class privileged_server : std::enable_shared_from_this<privileged_server> {
+class privileged_server : public std::enable_shared_from_this<privileged_server> {
 public:
     privileged_server(tcp::socket&& socket, privileged_connection* observer);
     ~privileged_server() { _send_task_ptr->stop_task(); }

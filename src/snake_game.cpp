@@ -14,11 +14,10 @@ void snake_game::attach_observer(game_server* observer) {
 }
 
 void snake_game::set_board_size(uint8_t height, uint8_t width) {
-    if (height == 0 || width == 0) {
-        return;
+    if (height != 0 && width != 0) {
+        _snake.set_board_size(height, width);
+        _snake.reset_snake();
     }
-    _snake.set_board_size(height, width);
-    _snake.reset_snake();
 }
 
 void snake_game::notify_snake_moved() const {
@@ -43,17 +42,15 @@ void snake_game::restart_game() {
 void snake_game::stop_game() {
     _timer_ptr->stop_timer();
 
-    if (_snake.get_board_height() == 0 || _snake.get_board_width() == 0) {
-        return;
+    if (_snake.get_board_height() != 0 && _snake.get_board_width() != 0) {
+        _snake.reset_snake();
     }
-    _snake.reset_snake();
 }
 
 void snake_game::start_snake() {
-    if (_snake.get_board_height() == 0 || _snake.get_board_width() == 0) {
-        return;
+    if (_snake.get_board_height() != 0 && _snake.get_board_width() != 0) {
+        _timer_ptr->start_timer(timer_function{*this}, _interval_ms);
     }
-    _timer_ptr->start_timer(timer_function{*this}, _interval_ms);
 }
 
 snake_game::~snake_game() {

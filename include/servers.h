@@ -19,7 +19,7 @@ public:
     TEST_IFACE ~servers();
     TEST_IFACE void attach_observer(game_server* observer);
 
-    TEST_IFACE void set_initial_data(const send_type& data);
+    TEST_IFACE void update_initial_data(const send_type& data);
     TEST_IFACE void send_data(const send_type& data);
     TEST_IFACE void change_receiving_server();
 
@@ -27,6 +27,8 @@ public:
     void update_disconnected(const std::shared_ptr<server>& disconnected);
     void update_server_accepted(const std::shared_ptr<server>& server);
     void update_timeout() { this->change_receiving_server(); }
+
+    size_t get_clients_count();
 
 private:
     void remove_disconnected_serv(const std::shared_ptr<server>& disconnected);

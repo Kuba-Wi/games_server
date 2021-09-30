@@ -1,12 +1,16 @@
 #pragma once
 
+#include "privileged_connection.h"
 #include "servers.h"
 #include "snake.h"
 #include "snake_game.h"
 
 class game_server  {
 public:
-    game_server(std::unique_ptr<servers>&& servers, std::unique_ptr<snake_game>&& snake_game);
+    game_server(std::unique_ptr<servers>&& servers, 
+                std::unique_ptr<snake_game>&& snake_game, 
+                std::unique_ptr<privileged_connection>&& p_connection);
+
     void restart_game();
     void stop_game();
     void update_game(uint8_t byte_received);
@@ -14,11 +18,10 @@ public:
     void update_game_finished();
 
     size_t get_clients_count() const;
-    void set_board_size(uint8_t height, uint8_t width);
+    void update_board_size(uint8_t height, uint8_t width);
 
 private:
-    void add_server_initial_data();
-
     std::unique_ptr<servers> _servers_ptr;
     std::unique_ptr<snake_game> _snake_game_ptr;
+    std::unique_ptr<privileged_connection> _priv_connection;
 };
