@@ -26,7 +26,6 @@ public:
     uint8_t get_board_width() const { return _snake.get_board_width(); }
 
 private:
-    void start_snake();
     void notify_snake_moved() const;
     void notify_game_finished() const;
 

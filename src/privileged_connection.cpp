@@ -20,8 +20,14 @@ void privileged_connection::update_server_accepted(const std::shared_ptr<privile
 }
 
 void privileged_connection::update_disconnected() {
-    std::lock_guard lg(_server_mx);
+    std::unique_lock ul(_server_mx);
     _priv_server.reset();
+    ul.unlock();
+
+    std::lock_guard lg(_observer_mx);
+    if (_game_observer) {
+        _game_observer->stop_game();
+    }
 }
 
 void privileged_connection::update_data_received(const std::vector<int8_t>& data_received) {

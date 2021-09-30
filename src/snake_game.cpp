@@ -36,25 +36,19 @@ void snake_game::notify_game_finished() const {
 
 void snake_game::restart_game() {
     this->stop_game();
-    this->start_snake();
-}
-
-void snake_game::stop_game() {
-    _timer_ptr->stop_timer();
 
     if (_snake.get_board_height() != 0 && _snake.get_board_width() != 0) {
         _snake.reset_snake();
-    }
-}
-
-void snake_game::start_snake() {
-    if (_snake.get_board_height() != 0 && _snake.get_board_width() != 0) {
         _timer_ptr->start_timer(timer_function{*this}, _interval_ms);
     }
 }
 
-snake_game::~snake_game() {
+void snake_game::stop_game() {
     _timer_ptr->stop_timer();
+}
+
+snake_game::~snake_game() {
+    this->stop_game();
 }
 
 template <>
