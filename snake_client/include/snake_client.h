@@ -35,7 +35,9 @@ public:
 private:
     void process_received_signal(const std::vector<int8_t>& signal);
     void refresh_snake_board(const std::vector<int8_t>& data);
-    void set_snake_board_size();
+    void resize_snake_board(uint8_t height, uint8_t width);
+
+    void clean_snake_board();
 
     mutable std::mutex _snake_board_mx;
     std::vector<std::vector<bool>> _snake_board;

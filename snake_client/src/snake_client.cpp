@@ -42,10 +42,10 @@ void snake_client::process_received_signal(const std::vector<int8_t>& signal) {
     
     case client_signal::initial_data:
         if (signal.size() >= 3) {
-            _board_height = signal[1];
-            _board_width = signal[2];
-            this->set_snake_board_size();
+            this->resize_snake_board(signal[1], signal[2]);
             set_board_dimensions();
+
+            refresh_model();
         }
         break;
     
@@ -69,11 +69,7 @@ bool snake_client::check_index_present(uint8_t x, uint8_t y) const {
 
 void snake_client::refresh_snake_board(const std::vector<int8_t>& data) {
     std::lock_guard lg(_snake_board_mx);
-    for (size_t i = 0; i <_snake_board.size(); ++i) {
-        for (size_t j = 0; j < _snake_board[i].size(); ++j) {
-            _snake_board[i][j] = false;
-        }
-    }
+    this->clean_snake_board();
 
     for (size_t i = 0; i < data.size() - 1; i += 2) {
         if (_snake_board.size() <= uint8_t(data[i])) {
@@ -86,13 +82,25 @@ void snake_client::refresh_snake_board(const std::vector<int8_t>& data) {
     }
 }
 
-void snake_client::set_snake_board_size() {
-    if (_board_width == 0 || _board_height == 0) {
+void snake_client::resize_snake_board(uint8_t height, uint8_t width) {
+    if (height == 0 || width == 0) {
         return;
     }
+    _board_height = height;
+    _board_width = width;
+
     std::lock_guard lg(_snake_board_mx);
     _snake_board.resize(_board_height);
     for (auto& row : _snake_board) {
         row.resize(_board_width);
+    }
+    this->clean_snake_board();
+}
+
+void snake_client::clean_snake_board() {
+    for (size_t i = 0; i <_snake_board.size(); ++i) {
+        for (size_t j = 0; j < _snake_board[i].size(); ++j) {
+            _snake_board[i][j] = false;
+        }
     }
 }
