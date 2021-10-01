@@ -14,9 +14,15 @@ void privileged_connection::attach_observer(game_server* observer) {
 }
 
 void privileged_connection::update_server_accepted(const std::shared_ptr<privileged_server>& server) {
-    std::lock_guard lg(_server_mx);
+    std::unique_lock ul_server(_server_mx);
     _priv_server = server;
     _priv_server->receive_data();
+    ul_server.unlock();
+
+    std::unique_lock ul_observer(_observer_mx);
+    auto clients_count = _game_observer->get_clients_count();
+    ul_observer.unlock();
+    this->send_clients_count(clients_count);
 }
 
 void privileged_connection::update_disconnected() {
@@ -36,7 +42,7 @@ void privileged_connection::update_data_received(const std::vector<int8_t>& data
     }
     using signal = privileged_serv_signals;
     
-    std::lock_guard lg(_observer_mx);
+    std::unique_lock ul(_observer_mx);
     if (!_game_observer) {
         return;
     }
@@ -48,9 +54,12 @@ void privileged_connection::update_data_received(const std::vector<int8_t>& data
     case signal::stop_game:
         _game_observer->stop_game();
         break;
-    case signal::get_clients_count:
-        this->send_clients_count(_game_observer->get_clients_count());
+    case signal::get_clients_count: {
+        auto clients_count = _game_observer->get_clients_count();
+        ul.unlock();
+        this->send_clients_count(clients_count);
         break;
+    }
     case signal::board_size:
         if (data_received.size() >= 3) {
             _game_observer->update_board_size(data_received[1], data_received[2]);
@@ -60,9 +69,13 @@ void privileged_connection::update_data_received(const std::vector<int8_t>& data
 }
 
 void privileged_connection::send_data(const std::vector<int8_t>& data) {
-    _priv_server->send_data(data);
+    std::unique_lock ul(_server_mx);
+    if (_priv_server)
+        _priv_server->send_data(data);
 }
 
 void privileged_connection::send_clients_count(size_t count) {
-    _priv_server->send_large_number(count, static_cast<int8_t>(privileged_serv_signals::get_clients_count));
+    std::unique_lock ul(_server_mx);
+    if (_priv_server)
+        _priv_server->send_large_number(count, static_cast<int8_t>(privileged_serv_signals::get_clients_count));
 }

@@ -31,10 +31,11 @@ public:
     size_t get_clients_count();
 
 private:
-    void remove_disconnected_serv(const std::shared_ptr<server>& disconnected);
+    size_t remove_disconnected_serv(const std::shared_ptr<server>& disconnected);
     void update_receiving_serv();
     void send_initial_data(const std::shared_ptr<server>& server_ptr);
     void send_client_signal(client_signal signal);
+    void notify_clients_count_changed(size_t clients_count);
 
     std::list<std::shared_ptr<server>> _server_list;
     std::shared_ptr<server> _receiving_server;

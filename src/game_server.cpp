@@ -42,3 +42,7 @@ void game_server::update_board_size(uint8_t height, uint8_t width) {
         _servers_ptr->update_initial_data({static_cast<int8_t>(height), static_cast<int8_t>(width)});
     }
 }
+
+void game_server::update_clients_count_changed(size_t clients_count) {
+    _priv_connection->send_clients_count(clients_count);
+}

@@ -20,6 +20,8 @@ public:
     size_t get_clients_count() const;
     void update_board_size(uint8_t height, uint8_t width);
 
+    void update_clients_count_changed(size_t clients_count);
+
 private:
     std::unique_ptr<servers> _servers_ptr;
     std::unique_ptr<snake_game> _snake_game_ptr;

@@ -37,14 +37,19 @@ void servers::update_initial_data(const send_type& data) {
 }
 
 void servers::update_server_accepted(const std::shared_ptr<server>& server) {
-    std::scoped_lock sl(_server_mx, _initial_data_mx);
-    _server_list.emplace_back(server);
-    _server_list.back()->receive_data();
-    this->send_initial_data(_server_list.back());
+    size_t clients_count = 0;
+    {
+        std::scoped_lock sl(_server_mx, _initial_data_mx);
+        _server_list.emplace_back(server);
+        _server_list.back()->receive_data();
+        this->send_initial_data(_server_list.back());
 
-    if (_server_list.size() == 1) {
-        this->update_receiving_serv();
+        if (_server_list.size() == 1) {
+            this->update_receiving_serv();
+        }
+        clients_count = _server_list.size();
     }
+    this->notify_clients_count_changed(clients_count);
 }
 
 void servers::send_data(const send_type& data) {
@@ -83,10 +88,11 @@ void servers::update_data_received(uint8_t byte_received) {
 }
 
 void servers::update_disconnected(const std::shared_ptr<server>& disconnected) {
-    this->remove_disconnected_serv(disconnected);
+    auto clients_count = this->remove_disconnected_serv(disconnected);
+    this->notify_clients_count_changed(clients_count);
 }
 
-void servers::remove_disconnected_serv(const std::shared_ptr<server>& disconnected) {
+size_t servers::remove_disconnected_serv(const std::shared_ptr<server>& disconnected) {
     std::lock_guard lg(_server_mx);
     _server_list.remove(disconnected);
 
@@ -95,6 +101,8 @@ void servers::remove_disconnected_serv(const std::shared_ptr<server>& disconnect
     } else if (_receiving_server == disconnected) {
         this->update_receiving_serv();
     }
+
+    return _server_list.size();
 }
 
 void servers::send_initial_data(const std::shared_ptr<server>& server_ptr) {
@@ -110,4 +118,11 @@ void servers::send_client_signal(client_signal signal) {
 size_t servers::get_clients_count() {
     std::lock_guard lg(_server_mx);
     return _server_list.size();
+}
+
+void servers::notify_clients_count_changed(size_t clients_count) {
+    std::lock_guard lg(_observer_mx);
+    if (_game_server_observer) {
+        _game_server_observer->update_clients_count_changed(clients_count);
+    }
 }
