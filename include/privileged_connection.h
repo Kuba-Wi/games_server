@@ -9,7 +9,7 @@ enum class privileged_serv_signals : int8_t {
     restart_game = -4,
     stop_game = -5,
     board_size = -6,
-    get_clients_count = -7
+    clients_count = -7
 };
 
 class game_server;
