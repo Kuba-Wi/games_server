@@ -4,9 +4,8 @@
 
 #include "game_server.h"
 
-snake_game::snake_game(std::unique_ptr<timer<snake_game>>&& timer, size_t interval_ms) :
-    _timer_ptr(std::move(timer)),
-    _interval_ms(interval_ms) {}
+snake_game::snake_game(std::unique_ptr<timer<snake_game>>&& timer) :
+    _timer_ptr(std::move(timer)) {}
 
 void snake_game::attach_observer(game_server* observer) {
     std::lock_guard lg(_observer_mx);
@@ -34,12 +33,12 @@ void snake_game::notify_game_finished() const {
     }
 }
 
-void snake_game::restart_game() {
+void snake_game::restart_game(size_t interval_ms) {
     this->stop_game();
 
     if (_snake.get_board_height() != 0 && _snake.get_board_width() != 0) {
         _snake.reset_snake();
-        _timer_ptr->start_timer(timer_function{*this}, _interval_ms);
+        _timer_ptr->start_timer(timer_function{*this}, interval_ms);
     }
 }
 

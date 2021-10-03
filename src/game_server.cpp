@@ -14,8 +14,8 @@ game_server::game_server(std::unique_ptr<servers>&& servers,
     _servers_ptr->accept_connections();
 }
 
-void game_server::restart_game() {
-    _snake_game_ptr->restart_game();
+void game_server::restart_game(size_t interval_ms) {
+    _snake_game_ptr->restart_game(interval_ms);
 }
 
 void game_server::stop_game() {

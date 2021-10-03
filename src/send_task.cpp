@@ -36,10 +36,7 @@ void send_task::send_data(const send_type& data) {
 }
 
 void send_task::send_large_number(size_t number, int8_t signal) {
-    send_type data_to_send;
-    if (signal != data_delimiter) {
-        data_to_send.emplace_back(signal);
-    }
+    send_type data_to_send{signal};
 
     while(number >= data_delimiter) {
         data_to_send.emplace_back(data_delimiter - 1);

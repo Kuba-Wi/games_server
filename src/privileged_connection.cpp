@@ -48,9 +48,11 @@ void privileged_connection::update_data_received(const std::vector<int8_t>& data
     }
 
     switch(static_cast<signal>(data_received.front())) {
-    case signal::restart_game:
-        _game_observer->restart_game();
+    case signal::restart_game: {
+        size_t interval_ms = this->decode_time_interval(data_received);
+        _game_observer->restart_game(interval_ms);
         break;
+    }
     case signal::stop_game:
         _game_observer->stop_game();
         break;
@@ -74,4 +76,12 @@ void privileged_connection::send_clients_count(size_t count) {
     std::unique_lock ul(_server_mx);
     if (_priv_server)
         _priv_server->send_large_number(count, static_cast<int8_t>(privileged_serv_signals::clients_count));
+}
+
+size_t privileged_connection::decode_time_interval(const std::vector<int8_t>& time_interval) const {
+    size_t interval_ms = 0;
+    for (size_t i = 1; i < time_interval.size(); ++i) {
+        interval_ms += time_interval[i];
+    }
+    return interval_ms;
 }

@@ -11,7 +11,7 @@ public:
                 std::unique_ptr<snake_game>&& snake_game, 
                 std::unique_ptr<privileged_connection>&& p_connection);
 
-    void restart_game();
+    void restart_game(size_t interval_ms);
     void stop_game();
     void update_game(uint8_t byte_received);
     void update_snake_moved(const std::vector<int8_t>& snake_data);

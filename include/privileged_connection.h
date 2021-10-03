@@ -27,6 +27,8 @@ public:
     void send_clients_count(size_t count);
 
 private:
+    size_t decode_time_interval(const std::vector<int8_t>& time_interval) const;
+
     std::shared_ptr<privileged_server> _priv_server;
     std::mutex _server_mx;
 
