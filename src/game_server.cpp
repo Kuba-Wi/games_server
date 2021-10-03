@@ -10,6 +10,8 @@ game_server::game_server(std::unique_ptr<servers>&& servers,
     _servers_ptr->attach_observer(this);
     _snake_game_ptr->attach_observer(this);
     _priv_connection->attach_observer(this);
+
+    _servers_ptr->accept_connections();
 }
 
 void game_server::restart_game() {

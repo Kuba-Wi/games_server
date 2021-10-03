@@ -22,6 +22,7 @@ public:
     TEST_IFACE void update_initial_data(const send_type& data);
     TEST_IFACE void send_data(const send_type& data);
     TEST_IFACE void change_receiving_server();
+    void accept_connections();
 
     void update_data_received(uint8_t byte_received);
     void update_disconnected(const std::shared_ptr<server>& disconnected);

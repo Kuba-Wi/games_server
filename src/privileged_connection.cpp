@@ -59,6 +59,8 @@ void privileged_connection::update_data_received(const std::vector<int8_t>& data
             _game_observer->update_board_size(data_received[1], data_received[2]);
         }
         break;
+    default:
+        break;
     }
 }
 

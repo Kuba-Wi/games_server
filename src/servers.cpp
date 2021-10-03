@@ -10,8 +10,6 @@ servers::servers(std::unique_ptr<accept_task>&& accept, std::unique_ptr<timeout_
 
     _accept_task_ptr->attach_observer(this);
     _timeout_task_ptr->attach_observer(this);
-
-    _accept_task_ptr->accept_connections();
 }
 
 servers::~servers() {
@@ -69,6 +67,10 @@ void servers::change_receiving_server() {
     _server_list.remove(_receiving_server);
     _server_list.push_back(ptr);
     this->update_receiving_serv();
+}
+
+void servers::accept_connections() {
+    _accept_task_ptr->accept_connections();
 }
 
 void servers::update_receiving_serv() {
