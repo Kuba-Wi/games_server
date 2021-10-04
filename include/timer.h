@@ -38,6 +38,10 @@ public:
             th.join();
         }
     }
+
+    bool is_started() {
+        return _active;
+    }
     
     TEST_IFACE ~timer() {
         this->stop_timer();

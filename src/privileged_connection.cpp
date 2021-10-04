@@ -61,6 +61,11 @@ void privileged_connection::update_data_received(const std::vector<int8_t>& data
             _game_observer->update_board_size(data_received[1], data_received[2]);
         }
         break;
+    case signal::snake_move_time: {
+        size_t interval_ms = this->decode_time_interval(data_received);
+        _game_observer->change_snake_move_time(interval_ms);
+        break;
+    }
     default:
         break;
     }

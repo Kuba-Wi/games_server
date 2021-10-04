@@ -17,6 +17,7 @@ public:
 
     void set_board_size(uint8_t height, uint8_t width);
     TEST_IFACE void restart_game(size_t interval_ms);
+    void change_time_interval(size_t new_interval_ms);
     void stop_game();
     TEST_IFACE void set_snake_direction(uint8_t direction) { _snake.set_current_direction(static_cast<move_direction>(direction)); }
 

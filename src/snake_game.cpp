@@ -42,6 +42,15 @@ void snake_game::restart_game(size_t interval_ms) {
     }
 }
 
+void snake_game::change_time_interval(size_t new_interval_ms) {
+    if (!_timer_ptr->is_started()) {
+        return;
+    }
+
+    _timer_ptr->stop_timer();
+    _timer_ptr->start_timer(timer_function{*this}, new_interval_ms);
+}
+
 void snake_game::stop_game() {
     _timer_ptr->stop_timer();
 }

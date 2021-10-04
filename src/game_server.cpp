@@ -22,6 +22,10 @@ void game_server::stop_game() {
     _snake_game_ptr->stop_game();
 }
 
+void game_server::change_snake_move_time(size_t move_time_ms) {
+    _snake_game_ptr->change_time_interval(move_time_ms);
+}
+
 void game_server::update_game(uint8_t byte_received) {
     _snake_game_ptr->set_snake_direction(byte_received);
 }

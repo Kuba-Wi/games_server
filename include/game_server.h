@@ -13,6 +13,7 @@ public:
 
     void restart_game(size_t interval_ms);
     void stop_game();
+    void change_snake_move_time(size_t move_time_ms);
     void update_game(uint8_t byte_received);
     void update_snake_moved(const std::vector<int8_t>& snake_data);
     void update_game_finished();
