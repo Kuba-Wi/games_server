@@ -32,6 +32,7 @@ void game_server::update_game(uint8_t byte_received) {
 
 void game_server::update_snake_moved(const std::vector<int8_t>& snake_data) {
     _servers_ptr->send_data(snake_data);
+    _priv_connection->send_data(snake_data);
 }
 
 void game_server::update_game_finished() {

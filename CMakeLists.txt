@@ -9,6 +9,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(spdlog REQUIRED)
+find_package(OpenSSL REQUIRED)
 
 set(FILES
     src/snake.cpp
@@ -23,6 +24,7 @@ set(FILES
     src/privileged_accept_task.cpp
     src/privileged_connection.cpp
     src/privileged_server.cpp
+    src/privileged_send_task.cpp
 )
 
 set(COMPILE_FLAGS -Wall -pedantic -Wextra)
@@ -32,7 +34,7 @@ add_library(server_core_lib STATIC ${FILES})
 target_compile_options(server_core_lib PRIVATE ${COMPILE_FLAGS})
 
 add_executable(${PROJECT_NAME} src/main.cpp src/socket_option.cpp)
-target_link_libraries(${PROJECT_NAME} server_core_lib pthread spdlog)
+target_link_libraries(${PROJECT_NAME} server_core_lib pthread spdlog ${OPENSSL_LIBRARIES})
 target_compile_options(${PROJECT_NAME} PRIVATE ${COMPILE_FLAGS})
 
 if(BUILD_TESTS)

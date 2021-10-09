@@ -4,10 +4,12 @@
 #include <thread>
 
 #include <boost/asio.hpp>
+#include <boost/asio/ssl.hpp>
 
 #include "test_iface.h"
 
-using tcp = boost::asio::ip::tcp;
+using boost::asio::ip::tcp;
+using ssl_socket = boost::asio::ssl::stream<tcp::socket>;
 
 constexpr size_t privileged_port_number = 30001;
 
@@ -21,10 +23,12 @@ public:
     TEST_IFACE void accept_connections();
 
 private:
-    void notify_client_accepted(tcp::socket& socket);
+    void do_handshake(const std::shared_ptr<ssl_socket>& socket);
+    void notify_client_accepted(const std::shared_ptr<ssl_socket>& socket);
 
-    boost::asio::io_context _io_context;
     tcp::endpoint _server_endpoint;
+    boost::asio::io_context _io_context;
+    boost::asio::ssl::context _ssl_context;
     tcp::acceptor _acceptor;
     std::thread _io_context_th;
 

@@ -5,13 +5,10 @@
 #include "privileged_connection.h"
 #include "socket_option.h"
 
-privileged_server::privileged_server(tcp::socket&& socket, privileged_connection* observer) :
-               _socket_ptr(std::make_shared<tcp::socket>(std::move(socket))),
-               _send_task_ptr(std::make_shared<send_task>(_socket_ptr)),
-               _connection_observer(observer) {
-
-    set_socket_no_delay_option(*_socket_ptr);
-}
+privileged_server::privileged_server(const std::shared_ptr<ssl_socket>& socket, privileged_connection* observer) :
+               _socket_ptr(socket),
+               _send_task_ptr(std::make_shared<privileged_send_task>(_socket_ptr)),
+               _connection_observer(observer) {}
 
 void privileged_server::receive_data() {
     async_read_until(*_socket_ptr,
