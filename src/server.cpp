@@ -8,7 +8,7 @@
 server::server(tcp::socket&& socket, servers* servers) : 
                _socket(std::make_shared<tcp::socket>(std::move(socket))),
                _servers_observer(servers),
-               _send_task_ptr(std::make_shared<send_task>(_socket)) {
+               _send_task_ptr(std::make_shared<send_task<tcp::socket>>(_socket)) {
 
     set_socket_no_delay_option(*_socket);
 }

@@ -9,6 +9,8 @@
 
 class servers;
 
+using boost::asio::ip::tcp;
+
 class server : public std::enable_shared_from_this<server> {
 public:
     server(tcp::socket&& socket, servers* servers);
@@ -24,5 +26,5 @@ private:
     uint8_t _data_buffer;
 
     servers* _servers_observer;
-    std::shared_ptr<send_task> _send_task_ptr;
+    std::shared_ptr<send_task<tcp::socket>> _send_task_ptr;
 };

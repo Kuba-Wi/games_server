@@ -7,7 +7,7 @@
 
 privileged_server::privileged_server(const std::shared_ptr<ssl_socket>& socket, privileged_connection* observer) :
                _socket_ptr(socket),
-               _send_task_ptr(std::make_shared<privileged_send_task>(_socket_ptr)),
+               _send_task_ptr(std::make_shared<send_task<ssl_socket>>(_socket_ptr)),
                _connection_observer(observer) {}
 
 void privileged_server::receive_data() {

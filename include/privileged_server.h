@@ -5,7 +5,7 @@
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 
-#include "privileged_send_task.h"
+#include "send_task.h"
 
 using boost::asio::ip::tcp;
 using ssl_socket = boost::asio::ssl::stream<tcp::socket>;
@@ -26,7 +26,7 @@ private:
     void notify_server_disconnected();
 
     std::shared_ptr<ssl_socket> _socket_ptr;
-    std::shared_ptr<privileged_send_task> _send_task_ptr;
+    std::shared_ptr<send_task<ssl_socket>> _send_task_ptr;
 
     std::vector<int8_t> _data_buffer;
 
