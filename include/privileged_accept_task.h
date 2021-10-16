@@ -24,6 +24,7 @@ public:
 
 private:
     void do_handshake(const std::shared_ptr<ssl_socket>& socket);
+    bool verify_client_certificate(bool preverified, boost::asio::ssl::verify_context& ctx);
     void notify_client_accepted(const std::shared_ptr<ssl_socket>& socket);
 
     tcp::endpoint _server_endpoint;

@@ -11,9 +11,9 @@ privileged_accept_task::privileged_accept_task() : _server_endpoint(boost::asio:
         _acceptor.bind(_server_endpoint);
         _acceptor.listen(boost::asio::socket_base::max_listen_connections);
 
-        _ssl_context.set_options(boost::asio::ssl::context::default_workarounds);
-        _ssl_context.use_certificate_file("cert.pem", boost::asio::ssl::context::pem);
-        _ssl_context.use_private_key_file("key.pem", boost::asio::ssl::context::pem);
+        _ssl_context.set_options(boost::asio::ssl::context::default_workarounds | boost::asio::ssl::context::no_tlsv1_3);
+        _ssl_context.use_certificate_file("server_certificate.pem", boost::asio::ssl::context::pem);
+        _ssl_context.use_private_key_file("server_private_key.pem", boost::asio::ssl::context::pem);
 
     } catch (const boost::system::system_error& er) {
         spdlog::error("Server initialisation failed: {}. \nTerminate.", er.what());
@@ -41,6 +41,11 @@ void privileged_accept_task::attach_observer(privileged_connection* observer) {
 }
 
 void privileged_accept_task::do_handshake(const std::shared_ptr<ssl_socket>& socket) {
+    socket->set_verify_mode(boost::asio::ssl::verify_peer | boost::asio::ssl::verify_fail_if_no_peer_cert);
+    socket->set_verify_callback([&](bool preverified, boost::asio::ssl::verify_context& ctx){
+        return this->verify_client_certificate(preverified, ctx);
+    });
+
     socket->async_handshake(boost::asio::ssl::stream_base::server,
         [&, socket](const boost::system::error_code& er) {
             if (!er) {
@@ -51,6 +56,25 @@ void privileged_accept_task::do_handshake(const std::shared_ptr<ssl_socket>& soc
             }
         });
 }
+
+bool privileged_accept_task::verify_client_certificate(bool preverified, boost::asio::ssl::verify_context& ctx) {
+    if (preverified) {
+        return true;
+    }
+
+    X509* received_cert = X509_STORE_CTX_get_current_cert(ctx.native_handle());
+
+    FILE* client_cert_file = fopen("client_certificate.pem", "r");
+    if (client_cert_file == NULL) {
+        spdlog::error("Handshake: Could not open the file with model client's certyficate");
+        return false;
+    }
+    X509* model_client_cert = PEM_read_X509(client_cert_file, NULL, NULL, NULL);
+    fclose(client_cert_file);
+
+    int result = X509_cmp(model_client_cert, received_cert); //returns 0 if certificates are identical
+    return result == 0;
+  }
 
 void privileged_accept_task::accept_connections() {
     _acceptor.async_accept(
