@@ -3,6 +3,7 @@
 #include <spdlog/spdlog.h>
 
 #include "privileged_connection.h"
+#include "program_options.h"
 
 privileged_accept_task::privileged_accept_task() : _server_endpoint(boost::asio::ip::tcp::v4(), privileged_port_number), 
                                                    _ssl_context(boost::asio::ssl::context::sslv23),
@@ -41,10 +42,14 @@ void privileged_accept_task::attach_observer(privileged_connection* observer) {
 }
 
 void privileged_accept_task::do_handshake(const std::shared_ptr<ssl_socket>& socket) {
-    socket->set_verify_mode(boost::asio::ssl::verify_peer | boost::asio::ssl::verify_fail_if_no_peer_cert);
-    socket->set_verify_callback([&](bool preverified, boost::asio::ssl::verify_context& ctx){
-        return this->verify_client_certificate(preverified, ctx);
-    });
+    if (get_program_options().trust_all) {
+        socket->set_verify_mode(boost::asio::ssl::verify_none);
+    } else {
+        socket->set_verify_mode(boost::asio::ssl::verify_peer | boost::asio::ssl::verify_fail_if_no_peer_cert);
+        socket->set_verify_callback([&](bool preverified, boost::asio::ssl::verify_context& ctx){
+            return this->verify_client_certificate(preverified, ctx);
+        });
+    }
 
     socket->async_handshake(boost::asio::ssl::stream_base::server,
         [&, socket](const boost::system::error_code& er) {

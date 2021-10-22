@@ -23,6 +23,8 @@ set(FILES
     src/privileged_accept_task.cpp
     src/privileged_connection.cpp
     src/privileged_server.cpp
+
+    src/program_options.cpp
 )
 
 set(COMPILE_FLAGS -Wall -pedantic -Wextra)
