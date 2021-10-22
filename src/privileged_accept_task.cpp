@@ -12,7 +12,7 @@ privileged_accept_task::privileged_accept_task() : _server_endpoint(boost::asio:
         _acceptor.listen(boost::asio::socket_base::max_listen_connections);
 
         _ssl_context.set_options(boost::asio::ssl::context::default_workarounds | boost::asio::ssl::context::no_tlsv1_3);
-        _ssl_context.use_certificate_file("server_certificate.pem", boost::asio::ssl::context::pem);
+        _ssl_context.use_certificate_file("server_cert.pem", boost::asio::ssl::context::pem);
         _ssl_context.use_private_key_file("server_private_key.pem", boost::asio::ssl::context::pem);
 
     } catch (const boost::system::system_error& er) {
@@ -64,7 +64,7 @@ bool privileged_accept_task::verify_client_certificate(bool preverified, boost::
 
     X509* received_cert = X509_STORE_CTX_get_current_cert(ctx.native_handle());
 
-    FILE* client_cert_file = fopen("client_certificate.pem", "r");
+    FILE* client_cert_file = fopen("player_cert.pem", "r");
     if (client_cert_file == NULL) {
         spdlog::error("Handshake: Could not open the file with model client's certyficate");
         return false;
