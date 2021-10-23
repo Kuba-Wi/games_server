@@ -5,8 +5,14 @@
 #include <unordered_map>
 
 void snake::set_board_size(uint8_t height, uint8_t width) {
-    _height = height;
-    _width = width;
+    if (this->is_board_size_proper(height, width)) {
+        _height = height;
+        _width = width;
+    }
+}
+
+bool snake::is_board_size_proper(uint8_t height, uint8_t width) {
+    return height * width >= MINIMAL_SNAKE_BOARD_AREA;
 }
 
 void snake::reset_snake() {

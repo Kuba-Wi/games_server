@@ -12,9 +12,13 @@ enum class move_direction {
     left
 };
 
+constexpr size_t MINIMAL_SNAKE_BOARD_AREA = 4;
+
 class snake {
 public:
     void set_board_size(uint8_t height, uint8_t width);
+    static bool is_board_size_proper(uint8_t height, uint8_t width);
+    bool is_board_size_set() const { return _height != 0 && _width != 0; }
     void reset_snake();
     void new_food();
     bool is_food_eaten() const;

@@ -44,7 +44,7 @@ size_t game_server::get_clients_count() const {
 }
 
 void game_server::update_board_size(uint8_t height, uint8_t width) {
-    if (height != 0 && width != 0) {
+    if (snake::is_board_size_proper(height, width)) {
         _snake_game_ptr->set_board_size(height, width);
         _servers_ptr->update_initial_data({static_cast<int8_t>(height), static_cast<int8_t>(width)});
     }
