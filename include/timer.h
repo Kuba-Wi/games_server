@@ -2,6 +2,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <optional>
 #include <thread>
 
 #include "test_iface.h"
@@ -20,11 +21,12 @@ class timer {
 public:
     TEST_IFACE void start_timer(timer_function<T>&& f, size_t interval_ms) {
         this->stop_timer();
-        this->_active = true;
+        _current_interval_ms = interval_ms;
+        _active = true;
         th = std::thread{[=, this]() mutable {
-            while (this->_active) {
+            while (_active) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(interval_ms));
-                if (!this->_active) {
+                if (!_active) {
                     return;
                 }
                 f();
@@ -39,8 +41,15 @@ public:
         }
     }
 
-    bool is_started() {
+    bool is_started() const {
         return _active;
+    }
+
+    std::optional<size_t> get_current_interval_ms() const {
+        if (this->is_started()) {
+            return _current_interval_ms;
+        }
+        return std::nullopt;
     }
     
     TEST_IFACE ~timer() {
@@ -49,5 +58,6 @@ public:
 
 private:
     std::atomic<bool> _active{false};
+    std::atomic<size_t> _current_interval_ms{0};
     std::thread th;
 };

@@ -14,8 +14,15 @@ void snake_game::attach_observer(game_server* observer) {
 
 void snake_game::set_board_size(uint8_t height, uint8_t width) {
     if (snake::is_board_size_proper(height, width)) {
+        auto interval_ms_opt = _timer_ptr->get_current_interval_ms();
+
+        this->stop_game();
         _snake.set_board_size(height, width);
         _snake.reset_snake();
+
+        if (interval_ms_opt.has_value()) {
+            _timer_ptr->start_timer(timer_function{*this}, interval_ms_opt.value());
+        }
     }
 }
 
@@ -47,7 +54,7 @@ void snake_game::change_time_interval(size_t new_interval_ms) {
         return;
     }
 
-    _timer_ptr->stop_timer();
+    this->stop_game();
     _timer_ptr->start_timer(timer_function{*this}, new_interval_ms);
 }
 
