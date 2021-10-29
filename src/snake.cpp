@@ -12,7 +12,7 @@ void snake::set_board_size(uint8_t height, uint8_t width) {
 }
 
 bool snake::is_board_size_proper(uint8_t height, uint8_t width) {
-    return height * width >= MINIMAL_SNAKE_BOARD_AREA;
+    return height >= MINIMAL_SNAKE_BOARD_LENGTH && width >= MINIMAL_SNAKE_BOARD_LENGTH;
 }
 
 void snake::reset_snake() {

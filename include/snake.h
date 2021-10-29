@@ -12,7 +12,7 @@ enum class move_direction {
     left
 };
 
-constexpr size_t MINIMAL_SNAKE_BOARD_AREA = 4;
+constexpr size_t MINIMAL_SNAKE_BOARD_LENGTH = 2;
 
 class snake {
 public:
