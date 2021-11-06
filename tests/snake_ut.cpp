@@ -6,15 +6,18 @@ constexpr size_t height = 8;
 constexpr size_t width = 6;
 
 struct snakeTest : public ::testing::Test {
-    snakeTest() : sn(height, width) {}
+    void SetUp() {
+        sn.set_board_size(height, width);
+        sn.reset_snake();
+    }
 
-    void check_initial_data(const std::vector<int8_t>& data) {
+    void check_snake_initial_data(const std::vector<int8_t>& snake_data) {
         constexpr size_t initial_data_size = 6;
 
-        ASSERT_EQ(data.size(), initial_data_size);
-        std::pair snake_head{data[0], data[1]};
-        std::pair snake_tail{data[2], data[3]};
-        std::pair food_index{data[4], data[5]};
+        ASSERT_EQ(snake_data.size(), initial_data_size);
+        std::pair snake_head{snake_data[0], snake_data[1]};
+        std::pair snake_tail{snake_data[2], snake_data[3]};
+        std::pair food_index{snake_data[4], snake_data[5]};
 
         ASSERT_EQ(snake_head.first, height / 2);
         ASSERT_EQ(snake_head.second, width / 2);
@@ -28,20 +31,18 @@ struct snakeTest : public ::testing::Test {
     snake sn;
 };
 
-TEST_F(snakeTest, constructorShouldSetBoardSize) {
-    ASSERT_EQ(sn.get_board_height(), height);
-    ASSERT_EQ(sn.get_board_width(), width);
-}
-
 TEST_F(snakeTest, getDataShouldReturnSnakeData) {
     auto data = sn.get_data();
-    check_initial_data(data);
+    ASSERT_EQ(sn.get_board_height(), height);
+    ASSERT_EQ(sn.get_board_width(), width);
+    ASSERT_TRUE(sn.is_board_size_set());
+    check_snake_initial_data(data);
 }
 
 TEST_F(snakeTest, resetSnakeSchouldGiveInitialData) {
     sn.reset_snake();
     auto data = sn.get_data();
-    check_initial_data(data);
+    check_snake_initial_data(data);
 }
 
 TEST_F(snakeTest, addSnakeIndexShouldAddSnakeTail) {
