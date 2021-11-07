@@ -25,6 +25,7 @@ struct serversTest : public Test {
         EXPECT_CALL(*accept_mock, attach_observer(_));
         EXPECT_CALL(*accept_mock, accept_connections());
         servers_tested = std::make_unique<servers>(std::move(accept_mock), std::move(timeout_mock));
+        servers_tested->accept_connections();
     }
 
     void update_first_server_accepted(std::shared_ptr<ServerMock>& s_mock) {
@@ -62,7 +63,7 @@ TEST_F(serversTest, updateServerAcceptedShouldInvokeSendAndReceiveFunctionsFromS
     update_first_server_accepted(serv_mock);
 }
 
-TEST_F(serversTest, setInitialDataShouldSetDataThatWillBeSentToNewAcceptedServer) {
+TEST_F(serversTest, updateInitialDataShouldSetDataThatWillBeSentToNewAcceptedServer) {
     const send_type init_data{1, 2};
     const send_type init_data_sent{static_cast<int8_t>(client_signal::initial_data), 1, 2};
     constexpr size_t reset_deadline_times = 1;
@@ -71,7 +72,7 @@ TEST_F(serversTest, setInitialDataShouldSetDataThatWillBeSentToNewAcceptedServer
     auto serv_mock = std::make_shared<ServerMock>(std::move(fake_socket), servers_tested.get());
 
     EXPECT_CALL(*serv_mock, send_data(init_data_sent));
-    servers_tested->set_initial_data(init_data);
+    servers_tested->update_initial_data(init_data);
     update_first_server_accepted(serv_mock);
 }
 
