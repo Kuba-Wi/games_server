@@ -19,7 +19,7 @@ private:
 template <typename T>
 class timer {
 public:
-    TEST_IFACE void start_timer(timer_function<T>&& f, size_t interval_ms) {
+    TEST_IFACE void restart_timer(timer_function<T>&& f, size_t interval_ms) {
         this->stop_timer();
         _current_interval_ms = interval_ms;
         _active = true;

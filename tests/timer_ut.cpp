@@ -12,7 +12,7 @@ TEST(timerTest, timerShouldBeStartedAfterStart) {
     Fake fake_object;
     timer<Fake> timer;
 
-    timer.start_timer(timer_function{fake_object}, interval_ms);
+    timer.restart_timer(timer_function{fake_object}, interval_ms);
     ASSERT_TRUE(timer.is_started());
 }
 
@@ -23,7 +23,7 @@ TEST(timerTest, timerShouldBeStoppedAfterStop) {
 
     ASSERT_FALSE(timer.is_started());
 
-    timer.start_timer(timer_function{fake_object}, interval_ms);
+    timer.restart_timer(timer_function{fake_object}, interval_ms);
     timer.stop_timer();
     ASSERT_FALSE(timer.is_started());
 }
@@ -33,7 +33,7 @@ TEST(timerTest, getCurrentIntervalShouldReturnTimeIntervalWhenTimerIsStarted) {
     Fake fake_object;
     timer<Fake> timer;
 
-    timer.start_timer(timer_function{fake_object}, interval_ms);
+    timer.restart_timer(timer_function{fake_object}, interval_ms);
     auto current_interval_opt = timer.get_current_interval_ms();
 
     ASSERT_TRUE(current_interval_opt.has_value());
