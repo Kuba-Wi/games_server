@@ -10,7 +10,7 @@ public:
                  servers(std::move(accept), std::move(timeout)) {}
 
     MOCK_METHOD(void, attach_observer, (game_server*), (override));
-    MOCK_METHOD(void, set_initial_data, (const send_type&), (override));
+    MOCK_METHOD(void, update_initial_data, (const send_type&), (override));
     MOCK_METHOD(void, send_data, (const send_type&), (override));
     MOCK_METHOD(void, change_receiving_server, (), (override));
 };

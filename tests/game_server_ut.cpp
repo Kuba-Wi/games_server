@@ -33,15 +33,18 @@ struct gameServerTest : public Test {
         EXPECT_CALL(*accept_mock_ptr, attach_observer(_));
         EXPECT_CALL(*accept_mock_ptr, accept_connections());
         servers_mock_ptr = std::make_unique<ServersMock>(std::move(accept_mock_ptr), std::move(timeout_mock_ptr));
-        sn_game_mock_ptr = std::make_unique<SnakeGameMock>(std::move(timer_mock_ptr), interval_ms, height, width);
+        sn_game_mock_ptr = std::make_unique<SnakeGameMock>(std::move(timer_mock_ptr));
+        priv_connection = std::make_unique<privileged_connection>(std::make_unique<privileged_accept_task>());
     }
 
     void constructGameServer() {
         const send_type initial_data{height, width};
         EXPECT_CALL(*servers_mock_ptr, attach_observer(_));
         EXPECT_CALL(*sn_game_mock_ptr, attach_observer(_));
-        EXPECT_CALL(*servers_mock_ptr, set_initial_data(initial_data));
-        game_server_tested = std::make_unique<game_server>(std::move(servers_mock_ptr), std::move(sn_game_mock_ptr));
+        EXPECT_CALL(*servers_mock_ptr, update_initial_data(initial_data));
+        game_server_tested = std::make_unique<game_server>(std::move(servers_mock_ptr),
+                                                           std::move(sn_game_mock_ptr),
+                                                           std::move(priv_connection));
     }
 
     std::unique_ptr<ServersMock> servers_mock_ptr;
@@ -49,6 +52,8 @@ struct gameServerTest : public Test {
     std::unique_ptr<AcceptTaskMock> accept_mock_ptr;
     std::unique_ptr<TimeoutMock> timeout_mock_ptr;
     std::unique_ptr<TimerMock> timer_mock_ptr;
+
+    std::unique_ptr<privileged_connection> priv_connection;
 
     std::unique_ptr<game_server> game_server_tested;
 };
@@ -58,9 +63,9 @@ TEST_F(gameServerTest, gameServerConstructorShouldAttachObserversAndSetInitialDa
 }
 
 TEST_F(gameServerTest, startGameFunctionShouldInvokeMethodFromSnakeGame) {
-    EXPECT_CALL(*sn_game_mock_ptr, restart_game());
+    EXPECT_CALL(*sn_game_mock_ptr, restart_game(interval_ms));
     constructGameServer();
-    game_server_tested->restart_game();
+    game_server_tested->restart_game(interval_ms);
 }
 
 TEST_F(gameServerTest, updateGameShouldInvokeMethodFromSnakeGame) {
