@@ -8,14 +8,14 @@ SnakeModel::SnakeModel() :_snake_client(std::make_unique<snake_client>(std::make
     connect(&qt_ui_if, &qt_ui_iface::stopSending, this, [&](){
         emit this->sendingStopped();
     });
-    connect(&qt_ui_if, &qt_ui_iface::waitForConnection, this, [&](){
-        emit this->waitForConnection();
-    });
     connect(&qt_ui_if, &qt_ui_iface::connectionEstablished, this, [&](){
         emit this->connectionEstablished();
     });
     connect(&qt_ui_if, &qt_ui_iface::setBoardDimensions, this, [&](){
         emit this->boardDimensionsSet();
+    });
+    connect(&qt_ui_if, &qt_ui_iface::connectionError, this, [&](QString message){
+        emit this->connectionError(message);
     });
 }
 

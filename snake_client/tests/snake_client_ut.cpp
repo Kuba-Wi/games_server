@@ -38,7 +38,7 @@ TEST_F(SnakeClientTest, setDisconnectedMethodShouldInvokeWaitForConnectionFreeFu
     create_snake_client(net_mock);
 
     EXPECT_CALL(*ui_mock_holder.mock_ptr, wait_for_connection());
-    snake_client_ptr->set_disconnected();
+    snake_client_ptr->update_disconnected({});
 }
 
 TEST_F(SnakeClientTest, setConnectedMethodShouldInvokeConnectionEstablishedFreeFunction) {
@@ -171,7 +171,7 @@ TEST_F(SnakeClientTest, setDisconnectedShouldNotLetSendDataToBeInvoked) {
     EXPECT_CALL(*ui_mock_holder.mock_ptr, enable_sending());
     EXPECT_CALL(*ui_mock_holder.mock_ptr, wait_for_connection());
     snake_client_ptr->update_snake(data_start);
-    snake_client_ptr->set_disconnected();
+    snake_client_ptr->update_disconnected({});
 
     snake_client_ptr->send_data(data_not_sent);
 }

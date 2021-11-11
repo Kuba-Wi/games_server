@@ -11,6 +11,7 @@ struct ui_iface_mock {
     MOCK_METHOD(void, set_board_dimensions, ());
     MOCK_METHOD(void, wait_for_connection, ());
     MOCK_METHOD(void, connection_established, ());
+    MOCK_METHOD(void, connection_error, (const std::string&));
 };
 
 struct uiMockHolder {

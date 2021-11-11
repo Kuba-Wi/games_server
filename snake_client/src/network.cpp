@@ -43,7 +43,7 @@ void network::connect() {
     boost::asio::async_connect(*_socket_ptr, _server_endpoint, 
         [&](const boost::system::error_code& error, const boost::asio::ip::tcp::endpoint&){
             if (error) {
-                this->connect();
+                this->notify_connection_failed(error.message());
             } else {
                 _socket_connected = true;
                 set_socket_no_delay_option(*_socket_ptr);
@@ -68,20 +68,26 @@ void network::update_data_received(const std::vector<int8_t>& received_data) {
     }
 }
 
-void network::update_disconnected() {
+void network::update_disconnected(const std::string& message) {
     std::unique_lock ul(_observer_mx);
     if (_snake_observer) {
-        _snake_observer->set_disconnected();
+        _snake_observer->update_disconnected(message);
     }
     ul.unlock();
 
     _socket_connected = false;
-    this->connect();
 }
 
 void network::notify_connected() const {
     std::lock_guard lg(_observer_mx);
     if (_snake_observer) {
         _snake_observer->set_connected();
+    }
+}
+
+void network::notify_connection_failed(const std::string& message) const {
+    std::lock_guard lg(_observer_mx);
+    if (_snake_observer) {
+        _snake_observer->update_connection_failed(message);
     }
 }

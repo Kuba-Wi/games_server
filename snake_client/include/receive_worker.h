@@ -29,7 +29,7 @@ private:
     void data_received_loop();
 
     void notify_data_received(const std::vector<int8_t>& data);
-    void notify_disconnected();
+    void notify_disconnected(const std::string& message);
 
     std::vector<int8_t> _data_received;
     std::list<std::vector<int8_t>> _received_queue;

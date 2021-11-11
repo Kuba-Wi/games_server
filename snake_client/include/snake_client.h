@@ -21,11 +21,12 @@ public:
     snake_client(std::unique_ptr<network>&& ptr);
 
     void update_snake(const std::vector<int8_t>& data);
-    void set_disconnected();
+    void update_disconnected(const std::string& message);
     void set_connected();
 
     bool set_server_address(const std::string& ip) { return _network_ptr->set_server_address(ip); }
     void connect_network() { _network_ptr->connect(); }
+    void update_connection_failed(const std::string& message) const;
 
     void send_data(uint8_t data);
     bool check_index_present(uint8_t x, uint8_t y) const;

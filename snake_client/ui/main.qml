@@ -50,9 +50,8 @@ ApplicationWindow {
     }
 
     Dialog {
-        id: wrong_ip_dialog
+        id: dialog_error
         width: parent.width
-        title: "Invalid ip, try again"
         standardButtons: Dialog.Ok
     }
 
@@ -82,7 +81,8 @@ ApplicationWindow {
             }
 
             onIpNotSet: {
-                wrong_ip_dialog.open();
+                dialog_error.title = "Invalid ip, try again"
+                dialog_error.open();
             }
 
             onSendingEnabled: {
@@ -97,13 +97,6 @@ ApplicationWindow {
                 label_connection.visible = true;
             }
 
-            onWaitForConnection: {
-                set_buttons_visibility(false);
-                label_connection.text = "Connecting...";
-                label_connection.visible = true;
-                set_wait_circle_state(true);
-            }
-
             onConnectionEstablished: {
                 set_buttons_visibility(false);
                 label_connection.text = "Connected, wait for your turn..."
@@ -115,6 +108,19 @@ ApplicationWindow {
             onBoardDimensionsSet: {
                 boardHeight = snake_model.get_board_height();
                 boardWidth = snake_model.get_board_width();
+            }
+
+            onConnectionError: {
+                label_connection.visible = false;
+                set_wait_circle_state(false);
+                label_ip_connect.visible = false;
+                set_buttons_visibility(false);
+
+                connect_button.visible = true;
+                text_ip.visible = true;
+
+                dialog_error.title = message
+                dialog_error.open();
             }
         }
 

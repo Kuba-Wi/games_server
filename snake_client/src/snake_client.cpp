@@ -17,9 +17,9 @@ void snake_client::update_snake(const std::vector<int8_t>& data) {
     }
 }
 
-void snake_client::set_disconnected() {
+void snake_client::update_disconnected(const std::string& message) {
     _sending_data_enabled = false; 
-    wait_for_connection();
+    connection_error(message);
 }
 
 void snake_client::set_connected() {
@@ -31,6 +31,10 @@ void snake_client::send_data(uint8_t data) {
         return;
     }
     _network_ptr->send_data(data);
+}
+
+void snake_client::update_connection_failed(const std::string& message) const {
+    connection_error(message);
 }
 
 void snake_client::process_received_signal(const std::vector<int8_t>& signal) {

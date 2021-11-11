@@ -28,10 +28,11 @@ public:
     TEST_IFACE void send_data(uint8_t data);
 
     TEST_IFACE void update_data_received(const std::vector<int8_t>& received_data);
-    TEST_IFACE void update_disconnected();
+    TEST_IFACE void update_disconnected(const std::string& message);
 
 private:
     void notify_connected() const;
+    void notify_connection_failed(const std::string& message) const;
 
     boost::asio::io_context _io_context;
     std::list<tcp::endpoint> _server_endpoint;

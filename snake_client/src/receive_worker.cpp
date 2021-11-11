@@ -32,7 +32,7 @@ void receive_worker::receive_data() {
                 this->refresh_data_buffer(bytes_with_delimiter);
                 this->receive_data();
             } else {
-                this->notify_disconnected();
+                this->notify_disconnected(er.message());
             }
         });
 }
@@ -75,8 +75,8 @@ void receive_worker::notify_data_received(const std::vector<int8_t>& received_da
     }
 }
 
-void receive_worker::notify_disconnected() {
+void receive_worker::notify_disconnected(const std::string& message) {
     if (_network_observer) {
-        _network_observer->update_disconnected();
+        _network_observer->update_disconnected(message);
     }
 }

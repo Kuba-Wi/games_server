@@ -30,3 +30,8 @@ void connection_established() {
     if (ui_mock_holder.mock_ptr)
         ui_mock_holder.mock_ptr->connection_established();
 }
+
+void connection_error(const std::string& message) {
+    if (ui_mock_holder.mock_ptr)
+        ui_mock_holder.mock_ptr->connection_error(message);
+}

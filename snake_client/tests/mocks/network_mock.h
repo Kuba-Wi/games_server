@@ -10,5 +10,5 @@ public:
     MOCK_METHOD(void, connect, (), (override));
     MOCK_METHOD(void, send_data, (uint8_t data), (override));
     MOCK_METHOD(void, update_data_received, (const std::vector<int8_t>&), (override));
-    MOCK_METHOD(void, update_disconnected, (), (override));
+    MOCK_METHOD(void, update_disconnected, (const std::string&), (override));
 };

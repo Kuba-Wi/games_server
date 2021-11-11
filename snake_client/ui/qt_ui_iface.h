@@ -29,6 +29,10 @@ public:
         emit this->connectionEstablished();
     }
 
+    void connection_error(const std::string& message) {
+        emit this->connectionError(message.c_str());
+    }
+
 signals:
     void refreshModel();
     void enableSending();
@@ -36,4 +40,5 @@ signals:
     void setBoardDimensions();
     void waitForConnection();
     void connectionEstablished();
+    void connectionError(QString message);
 } inline qt_ui_if;

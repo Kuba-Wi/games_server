@@ -42,9 +42,9 @@ signals:
     void ipNotSet();
     void sendingEnabled();
     void sendingStopped();
-    void waitForConnection();
     void connectionEstablished();
     void boardDimensionsSet();
+    void connectionError(QString message);
 
 private:
     std::unique_ptr<snake_client> _snake_client;
