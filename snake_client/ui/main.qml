@@ -72,7 +72,8 @@ ApplicationWindow {
             property var boardWidth: 0
 
             onIpSet: {
-                label_ip_connect.text = "connecting with " + text_ip.text
+                label_ip_connect.visible = true;
+                label_ip_connect.text = "connecting with " + text_ip.text;
                 connect_button.visible = false;
                 text_ip.visible = false;
                 set_wait_circle_state(true);
