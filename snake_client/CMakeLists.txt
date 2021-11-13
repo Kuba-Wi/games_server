@@ -14,6 +14,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Quick REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Quick REQUIRED)
 
+set(ANDROID_BOOST_PATH CACHE PATH "Path to Boost for Android")
+
 set(PROJECT_SOURCES_CORE
     src/snake_client.cpp
     src/network.cpp
@@ -35,7 +37,11 @@ include_directories(include)
 include_directories(ui)
 
 if(ANDROID)
-    include_directories(/home/kuba/Boost-for-Android/boost_1_76_0)
+    if(EXISTS ${ANDROID_BOOST_PATH})
+        include_directories(${ANDROID_BOOST_PATH})
+    else()
+        message(FATAL_ERROR "Path to Boost for Android is not specified")
+    endif()
     add_library(snake SHARED ${PROJECT_SOURCES} ${PROJECT_SOURCES_CORE})
 else()
     add_library(snake_core_lib STATIC ${PROJECT_SOURCES_CORE})
