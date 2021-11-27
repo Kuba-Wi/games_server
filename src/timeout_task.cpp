@@ -28,7 +28,7 @@ void timeout_task::attach_observer(servers* observer) {
 
 void timeout_task::reset_deadline() {
     boost::system::error_code er;
-    _timer.expires_from_now(boost::posix_time::seconds(timeout_seconds), er);
+    _timer.expires_from_now(boost::posix_time::seconds(TIMEOUT_SECONDS), er);
 }
 
 void timeout_task::check_timer() {

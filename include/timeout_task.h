@@ -7,7 +7,7 @@
 
 #include "test_iface.h"
 
-constexpr size_t timeout_seconds = 20;
+constexpr size_t TIMEOUT_SECONDS = 20;
 
 class servers;
 
