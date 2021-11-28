@@ -41,11 +41,11 @@ public:
         }
     }
 
-    bool is_started() const {
+    TEST_IFACE bool is_started() const {
         return _active;
     }
 
-    std::optional<size_t> get_current_interval_ms() const {
+    TEST_IFACE std::optional<size_t> get_current_interval_ms() const {
         if (this->is_started()) {
             return _current_interval_ms;
         }

@@ -4,6 +4,7 @@
 
 #include "privileged_accept_task.h"
 #include "privileged_server.h"
+#include "test_iface.h"
 
 enum class privileged_serv_signals : int8_t {
     restart_game = -4,
@@ -18,14 +19,15 @@ class game_server;
 class privileged_connection {
 public:
     privileged_connection(std::unique_ptr<privileged_accept_task>&& accept_task);
+    TEST_IFACE ~privileged_connection() {}
 
-    void attach_observer(game_server* observer);
+    TEST_IFACE void attach_observer(game_server* observer);
     void update_server_accepted(const std::shared_ptr<privileged_server>& server);
     void update_disconnected();
     void update_data_received(const std::vector<int8_t>& data_received);
 
-    void send_data(const std::vector<int8_t>& data);
-    void send_clients_count(size_t count);
+    TEST_IFACE void send_data(const std::vector<int8_t>& data);
+    TEST_IFACE void send_clients_count(size_t count);
 
 private:
     size_t decode_time_interval(const std::vector<int8_t>& time_interval) const;

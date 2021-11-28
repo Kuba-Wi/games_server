@@ -33,7 +33,7 @@ include_directories(include)
 add_library(server_core_lib STATIC ${FILES})
 target_compile_options(server_core_lib PRIVATE ${COMPILE_FLAGS})
 
-add_executable(${PROJECT_NAME} src/main.cpp src/socket_option.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp src/connection_initializers.cpp)
 target_link_libraries(${PROJECT_NAME} server_core_lib pthread spdlog ${OPENSSL_LIBRARIES})
 target_compile_options(${PROJECT_NAME} PRIVATE ${COMPILE_FLAGS})
 

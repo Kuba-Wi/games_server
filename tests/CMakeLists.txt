@@ -8,7 +8,7 @@ set(FILES_UT
     snake_game_ut.cpp
     servers_ut.cpp
     game_server_ut.cpp
-    socket_option_fake.cpp
+    connection_initializers_fake.cpp
 )
 
 add_executable(${PROJECT_NAME} ${FILES_UT})

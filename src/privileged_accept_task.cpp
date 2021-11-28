@@ -2,6 +2,7 @@
 
 #include <spdlog/spdlog.h>
 
+#include "connection_initializers.h"
 #include "privileged_connection.h"
 #include "program_options.h"
 
@@ -12,9 +13,7 @@ privileged_accept_task::privileged_accept_task() : _server_endpoint(boost::asio:
         _acceptor.bind(_server_endpoint);
         _acceptor.listen(boost::asio::socket_base::max_listen_connections);
 
-        _ssl_context.set_options(boost::asio::ssl::context::default_workarounds | boost::asio::ssl::context::no_tlsv1_3);
-        _ssl_context.use_certificate_file("server_cert.pem", boost::asio::ssl::context::pem);
-        _ssl_context.use_private_key_file("server_private_key.pem", boost::asio::ssl::context::pem);
+        use_ssl_cert_and_key(_ssl_context);
 
     } catch (const boost::system::system_error& er) {
         spdlog::error("Server initialisation failed: {}. \nTerminate.", er.what());

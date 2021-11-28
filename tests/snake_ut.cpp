@@ -138,3 +138,14 @@ TEST_F(snakeTest, isFoodEatenAndNewFoodShouldCheckAndChangeFoodIndex) {
     ASSERT_NE(head, food);
     ASSERT_NE(tail, food);
 }
+
+TEST(snakeSizeTest, boardSizeShouldNotBeSetIfNotProper) {
+    snake sn;
+    sn.set_board_size(1, 1);
+    ASSERT_EQ(sn.get_board_height(), 0);
+    ASSERT_EQ(sn.get_board_width(), 0);
+
+    sn.set_board_size(height, width);
+    ASSERT_EQ(sn.get_board_height(), height);
+    ASSERT_EQ(sn.get_board_width(), width);
+}

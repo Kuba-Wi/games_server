@@ -3,7 +3,6 @@
 #include <spdlog/spdlog.h>
 
 #include "privileged_connection.h"
-#include "socket_option.h"
 
 privileged_server::privileged_server(const std::shared_ptr<ssl_socket>& socket, privileged_connection* observer) :
                _socket_ptr(socket),

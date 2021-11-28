@@ -12,4 +12,7 @@ public:
     MOCK_METHOD(void, attach_observer, (game_server*), (override));
     MOCK_METHOD(void, restart_game, (size_t), (override));
     MOCK_METHOD(void, set_snake_direction, (uint8_t), (override));
+    MOCK_METHOD(void, stop_game, (), (override));
+    MOCK_METHOD(void, change_time_interval, (size_t), (override));
+    MOCK_METHOD(void, set_board_size, (uint8_t, uint8_t), (override));
 };
