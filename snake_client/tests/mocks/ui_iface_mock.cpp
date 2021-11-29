@@ -21,11 +21,6 @@ void set_board_dimensions() {
         ui_mock_holder.mock_ptr->set_board_dimensions();
 }
 
-void wait_for_connection() {
-    if (ui_mock_holder.mock_ptr)
-        ui_mock_holder.mock_ptr->wait_for_connection();
-}
-
 void connection_established() {
     if (ui_mock_holder.mock_ptr)
         ui_mock_holder.mock_ptr->connection_established();

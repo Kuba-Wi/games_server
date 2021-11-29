@@ -17,10 +17,6 @@ void set_board_dimensions() {
     qt_ui_if.set_board_dimensions();
 }
 
-void wait_for_connection() {
-    qt_ui_if.wait_for_connection();
-}
-
 void connection_established() {
     qt_ui_if.connection_established();
 }

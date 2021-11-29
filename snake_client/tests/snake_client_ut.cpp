@@ -33,12 +33,13 @@ TEST_F(SnakeClientTest, constructorShouldInvokeNetworkAttachObserverMethod) {
     create_snake_client(mock);
 }
 
-TEST_F(SnakeClientTest, setDisconnectedMethodShouldInvokeWaitForConnectionFreeFunction) {
+TEST_F(SnakeClientTest, setDisconnectedMethodShouldInvokeConnectionErrorFreeFunction) {
+    const std::string message{"error"};
     auto net_mock = std::make_unique<NetworkMock>();
     create_snake_client(net_mock);
 
-    EXPECT_CALL(*ui_mock_holder.mock_ptr, wait_for_connection());
-    snake_client_ptr->update_disconnected({});
+    EXPECT_CALL(*ui_mock_holder.mock_ptr, connection_error(message));
+    snake_client_ptr->update_disconnected(message);
 }
 
 TEST_F(SnakeClientTest, setConnectedMethodShouldInvokeConnectionEstablishedFreeFunction) {
@@ -62,6 +63,7 @@ INSTANTIATE_TEST_CASE_P(TestsWithTrueResult,
 INSTANTIATE_TEST_CASE_P(TestsWithFalseResult, 
                         SnakeClientParametrizedTest,
                         Values(pair_str_bool{"256.0.0.0", false},
+                               pair_str_bool{"0.0.0", false},
                                pair_str_bool{"-1.0.0.0", false},
                                pair_str_bool{"123456789", false},
                                pair_str_bool{"some text", false}));
@@ -80,9 +82,18 @@ TEST_F(SnakeClientTest, connectNetworkShouldInvokeConnectMethodFromNetwork) {
     snake_client_ptr->connect_network();
 }
 
+TEST_F(SnakeClientTest, updateConnectionFailedShouldInvokeConnectionErrorFunction) {
+    const std::string message{"error"};
+    auto mock = std::make_unique<NetworkMock>();
+    EXPECT_CALL(*ui_mock_holder.mock_ptr, connection_error(message));
+    create_snake_client(mock);
+    snake_client_ptr->update_connection_failed(message);
+}
+
 TEST_F(SnakeClientTest, sendDataShouldDoNothinkWhenSendingIsNotEnabled) {
     constexpr uint8_t data = 1;
     auto mock = std::make_unique<NetworkMock>();
+    EXPECT_CALL(*mock, send_data(_)).Times(0);
     create_snake_client(mock);
     snake_client_ptr->send_data(data);
 }
@@ -124,6 +135,7 @@ TEST_F(SnakeClientTest, updateSnakeWithInitialDataShouldSetBoardHeightAndWidth) 
     create_snake_client(mock);
     
     EXPECT_CALL(*ui_mock_holder.mock_ptr, set_board_dimensions());
+    EXPECT_CALL(*ui_mock_holder.mock_ptr, refresh_model());
     snake_client_ptr->update_snake(data_received);
 
     ASSERT_EQ(snake_client_ptr->get_board_height(), height);
@@ -163,15 +175,17 @@ TEST_F(SnakeClientTest, updateSnakeWithStopSendingSignalShouldNotLetSendDataToBe
 }
 
 TEST_F(SnakeClientTest, setDisconnectedShouldNotLetSendDataToBeInvoked) {
+    const std::string message{"error"};
     const std::vector<int8_t> data_start{static_cast<int8_t>(client_signal::start_sending)};
     constexpr uint8_t data_not_sent = 1;
     auto mock = std::make_unique<NetworkMock>();
+    EXPECT_CALL(*mock, send_data(_)).Times(0);
     create_snake_client(mock);
 
     EXPECT_CALL(*ui_mock_holder.mock_ptr, enable_sending());
-    EXPECT_CALL(*ui_mock_holder.mock_ptr, wait_for_connection());
+    EXPECT_CALL(*ui_mock_holder.mock_ptr, connection_error(message));
     snake_client_ptr->update_snake(data_start);
-    snake_client_ptr->update_disconnected({});
+    snake_client_ptr->update_disconnected(message);
 
     snake_client_ptr->send_data(data_not_sent);
 }
@@ -185,7 +199,7 @@ TEST_F(SnakeClientTest, checkIndexPresentOnEmptyBoardShouldReturnFalse) {
     ASSERT_FALSE(snake_client_ptr->check_index_present(x, y));
 }
 
-TEST_F(SnakeClientTest, checkIndexPresentShouldReturnTrueIfReceivedDataPointsToThisIndex) {
+TEST_F(SnakeClientTest, checkIndexPresentShouldReturnTrueIfReceivedDataPointsWithThisIndex) {
     constexpr int8_t height = 2;
     constexpr int8_t width = 2;
     const std::vector<int8_t> data_initial{static_cast<int8_t>(client_signal::initial_data), height, width};
@@ -194,7 +208,7 @@ TEST_F(SnakeClientTest, checkIndexPresentShouldReturnTrueIfReceivedDataPointsToT
     create_snake_client(mock);
 
     EXPECT_CALL(*ui_mock_holder.mock_ptr, set_board_dimensions());
-    EXPECT_CALL(*ui_mock_holder.mock_ptr, refresh_model());
+    EXPECT_CALL(*ui_mock_holder.mock_ptr, refresh_model()).Times(2);
     snake_client_ptr->update_snake(data_initial);
     snake_client_ptr->update_snake(data_with_indexes);
 
